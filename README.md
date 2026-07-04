@@ -18,13 +18,18 @@ We are currently working on:
 
 ## Planned Features
 
-- Passenger ride requests
-- Driver ride management
+- User Login and Registration
+- View available vehicles
 - Passenger queue system
-- Ride notifications
-- Seat availability tracking
-- User authentication
-- Trip history
+- Request a Ride
+- View fare join shared ride
+- Join shared ride
+- View Trip history
+- Receive Notifications
+- Update Vehicle status
+- Submit a complain
+- Manage Vehicles and Drivers 
+- Report Emergency
 
 ## Tech Stack
 
