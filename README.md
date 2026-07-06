@@ -65,6 +65,21 @@ Project documentation is currently being prepared and will include:
 - Coding Guidelines
 - User Documentation
 
+## 🧹 Coding Standards (ESLint)
+
+To ensure code quality and consistency, this project uses **ESLint** as a coding standard tool.
+
+ESLint helps in identifying errors, enforcing best practices, and maintaining a uniform coding style across the codebase.
+
+### 🔧 Key Features
+- Consistent code formatting and indentation
+- Detection of unused variables and errors
+- Enforced naming conventions
+- Adherence to modern JavaScript standards
+- Improved readability and maintainability
+
+All contributors are expected to follow the configured ESLint rules while writing code.
+
 ## Team
 
 Developed as a Software Engineering course project.
