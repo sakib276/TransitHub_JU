@@ -59,20 +59,28 @@ TransitHubJU/
 
 ## Documentation
 
+## Documentation
+
 Project documentation is currently being prepared and will include:
 
--Software Requirements Specification (SRS)**
+* **Software Requirements Specification (SRS)**
   Defines the functional and non-functional requirements of TransitHubJU, including user roles, use cases, and system constraints.
--System Design** (diagrams via PlantUML / Mermaid.js / Lucidchart)
+
+* **System Design** (diagrams via PlantUML / Mermaid.js / Lucidchart)
   Visual representation of the system's architecture, workflows, and data flow — including use case, sequence, and class diagrams (PlantUML), lightweight flowcharts (Mermaid.js), and detailed architecture/database diagrams (Lucidchart).
-  -API Documentation** (Swagger/OpenAPI + ReDoc/Scalar)
+
+* **API Documentation** (Swagger/OpenAPI + ReDoc/Scalar)
   Interactive documentation of all REST API endpoints, request/response formats, and authentication requirements, generated via Swagger/OpenAPI and presented professionally through ReDoc/Scalar.
--Coding Guidelines**
+
+* **Coding Guidelines**
   Standards and best practices for writing consistent, maintainable code across the frontend (React) and backend (Express), enforced via ESLint.
--UI Component Docs** (Storybook/Histoire)
+
+* **UI Component Docs** (Storybook/Histoire)
   Documentation and live previews of reusable UI components (buttons, forms, modals, cards, etc.), built and tested independently using Storybook or Histoire.
--User Documentation**
+
+* **User Documentation**
   End-user guides covering how to register, request rides, view fares, join shared rides, and use other core features of the platform.
+
 
 
 ## 🧹 Coding Standards (ESLint)
