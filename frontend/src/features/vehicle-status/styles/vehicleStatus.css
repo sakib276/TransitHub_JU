@@ -1,0 +1,382 @@
+:root {
+  --transit-blue: #5b7cfa;
+  --deep-transit-blue: #243f73;
+  --pastel-sky: #b8c8ff;
+
+  --mint-green: #b8f2d9;
+  --mint-dark: #198754;
+
+  --pastel-amber: #ffe7b8;
+  --amber-dark: #a66b00;
+
+  --soft-coral: #ffc9c9;
+  --soft-lavender: #e7e9ff;
+
+  --cloud-white: #f7f9fc;
+  --white: #ffffff;
+
+  --primary-text: #24324a;
+  --secondary-text: #6b7a90;
+  --border: #e6ecf5;
+
+  --danger: #c94f4f;
+}
+
+.vehicle-status-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 36px 44px;
+  background: var(--cloud-white);
+  color: var(--primary-text);
+}
+
+.vehicle-status-header {
+  margin-bottom: 28px;
+}
+
+.vehicle-status-header h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.vehicle-status-header p {
+  margin: 8px 0 0;
+  color: var(--secondary-text);
+  font-size: 16px;
+}
+
+.preview-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 14px 16px;
+  margin-bottom: 26px;
+
+  border: 1px dashed var(--pastel-sky);
+  border-radius: 12px;
+
+  background: var(--white);
+}
+
+.preview-label {
+  margin-right: 8px;
+  color: var(--secondary-text);
+
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.preview-button {
+  padding: 9px 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  background: var(--white);
+  color: var(--secondary-text);
+
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.preview-button:hover {
+  background: var(--soft-lavender);
+}
+
+.preview-button.active {
+  border-color: var(--deep-transit-blue);
+  background: var(--deep-transit-blue);
+  color: var(--white);
+}
+
+.vehicle-status-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 24px;
+}
+
+.status-card,
+.info-card {
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--white);
+
+  box-shadow: 0 3px 12px rgb(36 50 74 / 5%);
+}
+
+.vehicle-status-card-header,
+.info-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 22px 24px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.vehicle-status-card-header h2,
+.info-card-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.updated-time {
+  padding: 7px 12px;
+
+  border-radius: 18px;
+
+  background: #f0f3f8;
+  color: var(--secondary-text);
+
+  font-size: 13px;
+}
+
+.status-form {
+  padding: 28px 24px;
+}
+
+.status-options {
+  display: inline-flex;
+
+  padding: 5px;
+
+  border-radius: 28px;
+
+  background: #eef1f6;
+}
+
+.status-option {
+  padding: 11px 18px;
+
+  border: 0;
+  border-radius: 22px;
+
+  background: transparent;
+  color: var(--secondary-text);
+
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-option:hover {
+  background: #e5e9f0;
+}
+
+.status-option.selected.available {
+  background: var(--mint-dark);
+  color: var(--white);
+}
+
+.status-option.selected.busy {
+  background: var(--pastel-amber);
+  color: var(--amber-dark);
+}
+
+.status-option.selected.offline {
+  background: #e9edf3;
+  color: var(--primary-text);
+}
+
+.form-divider {
+  height: 1px;
+  margin: 28px 0;
+  background: var(--border);
+}
+
+.status-form label {
+  display: block;
+  margin-bottom: 8px;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.status-form label span {
+  color: var(--danger);
+}
+
+.status-form select {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 13px 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: var(--white);
+  color: var(--primary-text);
+
+  font-size: 15px;
+}
+
+.status-form select:focus {
+  outline: 2px solid var(--pastel-sky);
+  border-color: var(--transit-blue);
+}
+
+.status-form select:disabled {
+  background: #f0f2f6;
+  color: #9aa5b5;
+  cursor: not-allowed;
+}
+
+.field-help {
+  margin: 8px 0 20px;
+
+  color: var(--secondary-text);
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.primary-button {
+  width: 100%;
+  padding: 13px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: var(--deep-transit-blue);
+  color: var(--white);
+
+  cursor: pointer;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: var(--transit-blue);
+}
+
+.primary-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.status-message {
+  margin-bottom: 16px;
+  padding: 11px 14px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.status-message.success {
+  border: 1px solid var(--mint-green);
+  background: #e9faf1;
+  color: var(--mint-dark);
+}
+
+.status-message.error {
+  border: 1px solid var(--soft-coral);
+  background: #fff0f0;
+  color: var(--danger);
+}
+
+.status-info-list {
+  padding: 24px;
+}
+
+.info-item {
+  display: flex;
+  gap: 14px;
+
+  margin-bottom: 24px;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 10px;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.available-icon {
+  background: #e2f8ec;
+  color: var(--mint-dark);
+}
+
+.busy-icon {
+  background: #fff3dc;
+  color: var(--amber-dark);
+}
+
+.full-icon {
+  background: #edf0f5;
+  color: #64748b;
+}
+
+.offline-icon {
+  background: #edf0f5;
+  color: #64748b;
+}
+
+.info-item h3 {
+  margin: 0 0 5px;
+  font-size: 16px;
+}
+
+.info-item p {
+  margin: 0;
+
+  color: var(--secondary-text);
+
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .vehicle-status-page {
+    padding: 24px;
+  }
+
+  .vehicle-status-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .vehicle-status-page {
+    padding: 18px;
+  }
+
+  .preview-state {
+    flex-wrap: wrap;
+  }
+
+  .status-options {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .status-option {
+    padding: 10px 12px;
+  }
+}
