@@ -1,73 +1,76 @@
-import PropTypes from 'prop-types';
+import "../notifications.css";
 
 /**
- * Displays a single notification card.
+ * Maps notification types to their corresponding display icons.
  *
- * @param {Object} props - Component properties.
- * @param {Object} props.notification - Notification data.
- * @param {number} props.notification.notificationId - Notification ID.
- * @param {string} props.notification.title - Notification title.
- * @param {string} props.notification.message - Notification message.
- * @param {boolean} props.notification.isRead - Read status.
- * @param {string} props.notification.createdAt - Creation date and time.
- * @param {Function} props.onSelect - Handles notification selection.
- * @returns {JSX.Element} Notification card component.
+ * @constant
+ * @type {Object<string, string>}
  */
-function NotificationCard({ notification, onSelect }) {
-  const formattedDate = new Date(notification.createdAt).toLocaleString();
+const ICONS = {
+  driver_assigned: "🚗",
+  queue_update: "👥",
+  pickup_time: "🕐",
+  system_maintenance: "📢",
+  ride_completed: "✅",
+};
+
+/**
+ * Displays an individual notification card.
+ *
+ * The card shows the notification icon, title, message, time,
+ * read/unread status, and a button for viewing notification details.
+ *
+ * @component
+ * @param {Object} props - Component properties.
+ * @param {Object} props.notification - Notification data to display.
+ * @param {boolean} props.isSelected - Indicates whether the notification is selected.
+ * @param {Function} props.onSelect - Callback invoked when the notification is selected.
+ * @returns {JSX.Element} The notification card.
+ */
+export default function NotificationCard({
+  notification,
+  isSelected,
+  onSelect,
+}) {
+  const icon = ICONS[notification.type] || "🔔";
+  const isUnread = notification.status === "unread";
 
   return (
-    <article
-      className={`notification-card ${
-        notification.isRead ? 'read' : 'unread'
-      }`}
+    <div
+      onClick={() => onSelect(notification)}
+      className={`notif-card ${isSelected ? "selected" : ""}`}
     >
-      <div className="notification-card-header">
-        <div className="notification-title-section">
-          {!notification.isRead && (
-            <span className="notification-dot" title="Unread notification" />
-          )}
+      <span
+        className={`notif-dot ${isUnread ? "unread" : "read"}`}
+        aria-hidden="true"
+      />
 
-          <span className="notification-icon">🔔</span>
+      <div className="notif-icon">{icon}</div>
 
-          <h3>{notification.title}</h3>
-        </div>
-
-        <time className="notification-time">{formattedDate}</time>
+      <div className="notif-body">
+        <h3 className="notif-card-title">{notification.title}</h3>
+        <p className="notif-card-message">{notification.message}</p>
       </div>
 
-      <p className="notification-message">{notification.message}</p>
+      <div className="notif-side">
+        <span className="notif-time">{notification.time}</span>
 
-      <div className="notification-card-footer">
         <span
-          className={`notification-status ${
-            notification.isRead ? 'status-read' : 'status-unread'
-          }`}
+          className={`notif-badge ${isUnread ? "unread" : "read"}`}
         >
-          {notification.isRead ? 'Read' : 'Unread'}
+          {isUnread ? "Unread" : "Read"}
         </span>
 
         <button
-          type="button"
-          className="details-button"
-          onClick={() => onSelect(notification)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(notification);
+          }}
+          className="btn-outline"
         >
           View Details
         </button>
       </div>
-    </article>
+    </div>
   );
 }
-
-NotificationCard.propTypes = {
-  notification: PropTypes.shape({
-    notificationId: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    message: PropTypes.string.isRequired,
-    isRead: PropTypes.bool.isRequired,
-    createdAt: PropTypes.string.isRequired,
-  }).isRequired,
-  onSelect: PropTypes.func.isRequired,
-};
-
-export default NotificationCard;

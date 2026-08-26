@@ -1,0 +1,294 @@
+/* notifications.css */
+
+.notif-page {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #111827;
+}
+
+@media (max-width: 960px) {
+  .notif-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+}
+
+.panel + .panel {
+  margin-top: 20px;
+}
+
+.notif-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.panel-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0 0 16px 0;
+}
+
+/* Tabs */
+
+.notif-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.notif-tab {
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+}
+
+.notif-tab:hover {
+  background: #f9fafb;
+}
+
+.notif-tab.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+/* Notification card */
+
+.notif-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.notif-card:hover {
+  border-color: #9ca3af;
+}
+
+.notif-card.selected {
+  border-color: #111827;
+  background: #f9fafb;
+}
+
+.notif-dot {
+  margin-top: 8px;
+  height: 8px;
+  width: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.notif-dot.unread {
+  background: #111827;
+}
+
+.notif-dot.read {
+  border: 1px solid #d1d5db;
+}
+
+.notif-icon {
+  height: 40px;
+  width: 40px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.notif-icon.lg {
+  height: 48px;
+  width: 48px;
+  font-size: 22px;
+}
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.notif-card-message {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 4px 0 0 0;
+}
+
+.notif-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.notif-badge {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.notif-badge.unread {
+  background: #111827;
+  color: #fff;
+}
+
+.notif-badge.read {
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+}
+
+.btn-outline {
+  font-size: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 12px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-outline:hover {
+  background: #f9fafb;
+}
+
+/* Footer actions */
+
+.notif-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.notif-footer-note {
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 16px;
+}
+
+/* Details panel */
+
+.details-desc {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 4px 0 0 0;
+}
+
+.details-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.details-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.details-label {
+  color: #6b7280;
+  width: 128px;
+  flex-shrink: 0;
+}
+
+.details-value {
+  font-weight: 500;
+}
+
+.empty-state {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Recent activity */
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.activity-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.activity-detail {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 2px 0 0 0;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
