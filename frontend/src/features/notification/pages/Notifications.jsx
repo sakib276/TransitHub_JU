@@ -1,27 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
-import NotificationCard from "../components/NotificationCard";
-import NotificationDetails from "../components/NotificationDetails";
-import RecentActivity from "../components/RecentActivity";
-import "../notifications.css";
+import { useEffect, useMemo, useState } from 'react';
+import NotificationCard from '../components/NotificationCard';
+import NotificationDetails from '../components/NotificationDetails';
+import RecentActivity from '../components/RecentActivity';
+import '../notifications.css';
 import {
   getNotifications,
   getRecentActivity,
   markAllAsRead,
   clearNotifications,
-} from "../notificationApi";
+} from '../notificationApi';
+
+/**
+ * Defines the structure of a notification filtering tab.
+ *
+ * @typedef {Object} NotificationTab
+ * @property {string} key - Unique key used to identify the tab.
+ * @property {string} label - Display label shown for the tab.
+ */
 
 /**
  * Defines the available notification filtering tabs.
  *
  * @constant
- * @type {Array<{key: string, label: string}>}
+ * @type {NotificationTab[]}
  */
 const TABS = [
-  { key: "all", label: "All" },
-  { key: "unread", label: "Unread" },
-  { key: "ride", label: "Ride Updates" },
-  { key: "queue", label: "Queue Updates" },
-  { key: "system", label: "System Announcements" },
+  { key: 'all', label: 'All' },
+  { key: 'unread', label: 'Unread' },
+  { key: 'ride', label: 'Ride Updates' },
+  { key: 'queue', label: 'Queue Updates' },
+  { key: 'system', label: 'System Announcements' },
 ];
 
 /**
@@ -36,8 +44,8 @@ const TABS = [
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [activity, setActivity] = useState([]);
-  const [activeTab, setActiveTab] = useState("all");
-  const [selected, setSelected] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const [loading, setLoading] = useState(true);
 
   /**
@@ -54,7 +62,7 @@ export default function Notifications() {
 
       setNotifications(notifs);
       setActivity(acts);
-      setSelected(notifs[0] || null);
+      setSelectedNotification(notifs[0] || null);
       setLoading(false);
     })();
   }, []);
@@ -64,16 +72,20 @@ export default function Notifications() {
    *
    * @returns {Array} The filtered notification list.
    */
-  const filtered = useMemo(() => {
-    if (activeTab === "all") {
+  const filteredNotifications = useMemo(() => {
+    if (activeTab === 'all') {
       return notifications;
     }
 
-    if (activeTab === "unread") {
-      return notifications.filter((n) => n.status === "unread");
+    if (activeTab === 'unread') {
+      return notifications.filter(
+        (notification) => notification.status === 'unread'
+      );
     }
 
-    return notifications.filter((n) => n.category === activeTab);
+    return notifications.filter(
+      (notification) => notification.category === activeTab
+    );
   }, [notifications, activeTab]);
 
   /**
@@ -83,12 +95,14 @@ export default function Notifications() {
    * @returns {void}
    */
   const handleSelect = (notification) => {
-    setSelected(notification);
+    setSelectedNotification(notification);
 
-    if (notification.status === "unread") {
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notification.id ? { ...n, status: "read" } : n
+    if (notification.status === 'unread') {
+      setNotifications((previousNotifications) =>
+        previousNotifications.map((currentNotification) =>
+          currentNotification.id === notification.id
+            ? { ...currentNotification, status: 'read' }
+            : currentNotification
         )
       );
     }
@@ -103,8 +117,11 @@ export default function Notifications() {
   const handleMarkAllRead = async () => {
     await markAllAsRead();
 
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, status: "read" }))
+    setNotifications((previousNotifications) =>
+      previousNotifications.map((notification) => ({
+        ...notification,
+        status: 'read',
+      }))
     );
   };
 
@@ -118,7 +135,7 @@ export default function Notifications() {
     await clearNotifications();
 
     setNotifications([]);
-    setSelected(null);
+    setSelectedNotification(null);
   };
 
   return (
@@ -133,7 +150,7 @@ export default function Notifications() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`notif-tab ${
-                activeTab === tab.key ? "active" : ""
+                activeTab === tab.key ? 'active' : ''
               }`}
             >
               {tab.label}
@@ -143,15 +160,17 @@ export default function Notifications() {
 
         {loading ? (
           <p className="empty-state">Loading notifications…</p>
-        ) : filtered.length === 0 ? (
+        ) : filteredNotifications.length === 0 ? (
           <p className="empty-state">No notifications here.</p>
         ) : (
           <div>
-            {filtered.map((n) => (
+            {filteredNotifications.map((notification) => (
               <NotificationCard
-                key={n.id}
-                notification={n}
-                isSelected={selected?.id === n.id}
+                key={notification.id}
+                notification={notification}
+                isSelected={
+                  selectedNotification?.id === notification.id
+                }
                 onSelect={handleSelect}
               />
             ))}
@@ -173,7 +192,7 @@ export default function Notifications() {
 
       {/* Right: notification details and recent activity */}
       <div>
-        <NotificationDetails notification={selected} />
+        <NotificationDetails notification={selectedNotification} />
         <RecentActivity items={activity} />
       </div>
     </div>

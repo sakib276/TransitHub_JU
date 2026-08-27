@@ -1,4 +1,4 @@
-import "../notifications.css";
+import '../notifications.css';
 
 /**
  * Maps notification types to their corresponding display icons.
@@ -7,11 +7,11 @@ import "../notifications.css";
  * @type {Object<string, string>}
  */
 const ICONS = {
-  driver_assigned: "🚗",
-  queue_update: "👥",
-  pickup_time: "🕐",
-  system_maintenance: "📢",
-  ride_completed: "✅",
+  driver_assigned: '🚗',
+  queue_update: '👥',
+  pickup_time: '🕐',
+  system_maintenance: '📢',
+  ride_completed: '✅',
 };
 
 /**
@@ -26,22 +26,23 @@ const ICONS = {
  * @param {boolean} props.isSelected - Indicates whether the notification is selected.
  * @param {Function} props.onSelect - Callback invoked when the notification is selected.
  * @returns {JSX.Element} The notification card.
+ * @author Nourin Dina
  */
 export default function NotificationCard({
   notification,
   isSelected,
   onSelect,
 }) {
-  const icon = ICONS[notification.type] || "🔔";
-  const isUnread = notification.status === "unread";
+  const icon = ICONS[notification.type] || '🔔';
+  const isUnread = notification.status === 'unread';
 
   return (
     <div
       onClick={() => onSelect(notification)}
-      className={`notif-card ${isSelected ? "selected" : ""}`}
+      className={`notif-card ${isSelected ? 'selected' : ''}`}
     >
       <span
-        className={`notif-dot ${isUnread ? "unread" : "read"}`}
+        className={`notif-dot ${isUnread ? 'unread' : 'read'}`}
         aria-hidden="true"
       />
 
@@ -56,14 +57,14 @@ export default function NotificationCard({
         <span className="notif-time">{notification.time}</span>
 
         <span
-          className={`notif-badge ${isUnread ? "unread" : "read"}`}
+          className={`notif-badge ${isUnread ? 'unread' : 'read'}`}
         >
-          {isUnread ? "Unread" : "Read"}
+          {isUnread ? 'Unread' : 'Read'}
         </span>
 
         <button
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             onSelect(notification);
           }}
           className="btn-outline"

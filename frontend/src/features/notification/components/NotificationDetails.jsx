@@ -1,4 +1,4 @@
-import "../notifications.css";
+import '../notifications.css';
 
 /**
  * Maps notification types to their corresponding display icons.
@@ -7,11 +7,11 @@ import "../notifications.css";
  * @type {Object<string, string>}
  */
 const ICONS = {
-  driver_assigned: "🚗",
-  queue_update: "👥",
-  pickup_time: "🕐",
-  system_maintenance: "📢",
-  ride_completed: "✅",
+  driver_assigned: '🚗',
+  queue_update: '👥',
+  pickup_time: '🕐',
+  system_maintenance: '📢',
+  ride_completed: '✅',
 };
 
 /**
@@ -23,6 +23,7 @@ const ICONS = {
  * @param {Object} props - Component properties.
  * @param {Object|null} props.notification - Notification data to display.
  * @returns {JSX.Element} The notification details panel.
+ * @author Nourin Dina
  */
 export default function NotificationDetails({ notification }) {
   if (!notification) {
@@ -35,7 +36,7 @@ export default function NotificationDetails({ notification }) {
     );
   }
 
-  const icon = ICONS[notification.type] || "🔔";
+  const icon = ICONS[notification.type] || '🔔';
   const {
     description,
     dateTime,
