@@ -5,22 +5,19 @@
  * normally join Drivers + Users + Vehicles once a ride request is accepted.
  */
 
-const assignedDriverByRequest = {
-  'REQ-1001': {
-    driverName: 'Karim Mia',
-    driverPhoto: 'https://i.pravatar.cc/150?img=12',
-    vehicleType: 'Rickshaw',
-    vehicleColor: 'Green',
-    plateNumber: 'JU-RIK-101',
-  },
+const ASSIGNED_DRIVER = {
+  driverName: 'Karim Mia',
+  driverPhoto: 'https://i.pravatar.cc/150?img=12',
+  vehicleType: 'Rickshaw',
+  vehicleColor: 'Green',
+  plateNumber: 'JU-RIK-101',
 };
 
-// Requests where the ride is accepted, but driver/vehicle info is not
-// ready yet (simulates the "Info Unavailable" case in FR-11.1).
-const pendingRequestIds = new Set(['REQ-1002']);
+// How long the mock request takes.
+const LOAD_DELAY_MS = 2000;
 
-// Requests that always fail, used to simulate the "Network Failure" case.
-const failingRequestIds = new Set(['REQ-1003']);
+// How often the mock request fails, to simulate a network issue.
+const NETWORK_FAILURE_CHANCE = 0.3;
 
 /**
  * Waits for the given number of milliseconds.
@@ -35,29 +32,17 @@ function wait(ms) {
 }
 
 /**
- * Gets the driver and vehicle assigned to a ride request.
+ * Gets the driver and vehicle assigned to the passenger's accepted ride.
  *
- * @param {string} requestId - Ride request id.
- * @returns {Promise<Object|null>} Driver/vehicle info, or null if the ride
- * is accepted but the details are not ready yet.
+ * @returns {Promise<Object>} Driver/vehicle info.
  * @throws {Error} If the details fail to load (network failure).
  */
-export async function getAssignedDriver(requestId) {
-  await wait(600);
+export async function getAssignedDriver() {
+  await wait(LOAD_DELAY_MS);
 
-  if (failingRequestIds.has(requestId)) {
+  if (Math.random() < NETWORK_FAILURE_CHANCE) {
     throw new Error('Could not load driver details. Check your connection and try again.');
   }
 
-  if (pendingRequestIds.has(requestId)) {
-    return null;
-  }
-
-  const driver = assignedDriverByRequest[requestId];
-
-  if (!driver) {
-    throw new Error('No driver has been assigned to this ride yet.');
-  }
-
-  return driver;
+  return ASSIGNED_DRIVER;
 }

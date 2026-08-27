@@ -1,19 +1,14 @@
 import { useEffect, useState } from 'react';
 import { getAssignedDriver } from '../services/driverVehicleService';
 
-// How often to check again while details are not ready yet.
-const REFRESH_INTERVAL_MS = 3000;
-
 /**
- * Loads the driver/vehicle assigned to a ride request and keeps refreshing
- * while the details are not ready yet.
+ * Loads the driver/vehicle assigned to the passenger's accepted ride.
  *
- * @param {string} requestId - Ride request id.
  * @returns {{status: string, driver: Object|null, errorMessage: string, retry: Function}}
- * Current load status ('loading' | 'ready' | 'unavailable' | 'error'), the
- * loaded driver (if any), an error message (if any), and a retry function.
+ * Current load status ('loading' | 'ready' | 'error'), the loaded driver
+ * (if any), an error message (if any), and a retry function.
  */
-export function useAssignedDriver(requestId) {
+export function useAssignedDriver() {
   const [status, setStatus] = useState('loading');
   const [driver, setDriver] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -27,19 +22,14 @@ export function useAssignedDriver(requestId) {
       setErrorMessage('');
 
       try {
-        const result = await getAssignedDriver(requestId);
+        const result = await getAssignedDriver();
 
         if (isCancelled) {
           return;
         }
 
-        if (result) {
-          setDriver(result);
-          setStatus('ready');
-        } else {
-          setDriver(null);
-          setStatus('unavailable');
-        }
+        setDriver(result);
+        setStatus('ready');
       } catch (error) {
         if (isCancelled) {
           return;
@@ -56,19 +46,7 @@ export function useAssignedDriver(requestId) {
     return () => {
       isCancelled = true;
     };
-  }, [requestId, attempt]);
-
-  useEffect(() => {
-    if (status !== 'unavailable') {
-      return undefined;
-    }
-
-    const timerId = setTimeout(() => {
-      setAttempt((value) => value + 1);
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearTimeout(timerId);
-  }, [status]);
+  }, [attempt]);
 
   /**
    * Re-triggers loading of the assigned driver (used by the retry button).

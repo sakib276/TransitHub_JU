@@ -14,18 +14,20 @@ function AssignedDriverCard({ driver }) {
   return (
     <div className="assigned-driver-card">
       <img
-        className="driver-photo"
+        className="driver-avatar"
         src={driver.driverPhoto}
         alt={`Photo of ${driver.driverName}`}
       />
 
-      <div className="driver-details">
-        <h2>{driver.driverName}</h2>
-        <p className="vehicle-line">
+      <div className="driver-info">
+        <strong>{driver.driverName}</strong>
+        <p>
           {driver.vehicleColor} {driver.vehicleType}
         </p>
         <p className="plate-number">{driver.plateNumber}</p>
       </div>
+
+      <span className="available">On the way</span>
     </div>
   );
 }

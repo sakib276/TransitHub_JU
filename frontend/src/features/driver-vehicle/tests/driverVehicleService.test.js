@@ -1,9 +1,22 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAssignedDriver } from '../services/driverVehicleService';
 
 describe('getAssignedDriver', () => {
-  it('returns driver and vehicle details for an accepted ride', async () => {
-    const driver = await getAssignedDriver('REQ-1001');
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('returns the assigned driver and vehicle details when the request succeeds', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.9);
+
+    const resultPromise = getAssignedDriver();
+    await vi.runAllTimersAsync();
+    const driver = await resultPromise;
 
     expect(driver).toEqual({
       driverName: 'Karim Mia',
@@ -14,21 +27,15 @@ describe('getAssignedDriver', () => {
     });
   });
 
-  it('returns null when details are not ready yet', async () => {
-    const driver = await getAssignedDriver('REQ-1002');
+  it('throws an error to simulate an occasional network failure', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
 
-    expect(driver).toBeNull();
-  });
-
-  it('throws an error to simulate a network failure', async () => {
-    await expect(getAssignedDriver('REQ-1003')).rejects.toThrow(
+    const resultPromise = getAssignedDriver();
+    const assertion = expect(resultPromise).rejects.toThrow(
       'Could not load driver details. Check your connection and try again.',
     );
-  });
 
-  it('throws an error when the request has no assigned driver', async () => {
-    await expect(getAssignedDriver('REQ-9999')).rejects.toThrow(
-      'No driver has been assigned to this ride yet.',
-    );
+    await vi.runAllTimersAsync();
+    await assertion;
   });
 });
