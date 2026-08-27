@@ -1,24 +1,84 @@
-const serviceAreas = ["JU Gate", "Transport", "Hall", "Medical"];
+import { describe, it, expect } from "vitest";
+import { validateRequest } from "../services/rideRequestService";
 
-export function validateRequest(data, hasActiveRequest = false) {
-  if (hasActiveRequest) {
-    return "Active request already exists";
-  }
+describe("validateRequest", () => {
 
-  if (!data.pickup || !data.destination) {
-    return "Pickup and destination are required";
-  }
+  const validRequest = {
+    pickup: "JU Gate",
+    destination: "Transport",
+    seats: 2,
+  };
 
-  if (data.seats < 1) {
-    return "Seat count must be at least 1";
-  }
 
-  if (
-    !serviceAreas.includes(data.pickup) ||
-    !serviceAreas.includes(data.destination)
-  ) {
-    return "Outside service area";
-  }
+  it("returns Valid for a valid ride request", () => {
+    expect(validateRequest(validRequest)).toBe("Valid");
+  });
 
-  return "Valid";
-}
+
+  it("rejects request when an active request already exists", () => {
+    expect(
+      validateRequest(validRequest, true)
+    ).toBe("Active request already exists");
+  });
+
+
+  it("rejects request when pickup is missing", () => {
+    const request = {
+      ...validRequest,
+      pickup: "",
+    };
+
+    expect(
+      validateRequest(request)
+    ).toBe("Pickup and destination are required");
+  });
+
+
+  it("rejects request when destination is missing", () => {
+    const request = {
+      ...validRequest,
+      destination: "",
+    };
+
+    expect(
+      validateRequest(request)
+    ).toBe("Pickup and destination are required");
+  });
+
+
+  it("rejects request when seat count is less than 1", () => {
+    const request = {
+      ...validRequest,
+      seats: 0,
+    };
+
+    expect(
+      validateRequest(request)
+    ).toBe("Seat count must be at least 1");
+  });
+
+
+  it("rejects pickup outside the service area", () => {
+    const request = {
+      ...validRequest,
+      pickup: "Outside Campus",
+    };
+
+    expect(
+      validateRequest(request)
+    ).toBe("Outside service area");
+  });
+
+
+  it("rejects destination outside the service area", () => {
+    const request = {
+      ...validRequest,
+      destination: "Outside Campus",
+    };
+
+    expect(
+      validateRequest(request)
+    ).toBe("Outside service area");
+  });
+
+});
