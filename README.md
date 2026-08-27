@@ -35,7 +35,8 @@ vehicle-status/
 │   └── vehicle-status-service.test.js
 └── index.js
 
-Followed Coding Standards
+```
+## Followed Coding Standards
 
 This feature follows the project's defined coding standards:
 
@@ -47,13 +48,13 @@ This feature follows the project's defined coding standards:
 - Consistent spacing and curly braces
 - JSDoc for public functions and methods
 
-Testing Done
+## Testing Done
 
 Vitest is used to test vehicle-status validation, including:
 
--Valid AVAILABLE status with a stand
--Invalid AVAILABLE status without a stand
--Valid BUSY status
--Valid OFFLINE status
--Empty status validation
+- Valid AVAILABLE status with a stand
+- Invalid AVAILABLE status without a stand
+- Valid BUSY status
+- Valid OFFLINE status
+- Empty status validation
 
