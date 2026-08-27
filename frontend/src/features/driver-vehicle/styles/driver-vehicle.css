@@ -1,0 +1,66 @@
+.assigned-driver-page {
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 24px;
+  font-family: sans-serif;
+}
+
+.page-subtitle {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.demo-picker {
+  margin-bottom: 20px;
+}
+
+.status-text {
+  padding: 16px;
+  border-radius: 8px;
+  background: #f2f2f2;
+}
+
+.status-text.error {
+  background: #fdecea;
+  color: #b3261e;
+}
+
+.retry-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #1a73e8;
+  color: #fff;
+  cursor: pointer;
+}
+
+.assigned-driver-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.driver-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.driver-details h2 {
+  margin: 0 0 4px;
+}
+
+.vehicle-line {
+  margin: 0;
+  color: #333;
+}
+
+.plate-number {
+  margin: 4px 0 0;
+  font-weight: bold;
+}
