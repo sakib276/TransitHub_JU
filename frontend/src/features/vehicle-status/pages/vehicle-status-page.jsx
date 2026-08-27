@@ -1,6 +1,6 @@
-import StatusInfo from '../components/StatusInfo';
-import StatusSelector from '../components/StatusSelector';
-import '../styles/vehicleStatus.css';
+import StatusInfo from '../components/status-info';
+import StatusSelector from '../components/status-selector';
+import '../styles/vehicle-status.css';
 
 /**
  * Renders the driver's vehicle status page.

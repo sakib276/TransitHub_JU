@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import VehicleStatusCard from './VehicleStatusCard';
+import VehicleStatusCard from './vehicle-status-card';
 import {
   VEHICLE_STANDS,
   VEHICLE_STATUS,
   getVehicleStatus,
   updateVehicleStatus,
-} from '../services/vehicleStatusService';
+} from '../services/vehicle-status-service';
 
 /**
  * Allows a driver to select and update their current vehicle status.

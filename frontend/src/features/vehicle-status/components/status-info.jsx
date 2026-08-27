@@ -4,7 +4,7 @@
  * @returns {JSX.Element} Status information card.
  */
 function StatusInfo() {
-  const statusInformation = [
+  const StatusInformation = [
     {
       icon: '✓',
       className: 'available-icon',
@@ -42,7 +42,7 @@ function StatusInfo() {
       </div>
 
       <div className="status-info-list">
-        {statusInformation.map((item) => (
+        {StatusInformation.map((item) => (
           <div className="info-item" key={item.title}>
             <div className={`info-icon ${item.className}`}>
               {item.icon}

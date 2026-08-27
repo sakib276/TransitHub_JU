@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   VEHICLE_STATUS,
   validateVehicleStatus,
-} from '../services/vehicleStatusService';
+} from '../services/vehicle-status-service';
 
 describe('validateVehicleStatus', () => {
   it('accepts available status with a selected stand', () => {
