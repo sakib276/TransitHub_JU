@@ -47,8 +47,8 @@ export const ViewFarePage = () => {
           <span className="nav-item">My Rides</span>
         </nav>
         <div className="nav-right-icons">
-          <button className="nav-icon" title="Notifications">🔔</button>
-          <button className="nav-icon" title="Help">❓</button>
+          <button className="nav-icon" title="Notifications" type="button">🔔</button>
+          <button className="nav-icon" title="Help" type="button">❓</button>
           <div className="profile-avatar">👤</div>
         </div>
       </header>
@@ -67,10 +67,11 @@ export const ViewFarePage = () => {
             <div className="calc-controls-row">
               {/* Pickup Location Selector */}
               <div className="input-field-group">
-                <label>FROM</label>
+                <label htmlFor="pickup-select">FROM</label>
                 <div className="select-wrapper">
                   <span className="select-icon">📍</span>
                   <select
+                    id="pickup-select"
                     className="fare-select"
                     value={selectedPickupLocation}
                     onChange={(e) => setSelectedPickupLocation(e.target.value)}
@@ -101,10 +102,11 @@ export const ViewFarePage = () => {
 
               {/* Destination Location Selector */}
               <div className="input-field-group">
-                <label>TO</label>
+                <label htmlFor="destination-select">TO</label>
                 <div className="select-wrapper">
                   <span className="select-icon">📍</span>
                   <select
+                    id="destination-select"
                     className="fare-select"
                     value={selectedDestinationLocation}
                     onChange={(e) => setSelectedDestinationLocation(e.target.value)}
