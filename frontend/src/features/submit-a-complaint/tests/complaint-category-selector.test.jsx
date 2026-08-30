@@ -2,10 +2,28 @@
  * @file Tests for the complaint category selector component.
  */
 
-import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
+
+import '@testing-library/jest-dom/vitest';
 
 import ComplaintCategorySelector from '../components/complaint-category-selector';
+
+afterEach(() => {
+  cleanup();
+});
 
 /**
  * Test suite for ComplaintCategorySelector.
@@ -39,20 +57,20 @@ describe('Complaint category selector', () => {
     );
 
     expect(
-      screen.getByRole('option', { name: /driver/i }),
+      screen.getByRole('option', { name: /^driver$/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole('option', { name: /service/i }),
+      screen.getByRole('option', { name: /^service$/i }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole('option', { name: /ride/i }),
+      screen.getByRole('option', { name: /^ride$/i }),
     ).toBeInTheDocument();
   });
 
   /**
-   * Verifies that the selected value is displayed.
+   * Verifies that the selected category is displayed.
    */
   it('shows the selected complaint category', () => {
     render(
@@ -83,7 +101,9 @@ describe('Complaint category selector', () => {
     fireEvent.change(
       screen.getByLabelText(/complaint category/i),
       {
-        target: { value: 'SERVICE' },
+        target: {
+          value: 'SERVICE',
+        },
       },
     );
 
