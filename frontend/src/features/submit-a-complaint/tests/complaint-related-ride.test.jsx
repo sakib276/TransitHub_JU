@@ -31,6 +31,7 @@ afterEach(() => {
 describe('Complaint related ride', () => {
   /**
    * Verifies that the related ride field is rendered.
+   * 
    */
   it('renders the related ride field', () => {
     render(
