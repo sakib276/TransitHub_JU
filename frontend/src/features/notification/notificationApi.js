@@ -15,7 +15,7 @@
  * @constant
  * @type {string}
  */
-const BASE_URL = '/api/notifications';
+const _BASE_URL = '/api/notifications';
 
 /**
  * Mock notification data used during frontend development.
@@ -205,10 +205,11 @@ export async function markAllAsRead() {
  * @param {string} notificationId - Unique identifier of the notification.
  * @returns {Promise<void>} Resolves after the operation is completed.
  */
-export async function markAsRead(notificationId) {
+export async function markAsRead(_notificationId) {
+   return undefined;
+   
   // return fetch(`${BASE_URL}/${notificationId}/read`, { method: 'PATCH' });
-
-  return new Promise((resolve) => setTimeout(resolve, 150));
+  // return new Promise((resolve) => setTimeout(resolve, 150));
 }
 
 /**
