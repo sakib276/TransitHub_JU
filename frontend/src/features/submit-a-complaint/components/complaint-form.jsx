@@ -1,17 +1,16 @@
+
 /**
  * @file Provides the passenger complaint form.
  */
 
-import { useState } from 'react';
+import { useState } from "react";
 
-import ComplaintCategorySelector from './complaint-category-selector';
-import ComplaintDescription from './complaint-description';
-import ComplaintRelatedRide from './complaint-related-ride';
-import ComplaintSubmitButton from './complaint-submit-button';
+import ComplaintCategorySelector from "./complaint-category-selector";
+import ComplaintDescription from "./complaint-description";
+import ComplaintRelatedRide from "./complaint-related-ride";
+import ComplaintSubmitButton from "./complaint-submit-button";
 
-import {
-  validateComplaint,
-} from '../services/complaint-service';
+import { validateComplaint } from "../services/complaint-service";
 
 /**
  * Renders the passenger complaint submission form.
@@ -26,9 +25,9 @@ import {
  * @returns {JSX.Element} Passenger complaint form.
  */
 function ComplaintForm({ onSubmit }) {
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
-  const [relatedRide, setRelatedRide] = useState('');
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [relatedRide, setRelatedRide] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,8 +46,7 @@ function ComplaintForm({ onSubmit }) {
       relatedRide,
     };
 
-    const validationResult =
-      validateComplaint(complaintData);
+    const validationResult = validateComplaint(complaintData);
 
     if (!validationResult.isValid) {
       setErrors(validationResult.errors);
@@ -58,7 +56,9 @@ function ComplaintForm({ onSubmit }) {
     setErrors({});
     setIsSubmitting(true);
 
-    onSubmit(complaintData);
+    if (typeof onSubmit === "function") {
+      onSubmit(complaintData);
+    }
 
     setIsSubmitting(false);
   };

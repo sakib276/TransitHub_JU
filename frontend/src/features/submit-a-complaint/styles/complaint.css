@@ -1,0 +1,333 @@
+/**
+ * Styles for the submit-a-complaint feature.
+ *
+ * The styling follows the same visual language as the
+ * vehicle-status feature.
+ */
+
+:/* =========================================================
+   Submit a Complaint Page
+   ========================================================= */
+
+.complaint-page {
+  min-height: 100vh;
+  padding: 40px 56px 60px;
+  background: #f7f9fc;
+  color: #24324a;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   Page Header
+   ========================================================= */
+
+.complaint-page__header {
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+.complaint-page__header h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #24324a;
+}
+
+.complaint-page__header p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #6b7a90;
+}
+
+/* =========================================================
+   Preview State
+   ========================================================= */
+
+.complaint-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding: 8px 0;
+  flex-wrap: wrap;
+}
+
+.complaint-preview__label {
+  margin-right: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #6b7a90;
+}
+
+.complaint-preview__option {
+  padding: 7px 14px;
+  border: 1px solid #e6ecf5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #6b7a90;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.complaint-preview__option:hover {
+  border-color: #5b7cfa;
+  color: #5b7cfa;
+}
+
+.complaint-preview__option--active {
+  border-color: #5b7cfa;
+  background: #5b7cfa;
+  color: #ffffff;
+}
+
+/* =========================================================
+   Main Layout
+   ========================================================= */
+
+.complaint-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
+  gap: 28px;
+  align-items: start;
+}
+
+/* =========================================================
+   Complaint Form
+   ========================================================= */
+
+.complaint-form {
+  padding: 28px;
+  border: 1px solid #e6ecf5;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(36, 50, 74, 0.05);
+}
+
+.complaint-form > * {
+  margin-bottom: 20px;
+}
+
+.complaint-form > *:last-child {
+  margin-bottom: 0;
+}
+
+.complaint-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #24324a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.complaint-form select,
+.complaint-form textarea,
+.complaint-form input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e6ecf5;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #24324a;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.complaint-form select {
+  height: 46px;
+  padding: 0 14px;
+}
+
+.complaint-form textarea {
+  min-height: 140px;
+  padding: 13px 14px;
+  resize: vertical;
+}
+
+.complaint-form select:focus,
+.complaint-form textarea:focus,
+.complaint-form input:focus {
+  border-color: #5b7cfa;
+  box-shadow: 0 0 0 3px rgba(91, 124, 250, 0.1);
+}
+
+/* =========================================================
+   Form Errors
+   ========================================================= */
+
+.complaint-form__error {
+  margin-top: -12px;
+  margin-bottom: 16px;
+  color: #d95353;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* =========================================================
+   Submit Button
+   ========================================================= */
+
+.complaint-form button[type="submit"] {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 9px;
+  background: #5b7cfa;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.complaint-form button[type="submit"]:hover {
+  background: #4d6ee8;
+}
+
+.complaint-form button[type="submit"]:active {
+  transform: translateY(1px);
+}
+
+.complaint-form button[type="submit"]:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   What Happens Next
+   ========================================================= */
+
+.complaint-next {
+  padding: 26px;
+  border: 1px solid #e6ecf5;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(36, 50, 74, 0.05);
+}
+
+.complaint-next__header {
+  margin-bottom: 26px;
+}
+
+.complaint-next__header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #24324a;
+}
+
+/* =========================================================
+   Timeline
+   ========================================================= */
+
+.complaint-timeline {
+  position: relative;
+}
+
+.complaint-timeline::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  bottom: 22px;
+  left: 16px;
+  width: 1px;
+  background: #e6ecf5;
+}
+
+.complaint-timeline__item {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.complaint-timeline__item:last-child {
+  margin-bottom: 0;
+}
+
+.complaint-timeline__icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e6ecf5;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #9aa7b8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.complaint-timeline__item--completed
+  .complaint-timeline__icon {
+  border-color: #b8f2d9;
+  background: #b8f2d9;
+  color: #237a55;
+}
+
+.complaint-timeline__content {
+  padding-top: 2px;
+}
+
+.complaint-timeline__content h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #24324a;
+}
+
+.complaint-timeline__content p {
+  margin: 0;
+  color: #6b7a90;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .complaint-page {
+    padding: 32px 24px 48px;
+  }
+
+  .complaint-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .complaint-next {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .complaint-page {
+    padding: 24px 16px 40px;
+  }
+
+  .complaint-page__header h1 {
+    font-size: 26px;
+  }
+
+  .complaint-form,
+  .complaint-next {
+    padding: 20px;
+  }
+
+  .complaint-preview {
+    align-items: flex-start;
+  }
+}
