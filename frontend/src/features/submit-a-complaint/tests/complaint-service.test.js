@@ -1,3 +1,6 @@
+/**
+ * @file Tests for the passenger complaint validation service.
+ */
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -6,6 +9,7 @@ import {
 } from '../services/complaint-service';
 
 describe('validateComplaint', () => {
+   
   it('Passenger accepts a valid complaint with a related ride', () => {
     const complaintData = {
       category: COMPLAINT_CATEGORY.DRIVER,
@@ -31,6 +35,9 @@ describe('validateComplaint', () => {
       errors: {},
     });
   });
+    /**
+    * Verifies that a complaint without a category is rejected.
+    */
 
   it('Passenger rejects a complaint when the category is missing', () => {
     const complaintData = {
@@ -46,6 +53,9 @@ describe('validateComplaint', () => {
       },
     });
   });
+   /**
+   * Verifies that a complaint without a description is rejected.
+   */
 
   it('Passenger rejects a complaint when the description is missing', () => {
     const complaintData = {
