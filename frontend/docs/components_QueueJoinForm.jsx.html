@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/QueueJoinForm.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/QueueJoinForm.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Queue Join Form module.
+ * @module QueueJoinForm
+ */
+
+import { locations } from "../services/queueService";
+
+/**
+ * Displays the passenger queue registration form.
+ *
+ * Allows passengers to select pickup and destination points,
+ * specify seat requirements, choose a gender preference,
+ * and request priority consideration before joining the queue.
+ *
+ * @memberof module:QueueJoinForm
+ * @param {Object} props Component properties.
+ * @param {string} props.pickup Selected pickup location.
+ * @param {Function} props.setPickup Updates the pickup location.
+ * @param {string} props.destination Selected destination.
+ * @param {Function} props.setDestination Updates the destination.
+ * @param {number} props.seats Number of requested seats.
+ * @param {Function} props.setSeats Updates the seat count.
+ * @param {string} props.gender Selected gender preference.
+ * @param {Function} props.setGender Updates the gender preference.
+ * @param {boolean} props.priority Whether priority is requested.
+ * @param {Function} props.setPriority Updates the priority selection.
+ * @param {Function} props.onJoin Callback for joining the queue.
+ * @param {boolean} props.disabled Disables the form when already queued.
+ * @returns {JSX.Element} Queue join form.
+ */
+export default function QueueJoinForm({
+  pickup,
+  setPickup,
+  destination,
+  setDestination,
+  seats,
+  setSeats,
+  gender,
+  setGender,
+  priority,
+  setPriority,
+  onJoin,
+  disabled,
+}) {
+  return (
+    &lt;section className="queue-card">
+      &lt;h2>Join the waiting queue&lt;/h2>
+      &lt;p className="card-copy">
+        No vehicles are available right now. Join to receive a fair place in
+        line.
+      &lt;/p>
+
+      &lt;div className="queue-form-group">
+        &lt;label htmlFor="queue-pickup">Pickup point&lt;/label>
+        &lt;select
+          id="queue-pickup"
+          value={pickup}
+          onChange={(event) => setPickup(event.target.value)}
+          disabled={disabled}
+        >
+          &lt;option value="">Choose your pickup point&lt;/option>
+          {locations.map((location) => (
+            &lt;option key={location.id} value={location.name}>
+              {location.name}
+            &lt;/option>
+          ))}
+        &lt;/select>
+      &lt;/div>
+
+      &lt;div className="queue-form-group">
+        &lt;label htmlFor="queue-destination">Destination point&lt;/label>
+        &lt;select
+          id="queue-destination"
+          value={destination}
+          onChange={(event) => setDestination(event.target.value)}
+          disabled={disabled}
+        >
+          &lt;option value="">Choose your destination point&lt;/option>
+          {locations.map((location) => (
+            &lt;option key={location.id} value={location.name}>
+              {location.name}
+            &lt;/option>
+          ))}
+        &lt;/select>
+      &lt;/div>
+
+      &lt;div className="queue-form-row">
+        &lt;div className="queue-form-group">
+          &lt;label htmlFor="queue-seats">Seats needed&lt;/label>
+          &lt;input
+            id="queue-seats"
+            type="number"
+            min="1"
+            max="4"
+            value={seats}
+            onChange={(event) => setSeats(Number(event.target.value))}
+            disabled={disabled}
+          />
+        &lt;/div>
+
+        &lt;div className="queue-form-group">
+          &lt;label htmlFor="queue-gender">Gender preference&lt;/label>
+          &lt;select
+            id="queue-gender"
+            value={gender}
+            onChange={(event) => setGender(event.target.value)}
+            disabled={disabled}
+          >
+            &lt;option value="Any">Any&lt;/option>
+            &lt;option value="Male">Male&lt;/option>
+            &lt;option value="Female">Female&lt;/option>
+          &lt;/select>
+        &lt;/div>
+      &lt;/div>
+
+      &lt;label className="queue-priority-option">
+        &lt;input
+          type="checkbox"
+          checked={priority}
+          onChange={(event) => setPriority(event.target.checked)}
+          disabled={disabled}
+        />
+        Request priority consideration
+      &lt;/label>
+
+      &lt;button
+        className="queue-primary-btn"
+        onClick={onJoin}
+        disabled={disabled}
+      >
+        {disabled ? "Already in queue" : "Join queue"}
+      &lt;/button>
+    &lt;/section>
+  );
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AdminQueuePage.html">AdminQueuePage</a></li><li><a href="module-AdminQueueTable.html">AdminQueueTable</a></li><li><a href="module-DriverQueueCard.html">DriverQueueCard</a></li><li><a href="module-DriverQueuePage.html">DriverQueuePage</a></li><li><a href="module-PassengerQueuePage.html">PassengerQueuePage</a></li><li><a href="module-PriorityRequestForm.html">PriorityRequestForm</a></li><li><a href="module-QueueJoinForm.html">QueueJoinForm</a></li><li><a href="module-QueueStatusCard.html">QueueStatusCard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue Sep 01 2026 01:19:26 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
