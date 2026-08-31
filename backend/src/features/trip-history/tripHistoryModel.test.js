@@ -1,6 +1,6 @@
-const { describe, expect, it } = require("vitest");
+import { describe, expect, it } from "vitest";
 
-const { getTripHistory } = require("./tripHistoryModel");
+import { getTripHistory } from "./tripHistoryModel";
 
 describe("tripHistoryModel", () => {
   it("returns trip history for the requested passenger", async () => {
