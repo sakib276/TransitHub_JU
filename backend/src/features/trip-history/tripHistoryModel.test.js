@@ -29,3 +29,27 @@ describe("tripHistoryModel", () => {
     expect(result).toEqual([]);
   });
 });
+
+it("filters history by completion date", async () => {
+  const passengerId = 1;
+
+  const result = await getTripHistory(passengerId, {
+    date: "2026-08-30",
+  });
+
+  result.forEach((trip) => {
+    expect(trip.completedAt.startsWith("2026-08-30")).toBe(true);
+  });
+});
+
+it("filters history by destination", async () => {
+  const passengerId = 1;
+
+  const result = await getTripHistory(passengerId, {
+    destination: "Central Library",
+  });
+
+  result.forEach((trip) => {
+    expect(trip.destination).toBe("Central Library");
+  });
+});
