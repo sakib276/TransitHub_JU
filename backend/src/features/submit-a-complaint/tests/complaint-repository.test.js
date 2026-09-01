@@ -1,8 +1,14 @@
 /**
  * @file Unit tests for the Complaint repository.
  *
- * Tests database persistence operations while keeping the actual database
- * connection mocked.
+ * Tests database persistence operations using a mocked database client.
+ *
+ * Repository responsibility:
+ * - Execute SQL queries.
+ * - Pass parameterized values to the database.
+ * - Return database records.
+ *
+ * These tests do NOT require a real MySQL connection.
  */
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
@@ -14,8 +20,15 @@ describe('ComplaintRepository', () => {
   let repository;
 
   beforeEach(() => {
+    /**
+     * Mock database client.
+     *
+     * The real MySQL2 pool exposes execute().
+     * Therefore the repository tests must mock execute(),
+     * not query().
+     */
     db = {
-      query: vi.fn(),
+      execute: vi.fn(),
     };
 
     repository = new ComplaintRepository(db);
@@ -42,13 +55,25 @@ describe('ComplaintRepository', () => {
         updated_at: new Date(),
       };
 
-      db.query.mockResolvedValue([
-        [{ ...createdRecord }],
+      /**
+       * First database call:
+       * INSERT INTO complaints
+       */
+      db.execute.mockResolvedValueOnce([
+        {
+          insertId: 1,
+        },
       ]);
+
+      /**
+       * Second database call:
+       * findById(1) -> SELECT ...
+       */
+      db.execute.mockResolvedValueOnce([[createdRecord]]);
 
       const result = await repository.create(complaintData);
 
-      expect(db.query).toHaveBeenCalledTimes(1);
+      expect(db.execute).toHaveBeenCalledTimes(2);
       expect(result).toEqual(createdRecord);
     });
   });
@@ -65,16 +90,18 @@ describe('ComplaintRepository', () => {
         status: 'UNDER_REVIEW',
       };
 
-      db.query.mockResolvedValue([[record]]);
+      db.execute.mockResolvedValueOnce([[record]]);
 
-      const result = await repository.findByComplaintId('CMP-2026-001');
+      const result = await repository.findByComplaintId(
+        'CMP-2026-001',
+      );
 
-      expect(db.query).toHaveBeenCalledTimes(1);
+      expect(db.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(record);
     });
 
     it('returns null when complaint does not exist', async () => {
-      db.query.mockResolvedValue([[]]);
+      db.execute.mockResolvedValueOnce([[]]);
 
       const result = await repository.findByComplaintId('CMP-999');
 
@@ -103,11 +130,13 @@ describe('ComplaintRepository', () => {
         },
       ];
 
-      db.query.mockResolvedValue([records]);
+      db.execute.mockResolvedValueOnce([records]);
 
-      const result = await repository.findByPassengerId('passenger-101');
+      const result = await repository.findByPassengerId(
+        'passenger-101',
+      );
 
-      expect(db.query).toHaveBeenCalledTimes(1);
+      expect(db.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(records);
     });
   });
@@ -125,11 +154,11 @@ describe('ComplaintRepository', () => {
         },
       ];
 
-      db.query.mockResolvedValue([records]);
+      db.execute.mockResolvedValueOnce([records]);
 
       const result = await repository.findAll();
 
-      expect(db.query).toHaveBeenCalledTimes(1);
+      expect(db.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(records);
     });
   });
@@ -155,33 +184,48 @@ describe('ComplaintRepository', () => {
         reviewed_at: updateData.reviewed_at,
       };
 
-      db.query
-        .mockResolvedValueOnce([{ affectedRows: 1 }])
-        .mockResolvedValueOnce([[updatedRecord]]);
+      /**
+       * First call:
+       * UPDATE complaints ...
+       */
+      db.execute.mockResolvedValueOnce([
+        {
+          affectedRows: 1,
+        },
+      ]);
+
+      /**
+       * Second call:
+       * findByComplaintId()
+       */
+      db.execute.mockResolvedValueOnce([[updatedRecord]]);
 
       const result = await repository.updateStatus(
         'CMP-2026-001',
         updateData,
       );
 
-      expect(db.query).toHaveBeenCalledTimes(2);
+      expect(db.execute).toHaveBeenCalledTimes(2);
       expect(result).toEqual(updatedRecord);
     });
 
-    it('returns null when complaint does not exist', async () => {
-      db.query.mockResolvedValueOnce([{ affectedRows: 0 }]);
-
-      const result = await repository.updateStatus(
-        'CMP-999',
+    it('throws an error when complaint does not exist', async () => {
+      db.execute.mockResolvedValueOnce([
         {
+          affectedRows: 0,
+        },
+      ]);
+
+      await expect(
+        repository.updateStatus('CMP-999', {
           status: 'RESOLVED',
           admin_notes: null,
           reviewed_by: 'admin-001',
           reviewed_at: new Date(),
-        },
-      );
+        }),
+      ).rejects.toThrow('Complaint not found.');
 
-      expect(result).toBeNull();
+      expect(db.execute).toHaveBeenCalledTimes(1);
     });
   });
 });
