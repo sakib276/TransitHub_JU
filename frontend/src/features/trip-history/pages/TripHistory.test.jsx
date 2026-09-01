@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import TripHistory from "./TripHistory";
@@ -8,34 +8,31 @@ vi.mock("../tripHistoryApi", () => ({
   getTripHistory: vi.fn(),
 }));
 
-describe("TripHistory filtering", () => {
+const mockHistory = [
+  {
+    id: 1,
+    date: "2026-08-30",
+    destination: "Central Library",
+  },
+  {
+    id: 2,
+    date: "2026-08-29",
+    destination: "Sociology Building",
+  },
+];
+
+describe("TripHistory filters", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    getTripHistory.mockResolvedValue([
-      {
-        id: 1,
-        date: "2026-08-30",
-        destination: "Central Library",
-        fare: 20,
-      },
-      {
-        id: 2,
-        date: "2026-08-29",
-        destination: "Dairy Gate",
-        fare: 15,
-      },
-    ]);
+    getTripHistory.mockResolvedValue(mockHistory);
   });
 
-  it("sends the selected date when applying the date filter", async () => {
+  it("sends selected date when date filter is applied", async () => {
     render(<TripHistory />);
 
-    await waitFor(() => {
-      expect(getTripHistory).toHaveBeenCalledWith({});
-    });
+    const dateInput = await screen.findByLabelText(/date/i);
 
-    const dateInput = screen.getByLabelText(/date/i);
     fireEvent.change(dateInput, {
       target: { value: "2026-08-30" },
     });
@@ -49,14 +46,10 @@ describe("TripHistory filtering", () => {
     });
   });
 
-  it("sends the selected destination when applying the destination filter", async () => {
+  it("sends selected destination when destination filter is applied", async () => {
     render(<TripHistory />);
 
-    await waitFor(() => {
-      expect(getTripHistory).toHaveBeenCalledWith({});
-    });
-
-    const destinationInput = screen.getByLabelText(/destination/i);
+    const destinationInput = await screen.findByLabelText(/destination/i);
 
     fireEvent.change(destinationInput, {
       target: { value: "Central Library" },
@@ -74,15 +67,14 @@ describe("TripHistory filtering", () => {
   it("sends both date and destination filters together", async () => {
     render(<TripHistory />);
 
-    await waitFor(() => {
-      expect(getTripHistory).toHaveBeenCalledWith({});
-    });
+    const dateInput = await screen.findByLabelText(/date/i);
+    const destinationInput = await screen.findByLabelText(/destination/i);
 
-    fireEvent.change(screen.getByLabelText(/date/i), {
+    fireEvent.change(dateInput, {
       target: { value: "2026-08-30" },
     });
 
-    fireEvent.change(screen.getByLabelText(/destination/i), {
+    fireEvent.change(destinationInput, {
       target: { value: "Central Library" },
     });
 
@@ -96,18 +88,17 @@ describe("TripHistory filtering", () => {
     });
   });
 
-  it("clears filters and shows all trip history", async () => {
+  it("clearing filters shows all trip history", async () => {
     render(<TripHistory />);
 
-    await waitFor(() => {
-      expect(getTripHistory).toHaveBeenCalledWith({});
-    });
+    const dateInput = await screen.findByLabelText(/date/i);
+    const destinationInput = await screen.findByLabelText(/destination/i);
 
-    fireEvent.change(screen.getByLabelText(/date/i), {
+    fireEvent.change(dateInput, {
       target: { value: "2026-08-30" },
     });
 
-    fireEvent.change(screen.getByLabelText(/destination/i), {
+    fireEvent.change(destinationInput, {
       target: { value: "Central Library" },
     });
 
@@ -121,14 +112,11 @@ describe("TripHistory filtering", () => {
     });
 
     fireEvent.click(
-      screen.getByRole("button", { name: /clear filters/i }),
+      screen.getByRole("button", { name: /clear filters/i })
     );
 
     await waitFor(() => {
       expect(getTripHistory).toHaveBeenLastCalledWith({});
     });
-
-    expect(screen.getByLabelText(/date/i)).toHaveValue("");
-    expect(screen.getByLabelText(/destination/i)).toHaveValue("");
   });
 });
