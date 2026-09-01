@@ -10,11 +10,11 @@ import { describe, expect, it } from 'vitest';
 import {
   COMPLAINT_CATEGORY,
   COMPLAINT_STATUS,
-} from '../complaint-constants.js';
+} from '../constants/complaint-constants.js';
 import {
   validateCreateComplaint,
   validateUpdateComplaintStatus,
-} from '../complaint-validator.js';
+} from '../validators/complaint-validator.js';
 
 /**
  * Test suite for complaint creation validation.
