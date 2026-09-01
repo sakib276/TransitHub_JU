@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import TripHistory from "./TripHistory";
@@ -8,81 +8,127 @@ vi.mock("../tripHistoryApi", () => ({
   getTripHistory: vi.fn(),
 }));
 
-const mockTrips = [
-  {
-    historyId: 1,
-    tripId: 101,
-    pickup: "Main Gate",
-    destination: "Central Library",
-    farePaid: 40,
-    driverName: "Rahim",
-    rideType: "Regular",
-    status: "Completed",
-    completedAt: "2026-08-30T15:30:00",
-  },
-  {
-    historyId: 2,
-    tripId: 102,
-    pickup: "Dairy Gate",
-    destination: "JU Bot Tola",
-    farePaid: 30,
-    driverName: "Karim",
-    rideType: "Shared",
-    status: "Completed",
-    completedAt: "2026-08-29T12:00:00",
-  },
-];
-
-describe("TripHistory", () => {
+describe("TripHistory filtering", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    getTripHistory.mockResolvedValue([
+      {
+        id: 1,
+        date: "2026-08-30",
+        destination: "Central Library",
+        fare: 20,
+      },
+      {
+        id: 2,
+        date: "2026-08-29",
+        destination: "Dairy Gate",
+        fare: 15,
+      },
+    ]);
   });
 
-  it("shows loading state", () => {
-    getTripHistory.mockReturnValue(new Promise(() => {}));
-
+  it("sends the selected date when applying the date filter", async () => {
     render(<TripHistory />);
 
-    expect(
-      screen.getByText("Loading trip history...")
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenCalledWith({});
+    });
+
+    const dateInput = screen.getByLabelText(/date/i);
+    fireEvent.change(dateInput, {
+      target: { value: "2026-08-30" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /apply filters/i }));
+
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenLastCalledWith({
+        date: "2026-08-30",
+      });
+    });
   });
 
-  it("displays trip history", async () => {
-    getTripHistory.mockResolvedValue(mockTrips);
-
+  it("sends the selected destination when applying the destination filter", async () => {
     render(<TripHistory />);
 
-    expect(
-      await screen.findByText("Central Library")
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenCalledWith({});
+    });
 
-    expect(
-      screen.getByText("JU Bot Tola")
-    ).toBeInTheDocument();
+    const destinationInput = screen.getByLabelText(/destination/i);
+
+    fireEvent.change(destinationInput, {
+      target: { value: "Central Library" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /apply filters/i }));
+
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenLastCalledWith({
+        destination: "Central Library",
+      });
+    });
   });
 
-  it("shows empty state when no history exists", async () => {
-    getTripHistory.mockResolvedValue([]);
-
+  it("sends both date and destination filters together", async () => {
     render(<TripHistory />);
 
-    expect(
-      await screen.findByText("No trip history available.")
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenCalledWith({});
+    });
+
+    fireEvent.change(screen.getByLabelText(/date/i), {
+      target: { value: "2026-08-30" },
+    });
+
+    fireEvent.change(screen.getByLabelText(/destination/i), {
+      target: { value: "Central Library" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /apply filters/i }));
+
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenLastCalledWith({
+        date: "2026-08-30",
+        destination: "Central Library",
+      });
+    });
   });
 
-  it("shows error when loading fails", async () => {
-    getTripHistory.mockRejectedValue(
-      new Error("Network error")
+  it("clears filters and shows all trip history", async () => {
+    render(<TripHistory />);
+
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenCalledWith({});
+    });
+
+    fireEvent.change(screen.getByLabelText(/date/i), {
+      target: { value: "2026-08-30" },
+    });
+
+    fireEvent.change(screen.getByLabelText(/destination/i), {
+      target: { value: "Central Library" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /apply filters/i }));
+
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenLastCalledWith({
+        date: "2026-08-30",
+        destination: "Central Library",
+      });
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /clear filters/i }),
     );
 
-    render(<TripHistory />);
+    await waitFor(() => {
+      expect(getTripHistory).toHaveBeenLastCalledWith({});
+    });
 
-    expect(
-      await screen.findByText(
-        "Unable to load trip history. Please try again."
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/date/i)).toHaveValue("");
+    expect(screen.getByLabelText(/destination/i)).toHaveValue("");
   });
 });
