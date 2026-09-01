@@ -1,0 +1,406 @@
+/* =========================================================
+   TransitHub JU - Shared Layout
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f7f9fc;
+  color: #24324a;
+}
+
+/* =========================================================
+   App Layout
+   ========================================================= */
+
+.app-layout {
+  min-height: 100vh;
+  background: #f7f9fc;
+}
+
+.app-layout__content {
+  min-height: calc(100vh - 72px);
+}
+
+/* =========================================================
+   Navbar
+   ========================================================= */
+
+.app-navbar {
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 32px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #e6ecf5;
+
+  box-shadow: 0 2px 10px rgba(36, 50, 74, 0.05);
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.app-navbar__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* =========================================================
+   Hamburger Menu
+   ========================================================= */
+
+.app-navbar__menu {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  padding: 0;
+
+  border: 1px solid #e6ecf5;
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.app-navbar__menu:hover {
+  background: #f1f4ff;
+  border-color: #b8c8ff;
+}
+
+.app-navbar__menu span {
+  display: block;
+
+  width: 18px;
+  height: 2px;
+
+  border-radius: 2px;
+
+  background: #24324a;
+
+  transition: background 0.2s ease;
+}
+
+.app-navbar__menu:hover span {
+  background: #5b7cfa;
+}
+
+/* =========================================================
+   Navbar Brand
+   ========================================================= */
+
+.app-navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-navbar__logo {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #5b7cfa;
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.app-navbar__title {
+  margin: 0;
+
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  color: #24324a;
+}
+
+.app-navbar__subtitle {
+  margin: 3px 0 0;
+
+  font-size: 11px;
+  color: #6b7a90;
+}
+
+/* =========================================================
+   Navbar Right
+   ========================================================= */
+
+.app-navbar__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-navbar__welcome {
+  font-size: 13px;
+  color: #6b7a90;
+}
+
+.app-navbar__profile {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #b8c8ff;
+  color: #24324a;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   Sidebar
+   ========================================================= */
+
+.app-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 285px;
+  height: 100vh;
+
+  padding: 24px 14px;
+
+  background: #ffffff;
+
+  border-right: 1px solid #e6ecf5;
+
+  box-shadow: 8px 0 25px rgba(36, 50, 74, 0.08);
+
+  transform: translateX(-100%);
+
+  transition: transform 0.25s ease;
+
+  z-index: 1200;
+
+  overflow-y: auto;
+}
+
+.app-sidebar--open {
+  transform: translateX(0);
+}
+
+/* =========================================================
+   Sidebar Header
+   ========================================================= */
+
+.app-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 10px 20px;
+
+  border-bottom: 1px solid #eef1f6;
+
+  margin-bottom: 14px;
+}
+
+.app-sidebar__header > span {
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #6b7a90;
+}
+
+.app-sidebar__close {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #f7f9fc;
+  color: #6b7a90;
+
+  font-size: 23px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.app-sidebar__close:hover {
+  background: #eef1ff;
+  color: #5b7cfa;
+}
+
+/* =========================================================
+   Sidebar Navigation
+   ========================================================= */
+
+.app-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.app-sidebar__link {
+  display: flex;
+  align-items: center;
+
+  min-height: 44px;
+
+  padding: 10px 13px;
+
+  border-radius: 9px;
+
+  text-decoration: none;
+
+  color: #6b7a90;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.app-sidebar__link:hover {
+  background: #f1f4ff;
+  color: #5b7cfa;
+
+  transform: translateX(2px);
+}
+
+.app-sidebar__link--active {
+  background: #eef1ff;
+  color: #5b7cfa;
+
+  font-weight: 700;
+
+  border-left: 3px solid #5b7cfa;
+}
+
+/* =========================================================
+   Sidebar Overlay
+   ========================================================= */
+
+.sidebar-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(36, 50, 74, 0.25);
+
+  z-index: 1100;
+
+  animation: sidebarOverlayIn 0.2s ease;
+}
+
+@keyframes sidebarOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .app-navbar {
+    height: 64px;
+    padding: 0 18px;
+  }
+
+  .app-layout__content {
+    min-height: calc(100vh - 64px);
+  }
+
+  .app-navbar__welcome {
+    display: none;
+  }
+
+  .app-navbar__subtitle {
+    display: none;
+  }
+
+  .app-navbar__title {
+    font-size: 16px;
+  }
+
+  .app-navbar__logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .app-sidebar {
+    width: min(285px, 85vw);
+  }
+}
+
+@media (max-width: 400px) {
+  .app-navbar {
+    padding: 0 12px;
+  }
+
+  .app-navbar__left {
+    gap: 10px;
+  }
+
+  .app-navbar__menu {
+    width: 38px;
+    height: 38px;
+  }
+
+  .app-navbar__brand {
+    gap: 8px;
+  }
+
+  .app-navbar__logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-navbar__title {
+    font-size: 15px;
+  }
+}

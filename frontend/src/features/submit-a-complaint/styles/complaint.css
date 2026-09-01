@@ -9,35 +9,42 @@
    Submit a Complaint Page
    ========================================================= */
 
+
 .complaint-page {
-  min-height: 100vh;
-  padding: 40px 56px 60px;
+  width: 100%;
+  min-height: calc(100vh - 72px);
+
+  padding: 42px 32px 60px;
+
   background: #f7f9fc;
   color: #24324a;
-  box-sizing: border-box;
 }
 
 /* =========================================================
-   Page Header
+   Header
    ========================================================= */
 
 .complaint-page__header {
-  max-width: 760px;
-  margin-bottom: 28px;
+  width: min(100%, 1050px);
+  margin: 0 auto 26px;
 }
 
 .complaint-page__header h1 {
-  margin: 0 0 10px;
-  font-size: 32px;
-  font-weight: 700;
+  margin: 0 0 9px;
+
+  font-size: 30px;
   line-height: 1.2;
+  font-weight: 700;
+
   color: #24324a;
 }
 
 .complaint-page__header p {
   margin: 0;
-  font-size: 15px;
+
+  font-size: 14px;
   line-height: 1.6;
+
   color: #6b7a90;
 }
 
@@ -46,36 +53,48 @@
    ========================================================= */
 
 .complaint-preview {
+  width: min(100%, 1050px);
+
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-  padding: 8px 0;
   flex-wrap: wrap;
+
+  gap: 9px;
+
+  margin: 0 auto 22px;
 }
 
 .complaint-preview__label {
   margin-right: 4px;
-  font-size: 11px;
+
+  font-size: 10px;
   font-weight: 700;
+
   letter-spacing: 0.08em;
-  color: #6b7a90;
+
+  color: #8a97a9;
 }
 
 .complaint-preview__option {
-  padding: 7px 14px;
-  border: 1px solid #e6ecf5;
+  padding: 7px 13px;
+
+  border: 1px solid #e2e8f1;
   border-radius: 8px;
+
   background: #ffffff;
   color: #6b7a90;
-  font-size: 13px;
-  font-weight: 500;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
   cursor: pointer;
-  transition: all 0.2s ease;
+
+  transition: 0.2s ease;
 }
 
 .complaint-preview__option:hover {
-  border-color: #5b7cfa;
+  border-color: #b8c8ff;
   color: #5b7cfa;
 }
 
@@ -86,13 +105,20 @@
 }
 
 /* =========================================================
-   Main Layout
+   Main Complaint Layout
    ========================================================= */
 
 .complaint-layout {
+  width: min(100%, 1050px);
+
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
-  gap: 28px;
+
+  grid-template-columns: minmax(0, 1.55fr) minmax(270px, 0.75fr);
+
+  gap: 24px;
+
+  margin: 0 auto;
+
   align-items: start;
 }
 
@@ -101,71 +127,98 @@
    ========================================================= */
 
 .complaint-form {
+  width: 100%;
+
   padding: 28px;
-  border: 1px solid #e6ecf5;
-  border-radius: 16px;
+
+  border: 1px solid #e4eaf3;
+  border-radius: 15px;
+
   background: #ffffff;
+
   box-shadow: 0 4px 18px rgba(36, 50, 74, 0.05);
 }
 
 .complaint-form > * {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .complaint-form > *:last-child {
   margin-bottom: 0;
 }
 
+/* =========================================================
+   Form Controls
+   ========================================================= */
+
 .complaint-form label {
   display: block;
-  margin-bottom: 8px;
-  color: #24324a;
-  font-size: 14px;
+
+  margin-bottom: 7px;
+
+  font-size: 13px;
   font-weight: 600;
-}
 
-.complaint-form select,
-.complaint-form textarea,
-.complaint-form input {
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid #e6ecf5;
-  border-radius: 9px;
-  background: #ffffff;
   color: #24324a;
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.complaint-form input,
+.complaint-form select,
+.complaint-form textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #e0e6ef;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #24324a;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.complaint-form input,
 .complaint-form select {
-  height: 46px;
-  padding: 0 14px;
+  height: 44px;
+  padding: 0 12px;
 }
 
 .complaint-form textarea {
-  min-height: 140px;
-  padding: 13px 14px;
+  min-height: 125px;
+
+  padding: 12px;
+
   resize: vertical;
 }
 
+.complaint-form input:focus,
 .complaint-form select:focus,
-.complaint-form textarea:focus,
-.complaint-form input:focus {
+.complaint-form textarea:focus {
   border-color: #5b7cfa;
+
   box-shadow: 0 0 0 3px rgba(91, 124, 250, 0.1);
 }
 
 /* =========================================================
-   Form Errors
+   Errors
    ========================================================= */
 
 .complaint-form__error {
-  margin-top: -12px;
-  margin-bottom: 16px;
+  margin-top: -10px;
+  margin-bottom: 14px;
+
   color: #d95353;
-  font-size: 13px;
+
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -175,17 +228,25 @@
 
 .complaint-form button[type="submit"] {
   width: 100%;
-  min-height: 46px;
-  padding: 0 20px;
+  min-height: 44px;
+
+  padding: 0 18px;
+
   border: none;
-  border-radius: 9px;
+  border-radius: 8px;
+
   background: #5b7cfa;
   color: #ffffff;
+
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
+
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .complaint-form button[type="submit"]:hover {
@@ -197,7 +258,7 @@
 }
 
 .complaint-form button[type="submit"]:disabled {
-  opacity: 0.65;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -206,21 +267,28 @@
    ========================================================= */
 
 .complaint-next {
-  padding: 26px;
-  border: 1px solid #e6ecf5;
-  border-radius: 16px;
+  width: 100%;
+
+  padding: 24px;
+
+  border: 1px solid #e4eaf3;
+  border-radius: 15px;
+
   background: #ffffff;
+
   box-shadow: 0 4px 18px rgba(36, 50, 74, 0.05);
 }
 
 .complaint-next__header {
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
 .complaint-next__header h2 {
   margin: 0;
-  font-size: 20px;
+
+  font-size: 19px;
   font-weight: 700;
+
   color: #24324a;
 }
 
@@ -234,19 +302,26 @@
 
 .complaint-timeline::before {
   content: "";
+
   position: absolute;
-  top: 22px;
-  bottom: 22px;
-  left: 16px;
+
+  top: 18px;
+  bottom: 18px;
+  left: 15px;
+
   width: 1px;
-  background: #e6ecf5;
+
+  background: #e5eaf2;
 }
 
 .complaint-timeline__item {
   position: relative;
+
   display: flex;
-  gap: 14px;
-  margin-bottom: 28px;
+
+  gap: 13px;
+
+  margin-bottom: 25px;
 }
 
 .complaint-timeline__item:last-child {
@@ -256,56 +331,95 @@
 .complaint-timeline__icon {
   position: relative;
   z-index: 1;
+
+  flex: 0 0 30px;
+
+  width: 30px;
+  height: 30px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
-  border: 1px solid #e6ecf5;
+
+  border: 1px solid #e1e7ef;
   border-radius: 50%;
+
   background: #ffffff;
+
   color: #9aa7b8;
-  font-size: 13px;
+
+  font-size: 12px;
   font-weight: 700;
 }
 
 .complaint-timeline__item--completed
   .complaint-timeline__icon {
   border-color: #b8f2d9;
+
   background: #b8f2d9;
+
   color: #237a55;
 }
 
 .complaint-timeline__content {
-  padding-top: 2px;
+  padding-top: 1px;
 }
 
 .complaint-timeline__content h3 {
-  margin: 0 0 6px;
-  font-size: 14px;
+  margin: 0 0 5px;
+
+  font-size: 13px;
   font-weight: 700;
+
   color: #24324a;
 }
 
 .complaint-timeline__content p {
   margin: 0;
-  color: #6b7a90;
-  font-size: 13px;
+
+  font-size: 12px;
   line-height: 1.5;
+
+  color: #6b7a90;
 }
 
 /* =========================================================
-   Responsive
+   Tablet
    ========================================================= */
 
 @media (max-width: 900px) {
   .complaint-page {
-    padding: 32px 24px 48px;
+    padding: 32px 24px 50px;
+  }
+
+  .complaint-layout {
+    grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.8fr);
+  }
+
+  .complaint-form {
+    padding: 24px;
+  }
+
+  .complaint-next {
+    padding: 22px;
+  }
+}
+
+/* =========================================================
+   Mobile / Narrow Screen
+   ========================================================= */
+
+@media (max-width: 720px) {
+  .complaint-page {
+    padding: 28px 18px 45px;
   }
 
   .complaint-layout {
     grid-template-columns: 1fr;
+  }
+
+  .complaint-page__header h1 {
+    font-size: 26px;
   }
 
   .complaint-next {
@@ -313,21 +427,43 @@
   }
 }
 
-@media (max-width: 600px) {
+/* =========================================================
+   Small Mobile
+   ========================================================= */
+
+@media (max-width: 480px) {
   .complaint-page {
-    padding: 24px 16px 40px;
+    padding: 22px 14px 35px;
+  }
+
+  .complaint-page__header {
+    margin-bottom: 20px;
   }
 
   .complaint-page__header h1 {
-    font-size: 26px;
+    font-size: 23px;
   }
 
-  .complaint-form,
-  .complaint-next {
-    padding: 20px;
+  .complaint-page__header p {
+    font-size: 13px;
   }
 
   .complaint-preview {
     align-items: flex-start;
+  }
+
+  .complaint-preview__label {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .complaint-form {
+    padding: 19px;
+    border-radius: 13px;
+  }
+
+  .complaint-next {
+    padding: 19px;
+    border-radius: 13px;
   }
 }
