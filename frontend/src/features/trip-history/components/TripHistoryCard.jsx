@@ -1,42 +1,77 @@
 /**
- * Displays a single trip history record.
+ * Displays one trip history record.
  *
  * @param {Object} props - Component properties.
- * @param {Object} props.trip - Trip history information.
+ * @param {Object} props.trip - Trip history record.
+ * @param {Function} props.onSelect - Selects the trip.
  * @returns {JSX.Element} Trip history card.
  */
-function TripHistoryCard({ trip }) {
+function TripHistoryCard({ trip, onSelect }) {
   return (
     <article className="trip-history-card">
-      <h2>Trip #{trip.tripId}</h2>
+      <div className="trip-route">
+        <div className="trip-route-item">
+          <span className="route-icon">●</span>
+          <span>
+            {trip.pickup || "Main Gate"}
+          </span>
+        </div>
 
-      <p>
-        <strong>Pickup:</strong> {trip.pickup}
-      </p>
+        <div className="trip-route-item">
+          <span className="route-icon">●</span>
+          <span>
+            {trip.destination || "Central Library"}
+          </span>
+        </div>
+      </div>
 
-      <p>
-        <strong>Destination:</strong> {trip.destination}
-      </p>
+      <div className="trip-info trip-divider">
+        <div className="trip-info-item">
+          📅
+          <span>
+            {trip.completedAt
+              ? new Date(
+                  trip.completedAt
+                ).toLocaleDateString()
+              : "25 Jul 2026"}
+          </span>
+        </div>
 
-      <p>
-        <strong>Driver:</strong> {trip.driverName}
-      </p>
+        <div className="trip-info-item">
+          ◷
+          <span>09:30 AM</span>
+        </div>
+      </div>
 
-      <p>
-        <strong>Fare:</strong> ৳{trip.farePaid}
-      </p>
+      <div className="trip-info trip-divider">
+        <div className="trip-info-item">
+          ♙
+          <span>
+            {trip.driverName || "Driver Name"}
+          </span>
+        </div>
 
-      <p>
-        <strong>Ride Type:</strong> {trip.rideType}
-      </p>
+        <div className="trip-info-item">
+          🚗
+          <span>
+            {trip.vehicleNumber || "Vehicle (A 1234)"}
+          </span>
+        </div>
+      </div>
 
-      <p>
-        <strong>Status:</strong> {trip.status}
-      </p>
+      <div className="trip-actions trip-divider">
+        <span className="status-badge">
+          {trip.status || "Completed"}
+        </span>
 
-      <p>
-        <strong>Completed:</strong> {trip.completedAt}
-      </p>
+        <button
+          type="button"
+          className="details-button"
+          onClick={onSelect}
+        >
+          View Details
+        </button>
+      </div>
     </article>
   );
 }

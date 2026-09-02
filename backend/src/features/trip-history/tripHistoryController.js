@@ -1,37 +1,34 @@
-//const tripHistoryModel = require("./tripHistoryModel");
-import * as tripHistoryModel from "./tripHistoryModel";
+const tripHistoryModel = require("./tripHistoryModel");
+
 /**
  * Retrieves trip history for the authenticated passenger.
  *
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- * @returns {Promise<Object>} HTTP response containing trip history.
+ * @param {Object} request - Express request object.
+ * @param {Object} response - Express response object.
+ * @returns {Promise<void>} Sends trip history response.
  */
-async function getTripHistory(req, res) {
+const getTripHistory = async (request, response) => {
   try {
-    const passengerId = req.user.userId;
+    const userId = request.user.userId;
 
     const filters = {
-      date: req.query.date,
-      destination: req.query.destination,
+      date: request.query.date,
+      destination: request.query.destination,
     };
 
-    const history = await tripHistoryModel.getTripHistory(
-      passengerId,
-      filters
-    );
+    const history = await tripHistoryModel.getTripHistory(userId, filters);
 
-    return res.status(200).json({
+    return response.status(200).json({
       success: true,
       data: history,
     });
   } catch (error) {
-    return res.status(500).json({
+    return response.status(500).json({
       success: false,
       message: "Failed to retrieve trip history.",
     });
   }
-}
+};
 
 module.exports = {
   getTripHistory,
