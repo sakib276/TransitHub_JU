@@ -13,7 +13,7 @@ import { createDatabase } from '../../../config/database.js';
  * verification so that test data is not permanently stored.
  */
 describe('Submit a Complaint - Real Database Integration', () => {
-  /** @type {import('mysql2/promise').Pool} */
+  /** @type {Pool} */
   let db;
 
   /**

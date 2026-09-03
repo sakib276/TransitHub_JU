@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 
 import { ComplaintRepository } from './features/submit-a-complaint/repositories/complaint-repository.js';
@@ -14,7 +15,7 @@ import { createComplaintRoutes } from './features/submit-a-complaint/routes/comp
  *
  * @param {Object} options - Application configuration.
  * @param {Object} options.db - Database client.
- * @returns {import('express').Express} Configured Express application.
+ * @returns {Express} Configured Express application.
  */
 const createApp = ({
   db = {
@@ -37,6 +38,8 @@ const createApp = ({
    * Without this middleware, req.body would not contain
    * JSON data sent by the frontend or Supertest.
    */
+  //Enable cors to relate to backend and frontend ports.
+  app.use(cors());
   app.use(express.json());
 
   /**

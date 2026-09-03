@@ -31,37 +31,44 @@ function ComplaintForm({ onSubmit }) {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  /**
-   * Handles complaint form submission.
-   *
-   * @param {SubmitEvent} event - Form submission event.
-   * @returns {void}
-   */
-  const handleSubmit = (event) => {
-    event.preventDefault();
 
-    const complaintData = {
-      category,
-      description,
-      relatedRide,
-    };
+ /**
+ * Handles complaint form submission.
+ *
+ * @param {SubmitEvent} event - Form submission event.
+ * @returns {Promise<void>}
+ */
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    const validationResult = validateComplaint(complaintData);
-
-    if (!validationResult.isValid) {
-      setErrors(validationResult.errors);
-      return;
-    }
-
-    setErrors({});
-    setIsSubmitting(true);
-
-    if (typeof onSubmit === "function") {
-      onSubmit(complaintData);
-    }
-
-    setIsSubmitting(false);
+  const complaintData = {
+    category,
+    description,
+    relatedRide,
   };
+
+  const validationResult = validateComplaint(complaintData);
+
+  if (!validationResult.isValid) {
+    setErrors(validationResult.errors);
+    return;
+  }
+
+  setErrors({});
+  setIsSubmitting(true);
+
+  try {
+    if (typeof onSubmit === 'function') {
+      await onSubmit(complaintData);
+    }
+  } catch (error) {
+    setErrors({
+      submit: error.message,
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <form
@@ -99,6 +106,12 @@ function ComplaintForm({ onSubmit }) {
       {errors.description && (
         <p className="complaint-form__error">
           {errors.description}
+        </p>
+      )}
+
+      {errors.submit && (
+        <p className="complaint-form__error">
+          {errors.submit}
         </p>
       )}
 

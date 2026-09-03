@@ -14,7 +14,7 @@ dotenv.config();
  * database connections instead of creating a new
  * connection for every request.
  *
- * @returns {import('mysql2/promise').Pool} MySQL connection pool.
+ * @returns {Pool} MySQL connection pool.
  */
 const createDatabase = () => {
   const pool = mysql.createPool({

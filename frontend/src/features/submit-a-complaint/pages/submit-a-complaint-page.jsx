@@ -2,7 +2,7 @@
 /**
  * @file Provides the passenger submit-a-complaint page.
  */
-
+import { submitComplaint } from "../services/complaint-service";
 import "../styles/complaint.css";
 import ComplaintForm from "../components/complaint-form";
 
@@ -21,8 +21,18 @@ function SubmitAComplaintPage() {
    * @param {Object} complaintData - Submitted complaint data.
    * @returns {void}
    */
-  const handleComplaintSubmit = (complaintData) => {
-    console.log("Complaint submitted:", complaintData);
+  /**
+ * Submits complaint data to the backend API.
+ *
+ * @param {Object} complaintData - Complaint information.
+ * @returns {Promise<Object>} Created complaint.
+ */
+  const handleComplaintSubmit = async (complaintData) => {
+    const complaint = await submitComplaint(complaintData);
+
+    console.log("Complaint submitted:", complaint);
+
+    return complaint;
   };
 
   return (
