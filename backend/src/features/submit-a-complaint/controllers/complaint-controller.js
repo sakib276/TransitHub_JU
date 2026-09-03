@@ -17,9 +17,23 @@ export class ComplaintController {
    *
    * @param {Object} complaintService - Complaint service dependency.
    */
-  constructor(complaintService) {
-    this.complaintService = complaintService;
-  }
+ constructor(complaintService) {
+  this.complaintService = complaintService;
+
+  // Bind controller methods so that `this` continues to
+  // refer to the ComplaintController instance when Express
+  // calls these methods as route handlers.
+  this.createComplaint = this.createComplaint.bind(this);
+  this.getPassengerComplaints =
+    this.getPassengerComplaints.bind(this);
+  this.getComplaintById =
+    this.getComplaintById.bind(this);
+  this.getAllComplaints =
+    this.getAllComplaints.bind(this);
+  this.updateComplaintStatus =
+    this.updateComplaintStatus.bind(this);
+  this.handleError = this.handleError.bind(this);
+}
 
   /**
    * Creates a new complaint.
