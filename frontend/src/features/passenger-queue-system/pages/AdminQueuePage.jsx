@@ -3,8 +3,16 @@
  * @module AdminQueuePage
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminQueueTable from "../components/AdminQueueTable";
+import {
+  approvePriorityRequest,
+  assignPassenger,
+  getPendingPriorityRequests,
+  getQueue,
+  locations,
+  rejectPriorityRequest,
+} from "../services/queueService";
 import "../styles/adminQueue.css";
 
 /**
@@ -22,40 +30,6 @@ import "../styles/adminQueue.css";
  * @property {string} gender Gender preference.
  */
 
-/** @type {QueuePassenger[]} */
-const initialQueue = [
-  {
-    id: 1,
-    token: "JU-001",
-    name: "Anika",
-    priority: true,
-    pickup: "JU Gate",
-    destination: "Central Library",
-    seats: 1,
-    gender: "Female",
-  },
-  {
-    id: 2,
-    token: "JU-002",
-    name: "Nafis",
-    priority: false,
-    pickup: "JU Gate",
-    destination: "Business Studies",
-    seats: 2,
-    gender: "Any",
-  },
-  {
-    id: 3,
-    token: "ME-001",
-    name: "Raiyan",
-    priority: false,
-    pickup: "Medical",
-    destination: "Transport",
-    seats: 1,
-    gender: "Male",
-  },
-];
-
 /**
  * Admin Queue Page component.
  *
@@ -68,16 +42,50 @@ const initialQueue = [
  */
 export default function AdminQueuePage() {
   /** Selected pickup point. */
-  const [pickup, setPickup] = useState("JU Gate");
+  const [pickup, setPickup] = useState(String(locations[0].id));
 
   /** Available seats in the incoming vehicle. */
   const [seats, setSeats] = useState(2);
 
   /** Current passenger queue. */
-  const [queue, setQueue] = useState(initialQueue);
+  const [queue, setQueue] = useState([]);
 
   /** Status message displayed after queue operations. */
   const [message, setMessage] = useState("");
+  const [priorityRequests, setPriorityRequests] = useState([]);
+
+  const loadQueue = async () => {
+    try {
+      const data = await getQueue(pickup);
+      setQueue(Array.isArray(data) ? data : data.queue || []);
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
+  useEffect(() => {
+    loadQueue();
+    getPendingPriorityRequests()
+      .then(setPriorityRequests)
+      .catch((error) => setMessage(error.message));
+  }, [pickup]);
+
+  const reviewPriority = async (request, action) => {
+    try {
+      const review = action === "approve"
+        ? approvePriorityRequest(request.id)
+        : rejectPriorityRequest(request.id);
+      await review;
+      setPriorityRequests((items) => items.filter((item) => item.id !== request.id));
+      setMessage(`Priority request ${action}d.`);
+      await loadQueue();
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
+  const apiOrigin = (import.meta.env.VITE_API_URL || "http://localhost:5000/api")
+    .replace(/\/api\/?$/, "");
 
   /**
    * Filtered passenger list for the selected pickup point.
@@ -88,7 +96,19 @@ export default function AdminQueuePage() {
   const passengers = useMemo(
     () =>
       queue
-        .filter((item) => item.pickup === pickup)
+        .filter((item) => String(item.pickup_location_id) === pickup)
+        .map((item) => ({
+          ...item,
+          name: item.passenger_name || `Passenger ${item.passenger_id}`,
+          pickup:
+            locations.find((location) => location.id === Number(item.pickup_location_id))?.name ||
+            "Unknown",
+          destination:
+            locations.find((location) => location.id === Number(item.destination_location_id))?.name ||
+            "Unknown",
+          seats: item.seats_needed,
+          gender: item.gender_preference || "Any",
+        }))
         .sort((a, b) => Number(b.priority) - Number(a.priority)),
     [queue, pickup]
   );
@@ -102,24 +122,28 @@ export default function AdminQueuePage() {
    * @param {number} id Passenger identifier.
    * @returns {void}
    */
-  const assign = (id) => {
+  const assign = async (id) => {
     const passenger = queue.find((item) => item.id === id);
 
-    if (!passenger || seats < passenger.seats) {
+    if (!passenger || seats < passenger.seats_needed) {
       setMessage(
         "There are not enough available seats for this passenger's request."
       );
       return;
     }
 
-    setQueue((items) => items.filter((item) => item.id !== id));
-    setSeats((value) => value - passenger.seats);
-
-    setMessage(
-      `${passenger.seats} seat${
-        passenger.seats > 1 ? "s" : ""
-      } assigned and queue positions refreshed.`
-    );
+    try {
+      const result = await assignPassenger(id, {
+        driver_id: 2,
+        vehicle_id: 1,
+        availableSeats: seats,
+      });
+      setSeats((value) => value - result.seatsUsed);
+      setMessage(result.message);
+      await loadQueue();
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   /**
@@ -130,34 +154,33 @@ export default function AdminQueuePage() {
    *
    * @returns {void}
    */
-  const autoAssign = () => {
+  const autoAssign = async () => {
     let remainingSeats = seats;
+    let assignedSeats = 0;
 
-    const assigned = passengers.filter((passenger) => {
-      if (passenger.seats > remainingSeats) return false;
+    try {
+      for (const passenger of passengers) {
+        if (passenger.seats > remainingSeats) continue;
+        const result = await assignPassenger(passenger.id, {
+          driver_id: 2,
+          vehicle_id: 1,
+          availableSeats: remainingSeats,
+        });
+        remainingSeats -= result.seatsUsed;
+        assignedSeats += result.seatsUsed;
+      }
 
-      remainingSeats -= passenger.seats;
-      return true;
-    });
+      if (!assignedSeats) {
+        setMessage("No waiting passenger's seat request fits the available seats.");
+        return;
+      }
 
-    if (!assigned.length) {
-      setMessage(
-        "No waiting passenger's seat request fits the available seats."
-      );
-      return;
+      setSeats(remainingSeats);
+      setMessage(`${assignedSeats} seat${assignedSeats > 1 ? "s" : ""} assigned automatically.`);
+      await loadQueue();
+    } catch (error) {
+      setMessage(error.message);
     }
-
-    const ids = assigned.map((item) => item.id);
-
-    setQueue((items) => items.filter((item) => !ids.includes(item.id)));
-
-    setMessage(
-      `${seats - remainingSeats} seat${
-        seats - remainingSeats > 1 ? "s" : ""
-      } assigned automatically by queue order.`
-    );
-
-    setSeats(remainingSeats);
   };
 
   return (
@@ -184,8 +207,11 @@ export default function AdminQueuePage() {
                 value={pickup}
                 onChange={(event) => setPickup(event.target.value)}
               >
-                <option>JU Gate</option>
-                <option>Medical</option>
+                {locations.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -209,6 +235,29 @@ export default function AdminQueuePage() {
           </section>
 
           {message && <div className="queue-message">{message}</div>}
+
+          <section className="queue-card">
+            <h2>Priority requests</h2>
+            {priorityRequests.length === 0 ? (
+              <p className="queue-empty-state">No pending priority requests.</p>
+            ) : (
+              priorityRequests.map((request) => (
+                <article key={request.id} className="priority-review-row">
+                  <div>
+                    <strong>{request.reason}</strong>
+                    <span>Passenger {request.passenger_id} · Queue entry {request.queue_entry_id}</span>
+                  </div>
+                  <div className="queue-card-actions">
+                    <a href={`${apiOrigin}${request.proof_path}`} target="_blank" rel="noreferrer">
+                      View proof
+                    </a>
+                    <button type="button" onClick={() => reviewPriority(request, "approve")}>Approve</button>
+                    <button type="button" onClick={() => reviewPriority(request, "reject")}>Reject</button>
+                  </div>
+                </article>
+              ))
+            )}
+          </section>
 
           <AdminQueueTable
             passengers={passengers}

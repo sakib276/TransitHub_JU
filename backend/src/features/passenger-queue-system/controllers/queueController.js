@@ -32,9 +32,7 @@ export const joinQueue = async (req, res) => {
  */
 export const getQueue = async (req, res) => {
   try {
-    const result = await queueService.getQueue(
-      req.params.pickupId
-    );
+    const result = await queueService.getQueue(req.params.pickupId);
 
     res.json(result);
   } catch (error) {
@@ -73,9 +71,7 @@ export const assignPassenger = async (req, res) => {
  */
 export const markNoShow = async (req, res) => {
   try {
-    const result = await queueService.markNoShow(
-      req.params.id
-    );
+    const result = await queueService.markNoShow(req.params.id);
 
     res.json(result);
   } catch (error) {
@@ -88,9 +84,9 @@ export const markNoShow = async (req, res) => {
 /**
  * Creates a priority request.
  *
- * The route should use multer before this controller
- * so that the uploaded proof file is available as
- * req.file.
+ * Proof is currently accepted as a normal request-body value.
+ * Multer/file upload can be added later without changing
+ * the service/model structure.
  *
  * @param {Object} req Express request.
  * @param {Object} res Express response.
@@ -101,7 +97,7 @@ export const createPriorityRequest = async (req, res) => {
       queue_entry_id: req.body.queue_entry_id,
       passenger_id: req.body.passenger_id,
       reason: req.body.reason,
-      proof: req.file,
+      proof_path: req.file ? `/uploads/priority-proofs/${req.file.filename}` : req.body.proof_path,
     });
 
     res.status(201).json(result);

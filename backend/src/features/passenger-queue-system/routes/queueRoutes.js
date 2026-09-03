@@ -1,10 +1,10 @@
-
 /**
  * Passenger Queue Routes module.
  * @module queueRoutes
  */
 
 import express from "express";
+import upload from "../../../middleware/upload.js";
 
 import {
   joinQueue,
@@ -22,17 +22,16 @@ const router = express.Router();
 router.post("/", joinQueue);
 
 /**
+ * Submit a priority request.
+ *
+ * Currently accepts proof_path as a normal request-body value.
+ */
+router.post("/priority", upload.single("proof"), createPriorityRequest);
+
+/**
  * Get the waiting queue for a pickup location.
  */
 router.get("/:pickupId", getQueue);
-
-/**
- * Submit a priority request.
- *
- * Uses multipart/form-data because the request
- * contains a supporting proof file.
- */
-router.post("/priority", createPriorityRequest);
 
 /**
  * Assign a passenger to a vehicle.

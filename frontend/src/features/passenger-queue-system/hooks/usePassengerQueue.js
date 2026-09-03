@@ -1,60 +1,84 @@
+
+/**
+ * Passenger Queue Hook module.
+ * @module usePassengerQueue
+ */
+
 import { useState } from "react";
 import {
-  getQueueToken,
-  validatePriorityRequest,
-  validateQueueJoin,
+  joinQueue as joinQueueApi,
+  submitPriorityRequest as submitPriorityRequestApi,
 } from "../services/queueService";
 
+/**
+ * Provides passenger queue operations and state.
+ *
+ * @returns {Object} Queue state and actions.
+ */
 export default function usePassengerQueue() {
   const [queueEntry, setQueueEntry] = useState(null);
   const [priorityStatus, setPriorityStatus] = useState(null);
   const [message, setMessage] = useState("");
 
-  const joinQueue = ({ pickup, destination, seats, gender, priority = false, queueOpen = true, vehicleAvailable = false }) => {
-    const validation = validateQueueJoin({
-      pickup,
-      destination,
-      seats,
-      gender,
-      queueOpen,
-      alreadyQueued: Boolean(queueEntry),
-    });
-    if (validation !== "Valid") return setMessage(validation);
+  /**
+   * Adds the passenger to the waiting queue.
+   *
+   * @param {Object} data Queue information.
+   * @returns {Promise<Object>} Created queue entry.
+   */
+  const joinQueue = async (data) => {
+    try {
+      setMessage("");
 
-    if (vehicleAvailable) {
-      setMessage("A vehicle is available now. You have been offered a ride directly.");
-      return;
+      const result = await joinQueueApi(data);
+
+      setQueueEntry(result.queueEntry || result);
+      setMessage(result.message || "Successfully joined the queue.");
+
+      return result;
+    } catch (error) {
+      setMessage(error.message);
+      throw error;
     }
-
-    const position = 4;
-    setQueueEntry({ pickup, destination, seats, gender, priority, position, token: getQueueToken(position), joinedAt: "Just now" });
-    setMessage("You have joined the queue successfully.");
   };
 
-  const submitPriorityRequest = ({ reason, proof, needsReview = true }) => {
-    const validation = validatePriorityRequest({
-      reason,
-      proof,
-      hasActiveRequest: priorityStatus === "Pending",
-    });
-    if (validation !== "Valid") return setMessage(validation);
+  /**
+   * Submits a priority request.
+   *
+   * @param {Object} data Priority request information.
+   * @returns {Promise<Object>} Priority request result.
+   */
+  const submitPriorityRequest = async (data = {}) => {
+    try {
+      setMessage("");
 
-    if (reason === "Other") {
-      setPriorityStatus("Rejected");
-      setMessage("Priority request rejected: the proof does not meet the emergency policy.");
-      return;
+      if (!queueEntry?.id) {
+        throw new Error("Join the queue before submitting a priority request.");
+      }
+
+      const result = await submitPriorityRequestApi({
+        ...data,
+        queue_entry_id: queueEntry?.id,
+      });
+
+      setPriorityStatus(result.status || "Pending");
+      setMessage(
+        result.message || "Priority request submitted for review."
+      );
+
+      return result;
+    } catch (error) {
+      setMessage(error.message);
+      throw error;
     }
-
-    if (needsReview) {
-      setPriorityStatus("Pending");
-      setMessage("Your priority request is pending administrator review.");
-      return;
-    }
-
-    setPriorityStatus("Approved");
-    setQueueEntry((entry) => (entry ? { ...entry, position: 1, token: getQueueToken(1) } : entry));
-    setMessage("Priority approved. Your queue position has been updated.");
   };
 
-  return { queueEntry, priorityStatus, message, setMessage, joinQueue, submitPriorityRequest };
+  return {
+    queueEntry,
+    priorityStatus,
+    message,
+    joinQueue,
+    submitPriorityRequest,
+  };
 }
+

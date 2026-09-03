@@ -24,21 +24,25 @@ export default function PriorityRequestForm({ onSubmit, status }) {
   /** Uploaded supporting document or image. */
   const [proof, setProof] = useState(null);
 
-  /**
-   * Handles priority request submission.
-   *
-   * @param {React.FormEvent<HTMLFormElement>} event Form submission event.
-   * @returns {void}
-   */
-  const submit = (event) => {
+  /** Handles priority request submission. */
+  const submit = async (event) => {
     event.preventDefault();
 
-    onSubmit({
+    if (!reason) {
+      return;
+    }
+
+    if (!proof) {
+      return;
+    }
+
+    await onSubmit({
       reason,
       proof,
-      needsReview: true,
     });
   };
+
+  const isPending = status === "Pending";
 
   return (
     <section className="queue-card">
@@ -60,36 +64,42 @@ export default function PriorityRequestForm({ onSubmit, status }) {
       <form onSubmit={submit}>
         <div className="queue-form-group">
           <label htmlFor="priority-reason">Emergency reason</label>
+
           <select
             id="priority-reason"
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            disabled={status === "Pending"}
+            disabled={isPending}
+            required
           >
             <option value="">Select a reason</option>
-            <option>Medical emergency</option>
-            <option>Academic emergency</option>
-            <option>Other</option>
+            <option value="Medical emergency">Medical emergency</option>
+            <option value="Academic emergency">Academic emergency</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
         <div className="queue-form-group">
           <label htmlFor="priority-proof">Supporting proof</label>
+
           <input
             id="priority-proof"
             type="file"
             accept=".pdf,.jpg,.jpeg,.png"
-            onChange={(event) => setProof(event.target.files[0])}
-            disabled={status === "Pending"}
+            onChange={(event) =>
+              setProof(event.target.files?.[0] || null)
+            }
+            disabled={isPending}
+            required
           />
         </div>
 
         <button
           className="queue-outline-btn"
           type="submit"
-          disabled={status === "Pending"}
+          disabled={isPending}
         >
-          {status === "Pending"
+          {isPending
             ? "Request pending review"
             : "Submit priority request"}
         </button>

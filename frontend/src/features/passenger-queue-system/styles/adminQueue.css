@@ -1,3 +1,4 @@
 @import "./passengerQueue.css";
 .admin-controls { display:grid; grid-template-columns:1fr 1fr auto; align-items:end; gap:16px; }.admin-controls .queue-form-group { margin:0; }.admin-controls .queue-primary-btn { margin:0; width:auto; }
+.priority-review-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0; border-top:1px solid #dfe5e8; }.priority-review-row span { display:block; margin-top:4px; color:#66757d; font-size:0.9rem; }.priority-review-row a, .priority-review-row button { padding:8px 12px; border:1px solid #9aaab1; background:#fff; color:#17323d; cursor:pointer; text-decoration:none; }.priority-review-row button:first-of-type { background:#17323d; color:#fff; }
 @media(max-width:720px) { .admin-controls { grid-template-columns:1fr; }.admin-controls .queue-primary-btn { width:100%; } }

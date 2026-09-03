@@ -1,112 +1,98 @@
+
 /**
  * Driver Queue page module.
  * @module DriverQueuePage
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DriverQueueCard from "../components/DriverQueueCard";
+import {
+  getQueue,
+  assignPassenger,
+  markNoShow,
+} from "../services/queueService";
 import "../styles/driverQueue.css";
 
 /**
- * Passenger waiting in the driver queue.
+ * Displays the queue for the driver's pickup stand.
  *
- * @typedef {Object} QueuePassenger
- * @memberof module:DriverQueuePage
- * @property {number} id Unique passenger identifier.
- * @property {string} name Passenger name.
- * @property {string} token Queue token number.
- * @property {boolean} priority Whether the passenger has priority status.
- * @property {string} destination Passenger destination.
- * @property {number} seats Number of requested seats.
- * @property {string} gender Gender preference.
- */
-
-/** @type {QueuePassenger[]} */
-const initialPassengers = [
-  {
-    id: 1,
-    name: "Anika",
-    token: "JU-001",
-    priority: true,
-    destination: "Central Library",
-    seats: 1,
-    gender: "Female",
-  },
-  {
-    id: 2,
-    name: "Nafis",
-    token: "JU-002",
-    priority: false,
-    destination: "Business Studies",
-    seats: 2,
-    gender: "Any",
-  },
-  {
-    id: 3,
-    name: "Sadia",
-    token: "JU-003",
-    priority: false,
-    destination: "Transport",
-    seats: 1,
-    gender: "Female",
-  },
-];
-
-/**
- * Driver Queue Page component.
- *
- * Allows drivers to manage passengers waiting at a pickup stand,
- * assign available seats, and mark passengers as no-shows.
- *
- * @memberof module:DriverQueuePage
- * @returns {JSX.Element} Driver queue management interface.
+ * @returns {JSX.Element} Driver queue page.
  */
 export default function DriverQueuePage() {
-  /** Current waiting passenger list. */
-  const [passengers, setPassengers] = useState(initialPassengers);
-
-  /** Number of available vehicle seats. */
+  const [passengers, setPassengers] = useState([]);
   const [seats, setSeats] = useState(2);
-
-  /** Feedback message displayed after queue actions. */
   const [message, setMessage] = useState("");
 
-  /**
-   * Removes a passenger from the queue and displays a notification.
+  /*
+   * Temporary values.
    *
-   * @param {number} id Passenger identifier.
-   * @param {string} notice Status message to display.
-   * @returns {void}
+   * These should come from the authenticated driver
+   * and assigned vehicle once authentication/vehicle
+   * assignment is connected.
    */
-  const removePassenger = (id, notice) => {
-    setPassengers((items) => items.filter((item) => item.id !== id));
-    setMessage(notice);
+  const pickupLocationId = 1;
+  const driverId = 2;
+  const vehicleId = 1;
+
+  /**
+   * Loads the current waiting queue.
+   */
+  const loadQueue = async () => {
+    try {
+      const data = await getQueue(pickupLocationId);
+      setPassengers(Array.isArray(data) ? data : data.queue || []);
+    } catch (error) {
+      setMessage(error.message);
+    }
+  };
+
+  useEffect(() => {
+    loadQueue();
+  }, []);
+
+  /**
+   * Assigns a passenger to the current vehicle.
+   *
+   * @param {Object} passenger Queue entry.
+   */
+  const handleAssign = async (passenger) => {
+    try {
+      /*
+       * Refresh the queue immediately before assignment
+       * to reduce the chance of using stale queue data.
+       */
+      await loadQueue();
+
+      const result = await assignPassenger(passenger.id, {
+        driver_id: driverId,
+        vehicle_id: vehicleId,
+        availableSeats: seats,
+      });
+
+      setSeats((previousSeats) => previousSeats - result.seatsUsed);
+      setMessage(result.message);
+
+      await loadQueue();
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   /**
-   * Assigns seats to a passenger if enough seats are available.
+   * Marks a passenger as a no-show.
    *
-   * @param {QueuePassenger} passenger Passenger being assigned.
-   * @returns {void}
+   * @param {Object} passenger Queue entry.
    */
-  const assignSeat = (passenger) => {
-    if (seats < passenger.seats) {
-      setMessage(
-        `Only ${seats} seat${
-          seats === 1 ? " is" : "s are"
-        } available; ${passenger.name} requested ${passenger.seats}.`
-      );
-      return;
+  const handleNoShow = async (passenger) => {
+    try {
+      const result = await markNoShow(passenger.id);
+
+      setMessage(result.message);
+
+      await loadQueue();
+    } catch (error) {
+      setMessage(error.message);
     }
-
-    setSeats((value) => value - passenger.seats);
-
-    removePassenger(
-      passenger.id,
-      `${passenger.name} has been assigned ${passenger.seats} seat${
-        passenger.seats > 1 ? "s" : ""
-      }.`
-    );
   };
 
   return (
@@ -119,7 +105,10 @@ export default function DriverQueuePage() {
         <main className="queue-content">
           <div className="queue-page-title">
             <h1>Driver Queue</h1>
-            <p>Assign available seats fairly to passengers at your stand.</p>
+
+            <p>
+              Assign available seats fairly to passengers at your stand.
+            </p>
           </div>
 
           <div className="driver-queue-toolbar">
@@ -133,22 +122,35 @@ export default function DriverQueuePage() {
             </div>
           </div>
 
-          {message && <div className="queue-message">{message}</div>}
+          {message && (
+            <div className="queue-message" role="alert">
+              {message}
+            </div>
+          )}
 
           <section className="driver-queue-list">
-            {passengers.length ? (
+            {passengers.length > 0 ? (
               passengers.map((passenger) => (
                 <DriverQueueCard
                   key={passenger.id}
-                  passenger={passenger}
-                  disabled={seats < passenger.seats}
-                  onAssign={() => assignSeat(passenger)}
-                  onNoShow={() =>
-                    removePassenger(
-                      passenger.id,
-                      `${passenger.name} was marked as no-show. The next passenger may now board.`
-                    )
-                  }
+                  passenger={{
+                    id: passenger.id,
+                    name:
+                      passenger.passenger_name ||
+                      `Passenger ${passenger.passenger_id}`,
+                    token: passenger.token,
+                    priority: Boolean(passenger.priority),
+                    destination:
+                      passenger.destination_name ||
+                      passenger.destination ||
+                      "Unknown",
+                    seats: passenger.seats_needed,
+                    gender:
+                      passenger.gender_preference || "Any",
+                  }}
+                  disabled={seats < passenger.seats_needed}
+                  onAssign={() => handleAssign(passenger)}
+                  onNoShow={() => handleNoShow(passenger)}
                 />
               ))
             ) : (

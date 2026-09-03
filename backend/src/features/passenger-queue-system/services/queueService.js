@@ -1,4 +1,3 @@
-
 /**
  * Passenger Queue Service module.
  * @module queueService
@@ -7,6 +6,84 @@
 import QueueEntry from "../models/QueueEntry.js";
 import QueueAssignment from "../models/QueueAssignment.js";
 import PriorityRequest from "../models/PriorityRequest.js";
+
+/**
+ * Adds a passenger to the waiting queue.
+ *
+ * @param {Object} data Queue entry information.
+ * @returns {Promise<Object>} Created queue entry.
+ */
+export const joinQueue = async (data) => {
+  const passengerId = Number(data.passenger_id);
+  const pickupLocationId = Number(data.pickup_location_id);
+  const destinationLocationId = Number(data.destination_location_id);
+  const seatsNeeded = Number(data.seats_needed);
+
+  if (!Number.isInteger(passengerId) || passengerId < 1) {
+    throw new Error("A valid passenger is required.");
+  }
+
+  if (!Number.isInteger(pickupLocationId) || pickupLocationId < 1) {
+    throw new Error("A valid pickup location is required.");
+  }
+
+  if (!Number.isInteger(destinationLocationId) || destinationLocationId < 1) {
+    throw new Error("A valid destination location is required.");
+  }
+
+  if (pickupLocationId === destinationLocationId) {
+    throw new Error("Pickup and destination locations must be different.");
+  }
+
+  if (!Number.isInteger(seatsNeeded) || seatsNeeded < 1) {
+    throw new Error("At least one seat is required.");
+  }
+
+  const queueEntry = await QueueEntry.create({
+    passenger_id: passengerId,
+    token: `Q-${pickupLocationId}-${Date.now()}`,
+    pickup_location_id: pickupLocationId,
+    destination_location_id: destinationLocationId,
+    seats_needed: seatsNeeded,
+    gender_preference: data.gender_preference || "Any",
+    priority: Boolean(data.priority),
+    status: "Waiting",
+    joined_at: new Date(),
+  });
+
+  await refreshQueue(pickupLocationId);
+  await queueEntry.reload();
+
+  return {
+    message: "Successfully joined the queue.",
+    queueEntry,
+  };
+};
+
+/**
+ * Gets all waiting entries for a pickup location.
+ *
+ * @param {number|string} pickupId Pickup location ID.
+ * @returns {Promise<Array>} Ordered waiting queue.
+ */
+export const getQueue = async (pickupId) => {
+  const locationId = Number(pickupId);
+
+  if (!Number.isInteger(locationId) || locationId < 1) {
+    throw new Error("A valid pickup location is required.");
+  }
+
+  return QueueEntry.findAll({
+    where: {
+      pickup_location_id: locationId,
+      status: "Waiting",
+    },
+    order: [
+      ["priority", "DESC"],
+      ["joined_at", "ASC"],
+    ],
+  });
+};
 
 /**
  * Assigns a waiting passenger to a driver and vehicle.
@@ -90,23 +167,19 @@ export const markNoShow = async (queueId) => {
  * @param {Object} data Priority request information.
  * @param {number} data.queue_entry_id Queue entry ID.
  * @param {number} data.passenger_id Passenger ID.
- * @param {string} data.reason Emergency reason.
- * @param {Object} data.proof Uploaded proof file.
+ * @param {string} data.reason Priority reason.
+ * @param {string} data.proof_path Path or reference to supporting proof.
  * @returns {Promise<Object>} Priority request result.
  */
 export const createPriorityRequest = async (data) => {
-  const queueEntry = await QueueEntry.findByPk(
-    data.queue_entry_id
-  );
+  const queueEntry = await QueueEntry.findByPk(data.queue_entry_id);
 
   if (!queueEntry) {
     throw new Error("Queue entry not found.");
   }
 
   if (queueEntry.passenger_id !== Number(data.passenger_id)) {
-    throw new Error(
-      "Passenger does not own this queue entry."
-    );
+    throw new Error("Passenger does not own this queue entry.");
   }
 
   if (queueEntry.status !== "Waiting") {
@@ -115,11 +188,11 @@ export const createPriorityRequest = async (data) => {
     );
   }
 
-  if (!data.reason) {
+  if (!data.reason || !data.reason.trim()) {
     throw new Error("Priority reason is required.");
   }
 
-  if (!data.proof) {
+  if (!data.proof_path || !data.proof_path.trim()) {
     throw new Error("Supporting proof is required.");
   }
 
@@ -136,13 +209,11 @@ export const createPriorityRequest = async (data) => {
     );
   }
 
-  const proofPath = data.proof.path;
-
   const priorityRequest = await PriorityRequest.create({
     queue_entry_id: data.queue_entry_id,
-    passenger_id: data.passenger_id,
-    reason: data.reason,
-    proof: proofPath,
+    passenger_id: Number(data.passenger_id),
+    reason: data.reason.trim(),
+    proof_path: data.proof_path.trim(),
     status: "Pending",
   });
 

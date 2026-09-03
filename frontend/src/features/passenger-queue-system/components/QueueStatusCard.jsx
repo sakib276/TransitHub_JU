@@ -3,6 +3,8 @@
  * @module QueueStatusCard
  */
 
+import { locations } from "../services/queueService";
+
 /**
  * Displays the current passenger queue status.
  *
@@ -24,6 +26,15 @@ export default function QueueStatusCard({ entry, priorityStatus }) {
     );
   }
 
+  const pickupName =
+    locations.find((location) => location.id === Number(entry.pickup_location_id))
+      ?.name || "Unknown";
+
+  const destinationName =
+    locations.find(
+      (location) => location.id === Number(entry.destination_location_id)
+    )?.name || "Unknown";
+
   return (
     <section className="queue-card queue-status-card">
       <div className="queue-card-heading">
@@ -37,7 +48,7 @@ export default function QueueStatusCard({ entry, priorityStatus }) {
             priorityStatus ? priorityStatus.toLowerCase() : "waiting"
           }`}
         >
-          {priorityStatus || "Waiting"}
+          {priorityStatus || entry.status || "Waiting"}
         </span>
       </div>
 
@@ -48,22 +59,22 @@ export default function QueueStatusCard({ entry, priorityStatus }) {
 
       <div className="queue-detail">
         <span>Pickup point</span>
-        <strong>{entry.pickup}</strong>
+        <strong>{pickupName}</strong>
       </div>
 
       <div className="queue-detail">
         <span>Destination point</span>
-        <strong>{entry.destination}</strong>
+        <strong>{destinationName}</strong>
       </div>
 
       <div className="queue-detail">
         <span>Seats needed</span>
-        <strong>{entry.seats}</strong>
+        <strong>{entry.seats_needed}</strong>
       </div>
 
       <div className="queue-detail">
         <span>Gender preference</span>
-        <strong>{entry.gender}</strong>
+        <strong>{entry.gender_preference}</strong>
       </div>
 
       <div className="queue-detail">
@@ -73,7 +84,7 @@ export default function QueueStatusCard({ entry, priorityStatus }) {
 
       <div className="queue-detail">
         <span>Joined</span>
-        <strong>{entry.joinedAt}</strong>
+        <strong>{new Date(entry.joined_at).toLocaleString()}</strong>
       </div>
 
       <p className="queue-helper">

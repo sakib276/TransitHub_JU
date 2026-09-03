@@ -1,3 +1,4 @@
+
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 
@@ -9,11 +10,31 @@ const QueueAssignment = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    queue_entry_id: DataTypes.INTEGER,
-    driver_id: DataTypes.INTEGER,
-    vehicle_id: DataTypes.INTEGER,
-    seats_assigned: DataTypes.INTEGER,
-    assigned_at: DataTypes.DATE,
+
+    queue_entry_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    driver_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    vehicle_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    seats_assigned: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    assigned_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: "queue_assignments",
