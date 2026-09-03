@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/CreateRideModal.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/CreateRideModal.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Modal form enabling passengers to create a new shared ride request (FR-6.2).
+ * @module features/shared-ride/components/CreateRideModal
+ * @author Nazmus Sakib
+ */
+
+import React, { useState } from 'react';
+import { CAMPUS_LOCATIONS } from '../services/sharedRideService';
+
+export const CreateRideModal = ({ isModalOpen, onCloseModal, onCreateSubmit }) => {
+  const [pickup, setPickup] = useState('');
+  const [destination, setDestination] = useState('');
+  const [departureTime, setDepartureTime] = useState('In 10 mins');
+  const [totalSeats, setTotalSeats] = useState(4);
+  const [farePerSeat, setFarePerSeat] = useState(15);
+  const [vehicleType, setVehicleType] = useState('Battery Auto');
+
+  if (!isModalOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!pickup || !destination) {
+      alert('Please select both pickup and destination.');
+      return;
+    }
+    onCreateSubmit({
+      pickupLocation: pickup,
+      destinationLocation: destination,
+      departureTime,
+      totalSeats: Number(totalSeats),
+      farePerSeat: Number(farePerSeat),
+      vehicleType,
+      creatorName: 'Nazmus Sakib'
+    });
+  };
+
+  return (
+    &lt;div className="modal-backdrop">
+      &lt;div className="modal-content-card">
+        &lt;div className="modal-header">
+          &lt;h3>Create Shared Ride Request&lt;/h3>
+          &lt;button type="button" className="btn-close-x" onClick={onCloseModal}>✕&lt;/button>
+        &lt;/div>
+
+        &lt;form onSubmit={handleSubmit} className="modal-form">
+          &lt;div className="form-group-row">
+            &lt;div className="form-group">
+              &lt;label htmlFor="create-pickup-select">Pickup Point *&lt;/label>
+              &lt;select
+                id="create-pickup-select"
+                value={pickup}
+                onChange={(e) => setPickup(e.target.value)}
+                required
+              >
+                &lt;option value="">Select pickup&lt;/option>
+                {CAMPUS_LOCATIONS.map((loc) => (
+                  &lt;option key={loc} value={loc} disabled={loc === destination}>
+                    {loc}
+                  &lt;/option>
+                ))}
+              &lt;/select>
+            &lt;/div>
+
+            &lt;div className="form-group">
+              &lt;label htmlFor="create-destination-select">Destination *&lt;/label>
+              &lt;select
+                id="create-destination-select"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                required
+              >
+                &lt;option value="">Select destination&lt;/option>
+                {CAMPUS_LOCATIONS.map((loc) => (
+                  &lt;option key={loc} value={loc} disabled={loc === pickup}>
+                    {loc}
+                  &lt;/option>
+                ))}
+              &lt;/select>
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div className="form-group-row">
+            &lt;div className="form-group">
+              &lt;label htmlFor="create-departure-time">Departure Time&lt;/label>
+              &lt;input
+                id="create-departure-time"
+                type="text"
+                value={departureTime}
+                onChange={(e) => setDepartureTime(e.target.value)}
+                placeholder="e.g. 10:45 AM or In 10 mins"
+              />
+            &lt;/div>
+
+            &lt;div className="form-group">
+              &lt;label htmlFor="create-vehicle-type">Vehicle Type&lt;/label>
+              &lt;select
+                id="create-vehicle-type"
+                value={vehicleType}
+                onChange={(e) => setVehicleType(e.target.value)}
+              >
+                &lt;option value="Battery Auto">Battery Auto (Cart)&lt;/option>
+                &lt;option value="Rickshaw">Rickshaw&lt;/option>
+              &lt;/select>
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div className="form-group-row">
+            &lt;div className="form-group">
+              &lt;label htmlFor="create-total-seats">Total Seats (Capacity)&lt;/label>
+              &lt;input
+                id="create-total-seats"
+                type="number"
+                min="2"
+                max="6"
+                value={totalSeats}
+                onChange={(e) => setTotalSeats(e.target.value)}
+              />
+            &lt;/div>
+
+            &lt;div className="form-group">
+              &lt;label htmlFor="create-fare-seat">Estimated Fare / Seat (৳)&lt;/label>
+              &lt;input
+                id="create-fare-seat"
+                type="number"
+                min="5"
+                step="5"
+                value={farePerSeat}
+                onChange={(e) => setFarePerSeat(e.target.value)}
+              />
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div className="modal-actions-footer">
+            &lt;button type="button" className="btn-cancel-flat" onClick={onCloseModal}>
+              Cancel
+            &lt;/button>
+            &lt;button type="submit" className="btn-primary-action">
+              Publish Ride
+            &lt;/button>
+          &lt;/div>
+        &lt;/form>
+      &lt;/div>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

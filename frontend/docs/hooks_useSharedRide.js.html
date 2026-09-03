@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hooks/useSharedRide.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hooks/useSharedRide.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Custom state hook for Shared Ride feature managing role detection,
+ * filters, modal states, alerts, and service mutations.
+ * @module features/shared-ride/hooks/useSharedRide
+ * @author Nazmus Sakib
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import { sharedRideService } from '../services/sharedRideService';
+
+export const useSharedRide = () => {
+  // Read active role from auth session/localStorage (fallback to 'passenger')
+  const getInitialUserRole = () => {
+    try {
+      const storedAuthUser = localStorage.getItem('transithub_user') || localStorage.getItem('currentUser');
+      if (storedAuthUser) {
+        const parsed = JSON.parse(storedAuthUser);
+        if (parsed.role) return parsed.role.toLowerCase();
+      }
+      const directRole = localStorage.getItem('user_role') || localStorage.getItem('role');
+      if (directRole) return directRole.toLowerCase();
+    } catch (e) {
+      // JSON parse fallback
+    }
+    return 'passenger';
+  };
+
+  const [currentUserRole, setCurrentUserRole] = useState(getInitialUserRole);
+  const [allRidesList, setAllRidesList] = useState([]);
+  const [filteredRidesList, setFilteredRidesList] = useState([]);
+  const [searchPickup, setSearchPickup] = useState('');
+  const [searchDestination, setSearchDestination] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [notificationAlert, setNotificationAlert] = useState(null);
+  const [systemAnalytics, setSystemAnalytics] = useState(null);
+
+  // Modals state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isRateModalOpen, setIsRateModalOpen] = useState(false);
+  const [selectedRideForAction, setSelectedRideForAction] = useState(null);
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    const rides = await sharedRideService.getAllRides();
+    const analytics = await sharedRideService.getSystemAnalytics();
+    setAllRidesList(rides);
+    setSystemAnalytics(analytics);
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const result = sharedRideService.filterRides(searchPickup, searchDestination, allRidesList);
+    setFilteredRidesList(result);
+  }, [searchPickup, searchDestination, allRidesList]);
+
+  const showNotification = (message, type = 'success') => {
+    setNotificationAlert({ message, type });
+    setTimeout(() => setNotificationAlert(null), 4000);
+  };
+
+  const handleSwapSearchLocations = () => {
+    setSearchPickup(searchDestination);
+    setSearchDestination(searchPickup);
+  };
+
+  const handleJoinRide = async (rideId, passengerName = 'Nazmus Sakib') => {
+    const res = await sharedRideService.joinRide(rideId, { name: passengerName });
+    if (res.isSuccessful) {
+      setAllRidesList(res.updatedList);
+      showNotification(res.responseMessage, 'success');
+    } else {
+      showNotification(res.responseMessage, 'error');
+    }
+  };
+
+  const handleCancelBooking = async (rideId, passengerName = 'Nazmus Sakib') => {
+    const res = await sharedRideService.cancelBooking(rideId, passengerName);
+    if (res.isSuccessful) {
+      setAllRidesList(res.updatedList);
+      showNotification('Your seat reservation has been released.', 'info');
+    }
+  };
+
+  const handleCancelEntireRide = async (rideId, role) => {
+    if (!window.confirm('Are you sure you want to cancel this entire shared ride trip?')) return;
+    const res = await sharedRideService.cancelEntireRide(rideId, role);
+    if (res.isSuccessful) {
+      setAllRidesList(res.updatedList);
+      showNotification('The ride has been cancelled and co-passengers notified.', 'info');
+    }
+  };
+
+  const handleCreateRideSubmit = async (formData) => {
+    const duplicate = sharedRideService.findDuplicateRide(formData.pickupLocation, formData.destinationLocation, allRidesList);
+    if (duplicate) {
+      const confirmCreate = window.confirm(
+        `[Duplicate Detected] An open shared ride (${duplicate.pickupLocation} ➔ ${duplicate.destinationLocation}) departing at ${duplicate.departureTime} already exists. Do you still want to publish a new one?`
+      );
+      if (!confirmCreate) return false;
+    }
+
+    const res = await sharedRideService.createRide(formData);
+    if (res.isSuccessful) {
+      setAllRidesList(res.updatedList);
+      setIsCreateModalOpen(false);
+      showNotification('Shared ride request opened successfully!', 'success');
+      return true;
+    }
+    return false;
+  };
+
+  const handleEditRideSubmit = async (rideId, updatedFields) => {
+    const res = await sharedRideService.editRideDetails(rideId, updatedFields);
+    if (res.isSuccessful) {
+      setAllRidesList(res.updatedList);
+      setIsEditModalOpen(false);
+      setSelectedRideForAction(null);
+      showNotification(res.message, 'success');
+    } else {
+      showNotification(res.message, 'error');
+    }
+  };
+
+  const handleDriverResponse = async (rideId, action) => {
+    const res = await sharedRideService.driverRespondRide(rideId, action);
+    if (res.isSuccessful) {
+      setAllRidesList(res.updatedList);
+      showNotification(`Ride ${action.toLowerCase()} by driver.`, 'success');
+    }
+  };
+
+  const handleNoShow = async (rideId, passengerId) => {
+    const res = await sharedRideService.handleNoShow(rideId, passengerId);
+    if (res.isSuccessful) {
+      setAllRidesList(res.updatedList);
+      showNotification('Passenger marked as no-show and seat opened up.', 'info');
+    }
+  };
+
+  const handleFeedbackSubmit = async (payload) => {
+    const res = await sharedRideService.submitRideReview(payload);
+    if (res.isSuccessful) {
+      setIsRateModalOpen(false);
+      setSelectedRideForAction(null);
+      showNotification(res.message, 'success');
+      loadData();
+    }
+  };
+
+  return {
+    currentUserRole,
+    setCurrentUserRole,
+    allRidesList,
+    filteredRidesList,
+    searchPickup,
+    setSearchPickup,
+    searchDestination,
+    setSearchDestination,
+    handleSwapSearchLocations,
+    isLoading,
+    notificationAlert,
+    systemAnalytics,
+    handleJoinRide,
+    handleCancelBooking,
+    handleCancelEntireRide,
+    handleCreateRideSubmit,
+    handleEditRideSubmit,
+    handleDriverResponse,
+    handleNoShow,
+    handleFeedbackSubmit,
+    isCreateModalOpen,
+    setIsCreateModalOpen,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    isRateModalOpen,
+    setIsRateModalOpen,
+    selectedRideForAction,
+    setSelectedRideForAction
+  };
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

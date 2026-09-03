@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/DriverRideManager.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/DriverRideManager.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Driver control center for managing requests, accepting trips and no-shows (FR-6.3).
+ * @module features/shared-ride/components/DriverRideManager
+ * @author Nazmus Sakib
+ */
+
+import React from 'react';
+
+export const DriverRideManager = ({
+  ridesList,
+  onAcceptReject,
+  onNoShowPassenger,
+  onCancelByDriver
+}) => {
+  return (
+    &lt;div className="driver-manager-container">
+      &lt;div className="driver-manager-header" style={{ marginBottom: '16px' }}>
+        &lt;h2 className="sr-list-title">Driver Dashboard: Trip &amp; Seat Management&lt;/h2>
+        &lt;p className="sr-sub-title">Accept pending shared trips and monitor vehicle capacities in real-time.&lt;/p>
+      &lt;/div>
+
+      &lt;div className="driver-rides-grid">
+        {ridesList.length === 0 ? (
+          &lt;div className="empty-state-card">No shared ride requests available on campus right now.&lt;/div>
+        ) : (
+          ridesList.map((ride) => (
+            &lt;div key={ride.id} className="driver-ride-card">
+              &lt;div className="driver-card-header">
+                &lt;div>
+                  &lt;strong className="driver-route">{ride.pickupLocation} ➔ {ride.destinationLocation}&lt;/strong>
+                  &lt;div className="driver-sub-info" style={{ fontSize: '12px', color: '#64748b' }}>
+                    ⏰ {ride.departureTime} | 🚗 {ride.vehicleType} ({ride.vehicleNumber})
+                  &lt;/div>
+                &lt;/div>
+                &lt;div className={`status-pill ${ride.seatsAvailable === 0 ? 'full' : 'open'}`}>
+                  {ride.seatsAvailable} Seat(s) Available
+                &lt;/div>
+              &lt;/div>
+
+              {ride.driverStatus === 'PENDING' ? (
+                &lt;div className="driver-pending-actions" style={{ marginTop: '12px' }}>
+                  &lt;p style={{ fontSize: '13px', color: '#b45309', margin: '0 0 8px 0' }}>
+                    ⚠️ New Trip Request from {ride.creatorName}
+                  &lt;/p>
+                  &lt;div style={{ display: 'flex', gap: '8px' }}>
+                    &lt;button
+                      type="button"
+                      className="btn-accept-trip"
+                      onClick={() => onAcceptReject(ride.id, 'ACCEPTED')}
+                    >
+                      Accept Trip
+                    &lt;/button>
+                    &lt;button
+                      type="button"
+                      className="btn-reject-trip"
+                      onClick={() => onAcceptReject(ride.id, 'REJECTED')}
+                    >
+                      Reject
+                    &lt;/button>
+                  &lt;/div>
+                &lt;/div>
+              ) : (
+                &lt;div className="driver-active-trip-body" style={{ marginTop: '12px' }}>
+                  &lt;span className="roster-heading" style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>
+                    Passenger Roster ({ride.joinedPassengers.length}/{ride.totalSeats}):
+                  &lt;/span>
+                  &lt;ul className="passenger-list" style={{ listStyle: 'none', padding: 0, margin: '8px 0' }}>
+                    {ride.joinedPassengers.map((p) => (
+                      &lt;li key={p.id} className="passenger-row-item">
+                        &lt;span>👤 {p.name} {p.isCreator &amp;&amp; '(Trip Creator)'}&lt;/span>
+                        {!p.isCreator &amp;&amp; (
+                          &lt;button
+                            type="button"
+                            className="btn-no-show"
+                            onClick={() => onNoShowPassenger(ride.id, p.id)}
+                            title="Remove passenger and free up seat"
+                          >
+                            Mark No-Show
+                          &lt;/button>
+                        )}
+                      &lt;/li>
+                    ))}
+                  &lt;/ul>
+
+                  &lt;div style={{ marginTop: '12px', textAlign: 'right' }}>
+                    &lt;button
+                      type="button"
+                      className="btn-cancel-flat"
+                      style={{ color: '#dc2626', borderColor: '#fca5a5', fontSize: '12px' }}
+                      onClick={() => onCancelByDriver(ride.id, 'Driver')}
+                    >
+                      Cancel Entire Trip
+                    &lt;/button>
+                  &lt;/div>
+                &lt;/div>
+              )}
+            &lt;/div>
+          ))
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

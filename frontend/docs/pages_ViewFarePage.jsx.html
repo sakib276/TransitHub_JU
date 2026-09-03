@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/ViewFarePage.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/ViewFarePage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Main passenger view page for checking official campus transit fares.
+ * @module features/fare/pages/ViewFarePage
+ * @author Nazmus Sakib
+ * @version 1.0.0
+ */
+
+import React from 'react';
+import { useFare } from '../hooks/useFare';
+import { CAMPUS_LOCATIONS_LIST } from '../services/fareService';
+import { FareComparisonCard } from '../components/FareComparisonCard';
+import { FareChartTable } from '../components/FareChartTable';
+import { ReportOverchargeModal } from '../components/ReportOverchargeModal';
+import '../styles/fare.css';
+
+/**
+ * Main View Fare screen component.
+ * @returns {JSX.Element} The rendered React view.
+ */
+export const ViewFarePage = () => {
+  const {
+    selectedPickupLocation,
+    setSelectedPickupLocation,
+    selectedDestinationLocation,
+    setSelectedDestinationLocation,
+    calculatedFareDetails,
+    activeFareChartList,
+    handleCalculateFare,
+    handleSwapLocations,
+    isReportModalVisible,
+    setIsReportModalVisible,
+    handleSubmitOverchargeReport
+  } = useFare();
+
+  return (
+    &lt;div className="app-container">
+      {/* Top Application Navbar */}
+      &lt;header className="main-navbar">
+        &lt;div className="brand-section">
+          &lt;span>🚍&lt;/span> TransitHub_JU
+        &lt;/div>
+        &lt;nav className="nav-menu">
+          &lt;span className="nav-item">Home&lt;/span>
+          &lt;span className="nav-item">Available Vehicles&lt;/span>
+          &lt;span className="nav-item active">View Fare&lt;/span>
+          &lt;span className="nav-item">Shared Ride&lt;/span>
+          &lt;span className="nav-item">My Rides&lt;/span>
+        &lt;/nav>
+        &lt;div className="nav-right-icons">
+          &lt;button className="nav-icon" title="Notifications">🔔&lt;/button>
+          &lt;button className="nav-icon" title="Help">❓&lt;/button>
+          &lt;div className="profile-avatar">👤&lt;/div>
+        &lt;/div>
+      &lt;/header>
+
+      {/* Main Feature Layout */}
+      &lt;main className="fare-content-wrapper">
+        &lt;h1 className="main-heading">View Fare&lt;/h1>
+        &lt;p className="sub-heading">
+          Check the fixed fare between locations on campus. Reliability starts with transparency.
+        &lt;/p>
+
+        {/* Interactive Fare Calculator Container */}
+        &lt;section className="fare-calc-card">
+          &lt;div className="fare-calc-header">Calculate Fare&lt;/div>
+          &lt;div className="fare-calc-body">
+            &lt;div className="calc-controls-row">
+              {/* Pickup Location Selector */}
+              &lt;div className="input-field-group">
+                &lt;label>FROM&lt;/label>
+                &lt;div className="select-wrapper">
+                  &lt;span className="select-icon">📍&lt;/span>
+                  &lt;select
+                    className="fare-select"
+                    value={selectedPickupLocation}
+                    onChange={(e) => setSelectedPickupLocation(e.target.value)}
+                  >
+                    &lt;option value="">Select start point&lt;/option>
+                    {CAMPUS_LOCATIONS_LIST.map((locationName) => (
+                      &lt;option
+                        key={locationName}
+                        value={locationName}
+                        disabled={locationName === selectedDestinationLocation}
+                      >
+                        {locationName}
+                      &lt;/option>
+                    ))}
+                  &lt;/select>
+                &lt;/div>
+              &lt;/div>
+
+              {/* Bidirectional Location Swap Button */}
+              &lt;button
+                className="btn-swap"
+                onClick={handleSwapLocations}
+                title="Swap locations"
+                type="button"
+              >
+                ⇄
+              &lt;/button>
+
+              {/* Destination Location Selector */}
+              &lt;div className="input-field-group">
+                &lt;label>TO&lt;/label>
+                &lt;div className="select-wrapper">
+                  &lt;span className="select-icon">📍&lt;/span>
+                  &lt;select
+                    className="fare-select"
+                    value={selectedDestinationLocation}
+                    onChange={(e) => setSelectedDestinationLocation(e.target.value)}
+                  >
+                    &lt;option value="">Select destination&lt;/option>
+                    {CAMPUS_LOCATIONS_LIST.map((locationName) => (
+                      &lt;option
+                        key={locationName}
+                        value={locationName}
+                        disabled={locationName === selectedPickupLocation}
+                      >
+                        {locationName}
+                      &lt;/option>
+                    ))}
+                  &lt;/select>
+                &lt;/div>
+              &lt;/div>
+
+              {/* Submission / Evaluation Trigger Button */}
+              &lt;button
+                className="btn-calculate"
+                onClick={handleCalculateFare}
+                type="button"
+              >
+                Calculate Fare
+              &lt;/button>
+            &lt;/div>
+
+            {/* Dynamic Comparison Card Display */}
+            &lt;FareComparisonCard calculatedFareDetails={calculatedFareDetails} />
+          &lt;/div>
+        &lt;/section>
+
+        {/* Static Directory Title */}
+        &lt;h2 className="table-section-title">Predefined Fare List&lt;/h2>
+
+        {/* Campus Fare List Table Card */}
+        &lt;FareChartTable activeFareChartList={activeFareChartList} />
+
+        {/* Administration Policy &amp; Overcharge Action Notice */}
+        &lt;div className="bottom-info-banner">
+          &lt;span className="info-icon">ℹ️&lt;/span>
+          &lt;div>
+            &lt;strong>Note:&lt;/strong> Fares are fixed by the administration. No additional charges are allowed. If you encounter any irregularities, please{' '}
+            &lt;span
+              onClick={() => setIsReportModalVisible(true)}
+              style={{ textDecoration: 'underline', cursor: 'pointer', fontWeight: 600 }}
+              role="button"
+              tabIndex={0}
+            >
+              report via the help center
+            &lt;/span>.
+          &lt;/div>
+        &lt;/div>
+
+        {/* Overcharge Complaint Modal Dialog */}
+        &lt;ReportOverchargeModal
+          isModalOpen={isReportModalVisible}
+          onCloseModal={() => setIsReportModalVisible(false)}
+          onSubmitReport={handleSubmitOverchargeReport}
+        />
+      &lt;/main>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-features_fare.html">features/fare</a></li><li><a href="module-features_fare_components_AdminFareManager.html">features/fare/components/AdminFareManager</a></li><li><a href="module-features_fare_components_DriverFareView.html">features/fare/components/DriverFareView</a></li><li><a href="module-features_fare_components_FareChartTable.html">features/fare/components/FareChartTable</a></li><li><a href="module-features_fare_components_FareComparisonCard.html">features/fare/components/FareComparisonCard</a></li><li><a href="module-features_fare_components_ReportOverchargeModal.html">features/fare/components/ReportOverchargeModal</a></li><li><a href="module-features_fare_hooks_useFare.html">features/fare/hooks/useFare</a></li><li><a href="module-features_fare_pages_ViewFarePage.html">features/fare/pages/ViewFarePage</a></li><li><a href="module-features_fare_services_fareService.html">features/fare/services/fareService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Aug 27 2026 23:17:25 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

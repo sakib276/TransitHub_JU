@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/RateReportModal.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/RateReportModal.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Feedback and incident reporting modal for shared rides (FR-6.1.7).
+ * @module features/shared-ride/components/RateReportModal
+ * @author Nazmus Sakib
+ */
+
+import React, { useState } from 'react';
+
+export const RateReportModal = ({ isModalOpen, selectedRide, onCloseModal, onSubmitReview }) => {
+  const [ratingScore, setRatingScore] = useState(5);
+  const [issueCategory, setIssueCategory] = useState('None');
+  const [commentText, setCommentText] = useState('');
+
+  if (!isModalOpen || !selectedRide) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmitReview({
+      rideId: selectedRide.id,
+      driverName: selectedRide.driverName,
+      ratingScore: Number(ratingScore),
+      issueCategory,
+      commentText
+    });
+  };
+
+  return (
+    &lt;div className="modal-backdrop">
+      &lt;div className="modal-content-card">
+        &lt;div className="modal-header">
+          &lt;h3>Rate Trip / Report Issue&lt;/h3>
+          &lt;button type="button" className="btn-close-x" onClick={onCloseModal}>✕&lt;/button>
+        &lt;/div>
+
+        &lt;form onSubmit={handleSubmit} className="modal-form">
+          &lt;div className="form-group">
+            &lt;label htmlFor="rating-select">Rating (1 to 5 Stars)&lt;/label>
+            &lt;select
+              id="rating-select"
+              value={ratingScore}
+              onChange={(e) => setRatingScore(e.target.value)}
+            >
+              &lt;option value="5">⭐⭐⭐⭐⭐ - Excellent Service&lt;/option>
+              &lt;option value="4">⭐⭐⭐⭐ - Good&lt;/option>
+              &lt;option value="3">⭐⭐⭐ - Average&lt;/option>
+              &lt;option value="2">⭐⭐ - Poor&lt;/option>
+              &lt;option value="1">⭐ - Very Bad&lt;/option>
+            &lt;/select>
+          &lt;/div>
+
+          &lt;div className="form-group">
+            &lt;label htmlFor="issue-category-select">Report Issue (Optional)&lt;/label>
+            &lt;select
+              id="issue-category-select"
+              value={issueCategory}
+              onChange={(e) => setIssueCategory(e.target.value)}
+            >
+              &lt;option value="None">No Issues (Smooth Ride)&lt;/option>
+              &lt;option value="Overcharged">Overcharged Fare&lt;/option>
+              &lt;option value="Reckless Driving">Reckless Driving&lt;/option>
+              &lt;option value="Misbehavior">Unprofessional Behavior&lt;/option>
+              &lt;option value="Delayed Departure">Excessive Delay&lt;/option>
+            &lt;/select>
+          &lt;/div>
+
+          &lt;div className="form-group">
+            &lt;label htmlFor="comment-textarea">Comments &amp; Experience&lt;/label>
+            &lt;textarea
+              id="comment-textarea"
+              rows="3"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Provide constructive feedback for service quality..."
+            />
+          &lt;/div>
+
+          &lt;div className="modal-actions-footer">
+            &lt;button type="button" className="btn-cancel-flat" onClick={onCloseModal}>Cancel&lt;/button>
+            &lt;button type="submit" className="btn-primary-action">Submit Feedback&lt;/button>
+          &lt;/div>
+        &lt;/form>
+      &lt;/div>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

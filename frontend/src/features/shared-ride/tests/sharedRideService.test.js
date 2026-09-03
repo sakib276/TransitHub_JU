@@ -1,0 +1,200 @@
+// @vitest-environment jsdom
+/**
+ * @fileoverview Unit tests for sharedRideService (SRS FR-6).
+ * Covers ride search, seat allocation, duplicate detection, overbooking prevention,
+ * passenger joining/cancellation, driver responses, and system analytics.
+ * @module features/shared-ride/tests/sharedRideService.test
+ * @author Nazmus Sakib
+ */
+
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { sharedRideService, INITIAL_MOCK_RIDES } from '../services/sharedRideService';
+
+describe('sharedRideService - Unit Tests (SRS FR-6)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  describe('FR-6.1 & FR-6.4: Ride Discovery & Route Matching', () => {
+    it('retrieves default active rides and caches them in localStorage', async () => {
+      const rides = await sharedRideService.getAllRides();
+      expect(rides.length).toBe(INITIAL_MOCK_RIDES.length);
+
+      const cached = localStorage.getItem('transithub_ju_shared_rides');
+      expect(cached).not.toBeNull();
+      expect(JSON.parse(cached).length).toBe(INITIAL_MOCK_RIDES.length);
+    });
+
+    it('filters rides correctly based on pickup and destination match', () => {
+      const filtered = sharedRideService.filterRides('CSE', 'Dairy Gate', INITIAL_MOCK_RIDES);
+      expect(filtered.length).toBe(1);
+      expect(filtered[0].pickupLocation).toBe('CSE');
+      expect(filtered[0].destinationLocation).toBe('Dairy Gate');
+    });
+
+    it('excludes cancelled rides from the filtered results', () => {
+      const ridesWithCancelled = [
+        ...INITIAL_MOCK_RIDES,
+        {
+          id: 999,
+          pickupLocation: 'CSE',
+          destinationLocation: 'Dairy Gate',
+          seatsAvailable: 2,
+          status: 'CANCELLED'
+        }
+      ];
+
+      const filtered = sharedRideService.filterRides('CSE', 'Dairy Gate', ridesWithCancelled);
+      expect(filtered.every((r) => r.status !== 'CANCELLED')).toBe(true);
+    });
+  });
+
+  describe('FR-6.1 & FR-6.4: Seat Allocation, Overbooking & Cancellation', () => {
+    it('allows a passenger to join an open ride and decrements available seats', async () => {
+      const rides = await sharedRideService.getAllRides();
+      const targetRideId = rides[0].id;
+      const initialSeats = rides[0].seatsAvailable;
+
+      const result = await sharedRideService.joinRide(targetRideId, { name: 'Tanvir Hossain' });
+      expect(result.isSuccessful).toBe(true);
+      expect(result.responseMessage).toContain('Successfully booked');
+
+      const updatedRide = result.updatedList.find((r) => r.id === targetRideId);
+      expect(updatedRide.seatsAvailable).toBe(initialSeats - 1);
+      expect(updatedRide.joinedPassengers.some((p) => p.name === 'Tanvir Hossain')).toBe(true);
+    });
+
+    it('prevents a passenger from joining the same ride twice', async () => {
+      const rides = await sharedRideService.getAllRides();
+      const targetRideId = rides[0].id;
+
+      // Nazmus Sakib is already in ride 101 by default
+      const result = await sharedRideService.joinRide(targetRideId, { name: 'Nazmus Sakib' });
+      expect(result.isSuccessful).toBe(false);
+      expect(result.responseMessage).toContain('already registered');
+    });
+
+    it('prevents overbooking when seatsAvailable reaches zero (FR-6.4.3)', async () => {
+      // Create a ride with only 1 seat total (which is taken by creator, leaving 0 seats available)
+      await sharedRideService.createRide({
+        pickupLocation: 'Bottola',
+        destinationLocation: 'CSE',
+        totalSeats: 1,
+        farePerSeat: 10,
+        creatorName: 'Ajoy'
+      });
+
+      const rides = await sharedRideService.getAllRides();
+      const fullRide = rides[0]; // newly created ride is at index 0
+      expect(fullRide.seatsAvailable).toBe(0);
+
+      const result = await sharedRideService.joinRide(fullRide.id, { name: 'Late Passenger' });
+      expect(result.isSuccessful).toBe(false);
+      expect(result.responseMessage).toContain('full');
+    });
+
+    it('frees up seat when a passenger cancels their booking (FR-6.1.6)', async () => {
+      const rides = await sharedRideService.getAllRides();
+      const targetRide = rides[0];
+      const previousSeats = targetRide.seatsAvailable;
+
+      // Cancel booking for creator 'Nazmus Sakib'
+      const cancelRes = await sharedRideService.cancelBooking(targetRide.id, 'Nazmus Sakib');
+      expect(cancelRes.isSuccessful).toBe(true);
+
+      const updated = cancelRes.updatedList.find((r) => r.id === targetRide.id);
+      expect(updated.seatsAvailable).toBe(previousSeats + 1);
+      expect(updated.joinedPassengers.some((p) => p.name === 'Nazmus Sakib')).toBe(false);
+    });
+  });
+
+  describe('FR-6.2: Passenger Ride Creator & Duplicate Detection', () => {
+    it('detects existing open rides on identical routes (FR-6.2.3)', async () => {
+      const rides = await sharedRideService.getAllRides();
+      const duplicate = sharedRideService.findDuplicateRide('CSE', 'Dairy Gate', rides);
+
+      expect(duplicate).not.toBeNull();
+      expect(duplicate.pickupLocation).toBe('CSE');
+      expect(duplicate.destinationLocation).toBe('Dairy Gate');
+    });
+
+    it('creates a new shared ride request with creator as leader (FR-6.2.1)', async () => {
+      const newRidePayload = {
+        pickupLocation: 'Central Library',
+        destinationLocation: 'Prantic',
+        totalSeats: 4,
+        farePerSeat: 15,
+        creatorName: 'Nazmus Sakib',
+        vehicleType: 'Battery Auto'
+      };
+
+      const result = await sharedRideService.createRide(newRidePayload);
+      expect(result.isSuccessful).toBe(true);
+
+      const created = result.updatedList[0];
+      expect(created.pickupLocation).toBe('Central Library');
+      expect(created.seatsAvailable).toBe(3); // 4 - 1 (creator takes 1 seat)
+      expect(created.joinedPassengers[0].isCreator).toBe(true);
+    });
+
+    it('allows creator to edit ride details only before anyone else joins (FR-6.2.2)', async () => {
+      const rides = await sharedRideService.getAllRides();
+      const rideId = rides[0].id; // has only 1 passenger (creator)
+
+      const editRes = await sharedRideService.editRideDetails(rideId, {
+        departureTime: '12:15 PM',
+        farePerSeat: 25
+      });
+      expect(editRes.isSuccessful).toBe(true);
+
+      // Now add another passenger to simulate someone joining
+      await sharedRideService.joinRide(rideId, { name: 'Second Passenger' });
+
+      // Editing should now be rejected
+      const blockedEditRes = await sharedRideService.editRideDetails(rideId, {
+        departureTime: '01:00 PM'
+      });
+      expect(blockedEditRes.isSuccessful).toBe(false);
+      expect(blockedEditRes.message).toContain('Cannot edit details');
+    });
+  });
+
+  describe('FR-6.3 & FR-6.4: Driver Actions & System Analytics', () => {
+    it('allows driver to remove a no-show passenger and restore seat capacity (FR-6.3.4)', async () => {
+      // First, add a co-passenger
+      const rides = await sharedRideService.getAllRides();
+      const rideId = rides[0].id;
+      const joinRes = await sharedRideService.joinRide(rideId, { name: 'Late Student' });
+      const addedPassenger = joinRes.updatedList
+        .find((r) => r.id === rideId)
+        .joinedPassengers.find((p) => p.name === 'Late Student');
+
+      const seatsBefore = joinRes.updatedList.find((r) => r.id === rideId).seatsAvailable;
+
+      // Driver marks no-show
+      const noShowRes = await sharedRideService.handleNoShow(rideId, addedPassenger.id);
+      expect(noShowRes.isSuccessful).toBe(true);
+
+      const afterNoShowRide = noShowRes.updatedList.find((r) => r.id === rideId);
+      expect(afterNoShowRide.seatsAvailable).toBe(seatsBefore + 1);
+      expect(afterNoShowRide.joinedPassengers.some((p) => p.id === addedPassenger.id)).toBe(false);
+    });
+
+    it('records review/complaint and computes accurate system analytics (FR-6.4.5 & FR-6.4.6)', async () => {
+      await sharedRideService.submitRideReview({
+        rideId: 101,
+        driverName: 'Rafiqul Islam',
+        ratingScore: 5,
+        issueCategory: 'None',
+        commentText: 'Punctual and very friendly trip.'
+      });
+
+      const analytics = await sharedRideService.getSystemAnalytics();
+      expect(analytics.totalRidesCount).toBeGreaterThan(0);
+      expect(analytics.complaints.length).toBe(1);
+      expect(analytics.complaints[0].driverName).toBe('Rafiqul Islam');
+      expect(analytics.occupancyRate).toContain('%');
+    });
+  });
+});

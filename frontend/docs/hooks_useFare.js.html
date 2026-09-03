@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hooks/useFare.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hooks/useFare.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Custom React hook managing fare selection state, calculations, and modal visibility.
+ * @module features/fare/hooks/useFare
+ * @author Nazmus Sakib
+ * @version 1.0.0
+ */
+
+import { useState, useEffect } from 'react';
+import { fareService } from '../services/fareService';
+
+/**
+ * Hook to manage campus fare verification workflows.
+ * @returns {{
+ *   selectedPickupLocation: string,
+ *   setSelectedPickupLocation: Function,
+ *   selectedDestinationLocation: string,
+ *   setSelectedDestinationLocation: Function,
+ *   calculatedFareDetails: Object|null,
+ *   activeFareChartList: Array&lt;Object>,
+ *   isReportModalVisible: boolean,
+ *   setIsReportModalVisible: Function,
+ *   handleCalculateFare: Function,
+ *   handleSwapLocations: Function,
+ *   handleSubmitOverchargeReport: Function
+ * }}
+ */
+export const useFare = () => {
+  const [selectedPickupLocation, setSelectedPickupLocation] = useState('');
+  const [selectedDestinationLocation, setSelectedDestinationLocation] = useState('');
+  const [calculatedFareDetails, setCalculatedFareDetails] = useState(null);
+  const [activeFareChartList, setActiveFareChartList] = useState([]);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+
+  useEffect(() => {
+    const loadFareMatrix = async () => {
+      const response = await fareService.getFareChart();
+      if (response.isSuccessful) {
+        setActiveFareChartList(response.fareChartData);
+      }
+    };
+
+    loadFareMatrix();
+  }, []);
+
+  /**
+   * Triggers fare comparison evaluation based on active user selection.
+   */
+  const handleCalculateFare = () => {
+    if (selectedPickupLocation &amp;&amp; selectedDestinationLocation) {
+      const calculationOutcome = fareService.calculateFare(
+        selectedPickupLocation,
+        selectedDestinationLocation,
+        activeFareChartList
+      );
+      setCalculatedFareDetails(calculationOutcome);
+    }
+  };
+
+  /**
+   * Swaps start and destination values and triggers immediate recalculation.
+   */
+  const handleSwapLocations = () => {
+    const temporaryLocationHolder = selectedPickupLocation;
+    setSelectedPickupLocation(selectedDestinationLocation);
+    setSelectedDestinationLocation(temporaryLocationHolder);
+
+    if (selectedDestinationLocation &amp;&amp; temporaryLocationHolder) {
+      const calculationOutcome = fareService.calculateFare(
+        selectedDestinationLocation,
+        temporaryLocationHolder,
+        activeFareChartList
+      );
+      setCalculatedFareDetails(calculationOutcome);
+    }
+  };
+
+  /**
+   * Delegates overcharge incident submission to service layer.
+   * @param {Object} reportData - Incident metadata.
+   * @returns {Promise&lt;Object>}
+   */
+  const handleSubmitOverchargeReport = async (reportData) => {
+    return await fareService.reportOvercharge(reportData);
+  };
+
+  return {
+    selectedPickupLocation,
+    setSelectedPickupLocation,
+    selectedDestinationLocation,
+    setSelectedDestinationLocation,
+    calculatedFareDetails,
+    activeFareChartList,
+    isReportModalVisible,
+    setIsReportModalVisible,
+    handleCalculateFare,
+    handleSwapLocations,
+    handleSubmitOverchargeReport
+  };
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-features_fare.html">features/fare</a></li><li><a href="module-features_fare_components_AdminFareManager.html">features/fare/components/AdminFareManager</a></li><li><a href="module-features_fare_components_DriverFareView.html">features/fare/components/DriverFareView</a></li><li><a href="module-features_fare_components_FareChartTable.html">features/fare/components/FareChartTable</a></li><li><a href="module-features_fare_components_FareComparisonCard.html">features/fare/components/FareComparisonCard</a></li><li><a href="module-features_fare_components_ReportOverchargeModal.html">features/fare/components/ReportOverchargeModal</a></li><li><a href="module-features_fare_hooks_useFare.html">features/fare/hooks/useFare</a></li><li><a href="module-features_fare_pages_ViewFarePage.html">features/fare/pages/ViewFarePage</a></li><li><a href="module-features_fare_services_fareService.html">features/fare/services/fareService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Aug 27 2026 23:17:25 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

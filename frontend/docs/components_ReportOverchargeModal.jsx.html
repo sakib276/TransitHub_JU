@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/ReportOverchargeModal.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/ReportOverchargeModal.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Modal dialogue component allowing passengers to submit driver overcharge reports.
+ * @module features/fare/components/ReportOverchargeModal
+ * @author Nazmus Sakib
+ * @version 1.0.0
+ */
+
+import React, { useState } from 'react';
+
+/**
+ * Modal form for reporting transportation pricing violations.
+ * @param {Object} props - Component properties.
+ * @param {boolean} props.isModalOpen - Boolean controlling modal visibility.
+ * @param {Function} props.onCloseModal - Callback to close modal window.
+ * @param {Function} props.onSubmitReport - Callback to process report submission.
+ * @returns {JSX.Element|null} Rendered modal dialog.
+ */
+export const ReportOverchargeModal = ({ isModalOpen, onCloseModal, onSubmitReport }) => {
+  const [vehicleIdentifier, setVehicleIdentifier] = useState('');
+  const [chargedFareAmount, setChargedFareAmount] = useState('');
+  const [incidentDetails, setIncidentDetails] = useState('');
+  const [hasSubmittedSuccessfully, setHasSubmittedSuccessfully] = useState(false);
+
+  if (!isModalOpen) {
+    return null;
+  }
+
+  /**
+   * Handles form submission and triggers success confirmation.
+   * @param {React.FormEvent} formEvent - Form submission event.
+   */
+  const handleSubmit = async (formEvent) => {
+    formEvent.preventDefault();
+    await onSubmitReport({
+      vehicleIdentifier,
+      chargedFareAmount: Number(chargedFareAmount),
+      incidentDetails
+    });
+
+    setHasSubmittedSuccessfully(true);
+    setTimeout(() => {
+      setHasSubmittedSuccessfully(false);
+      onCloseModal();
+    }, 1500);
+  };
+
+  return (
+    &lt;div className="modal-overlay">
+      &lt;div className="modal-card">
+        &lt;div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          &lt;h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-dark)' }}>
+            Report Overcharging
+          &lt;/h3>
+          &lt;button
+            onClick={onCloseModal}
+            style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}
+          >
+            &amp;times;
+          &lt;/button>
+        &lt;/div>
+
+        {hasSubmittedSuccessfully ? (
+          &lt;div style={{ padding: '1rem', background: '#dcfce7', color: '#166534', borderRadius: '6px', textAlign: 'center' }}>
+            Report submitted successfully to administration.
+          &lt;/div>
+        ) : (
+          &lt;form onSubmit={handleSubmit}>
+            &lt;div style={{ marginBottom: '0.8rem' }}>
+              &lt;label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+                Vehicle / Driver Number
+              &lt;/label>
+              &lt;input
+                type="text"
+                value={vehicleIdentifier}
+                onChange={(e) => setVehicleIdentifier(e.target.value)}
+                placeholder="e.g. Rickshaw #104"
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-ui)', borderRadius: '6px' }}
+              />
+            &lt;/div>
+
+            &lt;div style={{ marginBottom: '0.8rem' }}>
+              &lt;label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+                Demanded Fare (৳)
+              &lt;/label>
+              &lt;input
+                type="number"
+                required
+                value={chargedFareAmount}
+                onChange={(e) => setChargedFareAmount(e.target.value)}
+                placeholder="Amount asked"
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-ui)', borderRadius: '6px' }}
+              />
+            &lt;/div>
+
+            &lt;div style={{ marginBottom: '1rem' }}>
+              &lt;label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+                Incident Details
+              &lt;/label>
+              &lt;textarea
+                rows="3"
+                value={incidentDetails}
+                onChange={(e) => setIncidentDetails(e.target.value)}
+                placeholder="Where did it happen? Any additional context..."
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-ui)', borderRadius: '6px', resize: 'none' }}
+              />
+            &lt;/div>
+
+            &lt;button type="submit" className="btn-calculate" style={{ width: '100%', height: '40px' }}>
+              Submit Report
+            &lt;/button>
+          &lt;/form>
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-features_fare.html">features/fare</a></li><li><a href="module-features_fare_components_AdminFareManager.html">features/fare/components/AdminFareManager</a></li><li><a href="module-features_fare_components_DriverFareView.html">features/fare/components/DriverFareView</a></li><li><a href="module-features_fare_components_FareChartTable.html">features/fare/components/FareChartTable</a></li><li><a href="module-features_fare_components_FareComparisonCard.html">features/fare/components/FareComparisonCard</a></li><li><a href="module-features_fare_components_ReportOverchargeModal.html">features/fare/components/ReportOverchargeModal</a></li><li><a href="module-features_fare_hooks_useFare.html">features/fare/hooks/useFare</a></li><li><a href="module-features_fare_pages_ViewFarePage.html">features/fare/pages/ViewFarePage</a></li><li><a href="module-features_fare_services_fareService.html">features/fare/services/fareService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Aug 27 2026 23:17:25 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/SharedRideCard.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/SharedRideCard.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Passenger horizontal ride card with details, join/cancel and creator edit actions.
+ * @module features/shared-ride/components/SharedRideCard
+ * @author Nazmus Sakib
+ */
+
+import React from 'react';
+
+export const SharedRideCard = ({
+  ride,
+  currentUserId = 'u_current',
+  currentUserName = 'Nazmus Sakib',
+  onBookRide,
+  onCancelRide,
+  onViewDetails,
+  onEditRide,
+  onCancelEntireTrip,
+  onOpenFeedback
+}) => {
+  const isCreator = ride.creatorId === currentUserId || ride.creatorName === currentUserName;
+  const isJoined = ride.joinedPassengers.some(
+    (p) => p.name.toLowerCase() === currentUserName.toLowerCase()
+  );
+  const canEdit = isCreator &amp;&amp; ride.joinedPassengers.length &lt;= 1;
+
+  const getVehicleIcon = (type) => (type.toLowerCase().includes('rickshaw') ? '🚲' : '🛺');
+
+  return (
+    &lt;div className="sr-ride-card">
+      &lt;div className="sr-card-left">
+        &lt;div className="sr-vehicle-box">
+          &lt;span className="sr-vehicle-icon">{getVehicleIcon(ride.vehicleType)}&lt;/span>
+          &lt;span className="sr-vehicle-name">
+            {ride.vehicleType.includes('Auto') ? 'Cart' : 'Rickshaw'}
+          &lt;/span>
+        &lt;/div>
+
+        &lt;div className="sr-route-info">
+          &lt;div className="sr-route-path">
+            &lt;span>{ride.pickupLocation}&lt;/span>
+            &lt;span className="sr-arrow">➔&lt;/span>
+            &lt;span>{ride.destinationLocation}&lt;/span>
+          &lt;/div>
+          &lt;div className="sr-datetime-row">
+            &lt;span className="sr-dt-item">📅 {ride.departureDate}&lt;/span>
+            &lt;span className="sr-dt-item">⏰ {ride.departureTime}&lt;/span>
+          &lt;/div>
+        &lt;/div>
+      &lt;/div>
+
+      &lt;div className="sr-card-stats">
+        &lt;div className="sr-stat-item">
+          &lt;span className="sr-stat-label">Available Seats&lt;/span>
+          &lt;span className={`sr-seats-val ${ride.seatsAvailable === 0 ? 'full' : 'open'}`}>
+            👥 {ride.seatsAvailable}/{ride.totalSeats}
+          &lt;/span>
+        &lt;/div>
+
+        &lt;div className="sr-stat-item">
+          &lt;span className="sr-stat-label">Fare per person&lt;/span>
+          &lt;span className="sr-fare-val">৳ {ride.farePerSeat}&lt;/span>
+        &lt;/div>
+      &lt;/div>
+
+      &lt;div className="sr-card-actions">
+        &lt;button
+          type="button"
+          className="sr-view-details-btn"
+          onClick={() => onViewDetails(ride)}
+        >
+          View Details
+        &lt;/button>
+
+        {isCreator ? (
+          &lt;div className="sr-creator-action-group">
+            {canEdit &amp;&amp; (
+              &lt;button
+                type="button"
+                className="sr-btn-edit-sm"
+                onClick={() => onEditRide(ride)}
+              >
+                Edit
+              &lt;/button>
+            )}
+            &lt;button
+              type="button"
+              className="sr-book-btn joined"
+              onClick={() => onCancelEntireTrip(ride.id, 'Creator')}
+            >
+              Cancel Ride
+            &lt;/button>
+          &lt;/div>
+        ) : isJoined ? (
+          &lt;div className="sr-passenger-joined-group">
+            &lt;button
+              type="button"
+              className="sr-book-btn joined"
+              onClick={() => onCancelRide(ride.id, currentUserName)}
+            >
+              Cancel Seat
+            &lt;/button>
+            &lt;button
+              type="button"
+              className="sr-rate-btn-link"
+              onClick={() => onOpenFeedback(ride)}
+            >
+              Rate / Report
+            &lt;/button>
+          &lt;/div>
+        ) : (
+          &lt;button
+            type="button"
+            className="sr-book-btn"
+            disabled={ride.seatsAvailable &lt;= 0}
+            onClick={() => onBookRide(ride.id, currentUserName)}
+          >
+            {ride.seatsAvailable &lt;= 0 ? 'Ride Full' : 'Book Shared Ride'}
+          &lt;/button>
+        )}
+      &lt;/div>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

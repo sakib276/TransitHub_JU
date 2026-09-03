@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/EditRideModal.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/EditRideModal.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Modal enabling ride creators to update details prior to joins (FR-6.2.2).
+ * @module features/shared-ride/components/EditRideModal
+ * @author Nazmus Sakib
+ */
+
+import React, { useState, useEffect } from 'react';
+import { CAMPUS_LOCATIONS } from '../services/sharedRideService';
+
+export const EditRideModal = ({ isOpen, ride, onClose, onEditSubmit }) => {
+  const [departureTime, setDepartureTime] = useState('');
+  const [farePerSeat, setFarePerSeat] = useState(15);
+  const [pickup, setPickup] = useState('');
+  const [destination, setDestination] = useState('');
+
+  useEffect(() => {
+    if (ride) {
+      setDepartureTime(ride.departureTime || '');
+      setFarePerSeat(ride.farePerSeat || 15);
+      setPickup(ride.pickupLocation || '');
+      setDestination(ride.destinationLocation || '');
+    }
+  }, [ride]);
+
+  if (!isOpen || !ride) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onEditSubmit(ride.id, {
+      pickupLocation: pickup,
+      destinationLocation: destination,
+      departureTime,
+      farePerSeat: Number(farePerSeat)
+    });
+  };
+
+  return (
+    &lt;div className="modal-backdrop">
+      &lt;div className="modal-content-card">
+        &lt;div className="modal-header">
+          &lt;h3>Edit Shared Ride Details&lt;/h3>
+          &lt;button type="button" className="btn-close-x" onClick={onClose}>✕&lt;/button>
+        &lt;/div>
+
+        &lt;form onSubmit={handleSubmit} className="modal-form">
+          &lt;div className="form-group-row">
+            &lt;div className="form-group">
+              &lt;label htmlFor="edit-pickup">Pickup Location&lt;/label>
+              &lt;select id="edit-pickup" value={pickup} onChange={(e) => setPickup(e.target.value)}>
+                {CAMPUS_LOCATIONS.map((loc) => (
+                  &lt;option key={loc} value={loc} disabled={loc === destination}>{loc}&lt;/option>
+                ))}
+              &lt;/select>
+            &lt;/div>
+            &lt;div className="form-group">
+              &lt;label htmlFor="edit-destination">Destination&lt;/label>
+              &lt;select id="edit-destination" value={destination} onChange={(e) => setDestination(e.target.value)}>
+                {CAMPUS_LOCATIONS.map((loc) => (
+                  &lt;option key={loc} value={loc} disabled={loc === pickup}>{loc}&lt;/option>
+                ))}
+              &lt;/select>
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div className="form-group-row">
+            &lt;div className="form-group">
+              &lt;label htmlFor="edit-departure-time">Departure Time&lt;/label>
+              &lt;input
+                id="edit-departure-time"
+                type="text"
+                value={departureTime}
+                onChange={(e) => setDepartureTime(e.target.value)}
+              />
+            &lt;/div>
+            &lt;div className="form-group">
+              &lt;label htmlFor="edit-fare">Fare per seat (৳)&lt;/label>
+              &lt;input
+                id="edit-fare"
+                type="number"
+                min="5"
+                step="5"
+                value={farePerSeat}
+                onChange={(e) => setFarePerSeat(e.target.value)}
+              />
+            &lt;/div>
+          &lt;/div>
+
+          &lt;div className="modal-actions-footer">
+            &lt;button type="button" className="btn-cancel-flat" onClick={onClose}>Cancel&lt;/button>
+            &lt;button type="submit" className="btn-primary-action">Save Changes&lt;/button>
+          &lt;/div>
+        &lt;/form>
+      &lt;/div>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

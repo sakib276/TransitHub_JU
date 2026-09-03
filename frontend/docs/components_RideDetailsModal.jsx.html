@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/RideDetailsModal.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/RideDetailsModal.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Modal dialog presenting full driver and passenger breakdown (FR-6.1.2).
+ * @module features/shared-ride/components/RideDetailsModal
+ * @author Nazmus Sakib
+ */
+
+import React from 'react';
+
+export const RideDetailsModal = ({ isOpen, ride, onClose, onBookRide, currentUserName }) => {
+  if (!isOpen || !ride) return null;
+
+  const isJoined = ride.joinedPassengers.some(
+    (p) => p.name.toLowerCase() === currentUserName.toLowerCase()
+  );
+
+  return (
+    &lt;div className="modal-backdrop">
+      &lt;div className="modal-content-card">
+        &lt;div className="modal-header">
+          &lt;h3>Ride Details&lt;/h3>
+          &lt;button type="button" className="btn-close-x" onClick={onClose}>✕&lt;/button>
+        &lt;/div>
+
+        &lt;div className="ride-details-grid" style={{ marginBottom: '16px' }}>
+          &lt;div className="detail-item">
+            &lt;span className="detail-label">Route&lt;/span>
+            &lt;span className="detail-value">{ride.pickupLocation} ➔ {ride.destinationLocation}&lt;/span>
+          &lt;/div>
+          &lt;div className="detail-item">
+            &lt;span className="detail-label">Departure&lt;/span>
+            &lt;span className="detail-value">⏰ {ride.departureTime}&lt;/span>
+          &lt;/div>
+          &lt;div className="detail-item">
+            &lt;span className="detail-label">Vehicle&lt;/span>
+            &lt;span className="detail-value">{ride.vehicleType} ({ride.vehicleNumber})&lt;/span>
+          &lt;/div>
+          &lt;div className="detail-item">
+            &lt;span className="detail-label">Driver / Creator&lt;/span>
+            &lt;span className="detail-value">👤 {ride.driverName}&lt;/span>
+          &lt;/div>
+          &lt;div className="detail-item">
+            &lt;span className="detail-label">Per Person Fare&lt;/span>
+            &lt;span className="detail-value fare-highlight">৳ {ride.farePerSeat}&lt;/span>
+          &lt;/div>
+          &lt;div className="detail-item">
+            &lt;span className="detail-label">Available Capacity&lt;/span>
+            &lt;span className="detail-value">{ride.seatsAvailable} of {ride.totalSeats} seats open&lt;/span>
+          &lt;/div>
+        &lt;/div>
+
+        &lt;div className="passengers-roster" style={{ marginBottom: '20px' }}>
+          &lt;span className="roster-title">Joined Co-Passengers:&lt;/span>
+          &lt;div className="roster-chips">
+            {ride.joinedPassengers.map((p) => (
+              &lt;span key={p.id} className={`passenger-chip ${p.isCreator ? 'creator-chip' : ''}`}>
+                {p.name} {p.isCreator &amp;&amp; '(Leader)'}
+              &lt;/span>
+            ))}
+          &lt;/div>
+        &lt;/div>
+
+        &lt;div className="modal-actions-footer">
+          &lt;button type="button" className="btn-cancel-flat" onClick={onClose}>Close&lt;/button>
+          {!isJoined &amp;&amp; ride.seatsAvailable > 0 &amp;&amp; (
+            &lt;button
+              type="button"
+              className="btn-primary-action"
+              onClick={() => {
+                onBookRide(ride.id, currentUserName);
+                onClose();
+              }}
+            >
+              Confirm Booking
+            &lt;/button>
+          )}
+        &lt;/div>
+      &lt;/div>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

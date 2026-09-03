@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/SharedRidePage.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/SharedRidePage.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Main screen for Join Shared Ride module (SRS FR-6).
+ * Automatically renders the correct interface based on authenticated role.
+ * @module features/shared-ride/pages/SharedRidePage
+ * @author Nazmus Sakib
+ * @version 1.0.0
+ */
+
+import React, { useState } from 'react';
+import { useSharedRide } from '../hooks/useSharedRide';
+import { CAMPUS_LOCATIONS } from '../services/sharedRideService';
+import { SharedRideCard } from '../components/SharedRideCard';
+import { RideDetailsModal } from '../components/RideDetailsModal';
+import { CreateRideModal } from '../components/CreateRideModal';
+import { EditRideModal } from '../components/EditRideModal';
+import { RateReportModal } from '../components/RateReportModal';
+import { DriverRideManager } from '../components/DriverRideManager';
+import { AdminSystemReportView } from '../components/AdminSystemReportView';
+import '../styles/sharedRide.css';
+
+export const SharedRidePage = () => {
+  const {
+    currentUserRole,
+    allRidesList,
+    filteredRidesList,
+    searchPickup,
+    setSearchPickup,
+    searchDestination,
+    setSearchDestination,
+    handleSwapSearchLocations,
+    isLoading,
+    notificationAlert,
+    systemAnalytics,
+    handleJoinRide,
+    handleCancelBooking,
+    handleCancelEntireRide,
+    handleCreateRideSubmit,
+    handleEditRideSubmit,
+    handleDriverResponse,
+    handleNoShow,
+    handleFeedbackSubmit,
+    isCreateModalOpen,
+    setIsCreateModalOpen,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    isRateModalOpen,
+    setIsRateModalOpen,
+    selectedRideForAction,
+    setSelectedRideForAction
+  } = useSharedRide();
+
+  const [activeDetailsRide, setActiveDetailsRide] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  return (
+    &lt;div className="shared-ride-page">
+      {/* Top Application Navbar */}
+      &lt;header className="sr-navbar">
+        &lt;div className="sr-brand">
+          &lt;span>🚍&lt;/span> TransitHub_JU
+        &lt;/div>
+        &lt;nav className="sr-nav-links">
+          &lt;span className="sr-nav-item">Home&lt;/span>
+          &lt;span className="sr-nav-item">Available Vehicles&lt;/span>
+          &lt;span className="sr-nav-item">View Fare&lt;/span>
+          &lt;span className="sr-nav-item active">Shared Ride&lt;/span>
+          &lt;span className="sr-nav-item">My Rides&lt;/span>
+        &lt;/nav>
+        &lt;div className="sr-nav-right">
+          &lt;button className="sr-icon-btn" title="Notifications" type="button">🔔&lt;/button>
+          &lt;button className="sr-icon-btn" title="Help" type="button">❓&lt;/button>
+          &lt;div className="sr-user-avatar">
+            &lt;span>👤&lt;/span>
+          &lt;/div>
+        &lt;/div>
+      &lt;/header>
+
+      {/* Main Container */}
+      &lt;main className="sr-container">
+        {notificationAlert &amp;&amp; (
+          &lt;div className={`notification-toast ${notificationAlert.type}`}>
+            {notificationAlert.message}
+          &lt;/div>
+        )}
+
+        {/* 1. PASSENGER VIEW */}
+        {currentUserRole === 'passenger' &amp;&amp; (
+          &lt;>
+            &lt;div className="sr-header-section">
+              &lt;div className="sr-title-action-row">
+                &lt;div>
+                  &lt;h1 className="sr-main-title">Join Shared Ride&lt;/h1>
+                  &lt;p className="sr-sub-title">
+                    Share your ride and travel together. Save fare, travel smart.
+                  &lt;/p>
+                &lt;/div>
+                &lt;button
+                  type="button"
+                  className="sr-create-btn"
+                  onClick={() => setIsCreateModalOpen(true)}
+                >
+                  ➕ Create Ride Request
+                &lt;/button>
+              &lt;/div>
+            &lt;/div>
+
+            {/* Route Filter Card */}
+            &lt;section className="sr-search-card">
+              &lt;form className="sr-search-form" onSubmit={(e) => e.preventDefault()}>
+                &lt;div className="sr-input-field">
+                  &lt;label htmlFor="search-from-select">From&lt;/label>
+                  &lt;div className="sr-select-box">
+                    &lt;span className="sr-field-icon">📍&lt;/span>
+                    &lt;select
+                      id="search-from-select"
+                      className="sr-select"
+                      value={searchPickup}
+                      onChange={(e) => setSearchPickup(e.target.value)}
+                    >
+                      &lt;option value="">Select start point&lt;/option>
+                      {CAMPUS_LOCATIONS.map((loc) => (
+                        &lt;option key={loc} value={loc} disabled={loc === searchDestination}>
+                          {loc}
+                        &lt;/option>
+                      ))}
+                    &lt;/select>
+                  &lt;/div>
+                &lt;/div>
+
+                &lt;button
+                  type="button"
+                  className="sr-swap-btn"
+                  title="Swap pickup and destination"
+                  onClick={handleSwapSearchLocations}
+                >
+                  ⇄
+                &lt;/button>
+
+                &lt;div className="sr-input-field">
+                  &lt;label htmlFor="search-to-select">To&lt;/label>
+                  &lt;div className="sr-select-box">
+                    &lt;span className="sr-field-icon">🚩&lt;/span>
+                    &lt;select
+                      id="search-to-select"
+                      className="sr-select"
+                      value={searchDestination}
+                      onChange={(e) => setSearchDestination(e.target.value)}
+                    >
+                      &lt;option value="">Select destination&lt;/option>
+                      {CAMPUS_LOCATIONS.map((loc) => (
+                        &lt;option key={loc} value={loc} disabled={loc === searchPickup}>
+                          {loc}
+                        &lt;/option>
+                      ))}
+                    &lt;/select>
+                  &lt;/div>
+                &lt;/div>
+
+                &lt;button type="submit" className="sr-search-btn">
+                  &lt;span>🔍&lt;/span> Search Rides
+                &lt;/button>
+              &lt;/form>
+            &lt;/section>
+
+            {/* List Header without Live Data */}
+            &lt;div className="sr-list-header">
+              &lt;h2 className="sr-list-title">Available Shared Rides&lt;/h2>
+            &lt;/div>
+
+            {/* Rides Stack */}
+            &lt;div className="sr-rides-stack">
+              {isLoading ? (
+                &lt;div className="loading-state">Loading campus rides...&lt;/div>
+              ) : filteredRidesList.length === 0 ? (
+                &lt;div className="no-rides-card">
+                  &lt;p>No active shared rides currently heading this way.&lt;/p>
+                  &lt;button
+                    type="button"
+                    className="btn-primary-action"
+                    onClick={() => setIsCreateModalOpen(true)}
+                  >
+                    Start Your Own Request
+                  &lt;/button>
+                &lt;/div>
+              ) : (
+                filteredRidesList.map((ride) => (
+                  &lt;SharedRideCard
+                    key={ride.id}
+                    ride={ride}
+                    currentUserId="u_current"
+                    currentUserName="Nazmus Sakib"
+                    onBookRide={handleJoinRide}
+                    onCancelRide={handleCancelBooking}
+                    onViewDetails={(r) => {
+                      setActiveDetailsRide(r);
+                      setIsDetailsModalOpen(true);
+                    }}
+                    onEditRide={(r) => {
+                      setSelectedRideForAction(r);
+                      setIsEditModalOpen(true);
+                    }}
+                    onCancelEntireTrip={handleCancelEntireRide}
+                    onOpenFeedback={(r) => {
+                      setSelectedRideForAction(r);
+                      setIsRateModalOpen(true);
+                    }}
+                  />
+                ))
+              )}
+            &lt;/div>
+
+            {/* Info Banner */}
+            &lt;section className="sr-info-box">
+              &lt;div className="sr-info-icon-badge">👥&lt;/div>
+              &lt;div className="sr-info-content">
+                &lt;h4>What is Shared Ride?&lt;/h4>
+                &lt;p>
+                  Shared Ride is a community-driven transportation feature designed specifically for the campus. It allows students and staff to pool their resources, sharing a single vehicle (Rickshaw or Cart) with others heading in the same direction. By splitting the cost, users enjoy a more affordable commute while reducing wait times and traffic congestion within the university grounds. It's a reliable, utility-focused solution for smart campus mobility.
+                &lt;/p>
+              &lt;/div>
+            &lt;/section>
+          &lt;/>
+        )}
+
+        {/* 2. DRIVER VIEW */}
+        {currentUserRole === 'driver' &amp;&amp; (
+          &lt;DriverRideManager
+            ridesList={allRidesList}
+            onAcceptReject={handleDriverResponse}
+            onNoShowPassenger={handleNoShow}
+            onCancelByDriver={handleCancelEntireRide}
+          />
+        )}
+
+        {/* 3. SYSTEM / ADMIN VIEW */}
+        {currentUserRole === 'admin' &amp;&amp; (
+          &lt;AdminSystemReportView analytics={systemAnalytics} />
+        )}
+
+        {/* Floating Emergency Action Button */}
+        &lt;button
+          type="button"
+          className="sr-emergency-fab"
+          title="Emergency Help"
+          onClick={() => alert('Emergency alert dispatched to campus transport authority.')}
+        >
+          ✳️
+        &lt;/button>
+
+        {/* Modals */}
+        &lt;RideDetailsModal
+          isOpen={isDetailsModalOpen}
+          ride={activeDetailsRide}
+          onClose={() => setIsDetailsModalOpen(false)}
+          onBookRide={handleJoinRide}
+          currentUserName="Nazmus Sakib"
+        />
+
+        &lt;CreateRideModal
+          isModalOpen={isCreateModalOpen}
+          onCloseModal={() => setIsCreateModalOpen(false)}
+          onCreateSubmit={handleCreateRideSubmit}
+        />
+
+        &lt;EditRideModal
+          isOpen={isEditModalOpen}
+          ride={selectedRideForAction}
+          onClose={() => setIsEditModalOpen(false)}
+          onEditSubmit={handleEditRideSubmit}
+        />
+
+        &lt;RateReportModal
+          isModalOpen={isRateModalOpen}
+          selectedRide={selectedRideForAction}
+          onCloseModal={() => setIsRateModalOpen(false)}
+          onSubmitReview={handleFeedbackSubmit}
+        />
+      &lt;/main>
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="features_shared-ride_tests_SharedRidePage.module_test.html">features/shared-ride/tests/SharedRidePage.test</a></li><li><a href="features_shared-ride_tests_sharedRideService.module_test.html">features/shared-ride/tests/sharedRideService.test</a></li><li><a href="module-features_shared-ride_components_AdminSystemReportView.html">features/shared-ride/components/AdminSystemReportView</a></li><li><a href="module-features_shared-ride_components_CreateRideModal.html">features/shared-ride/components/CreateRideModal</a></li><li><a href="module-features_shared-ride_components_DriverRideManager.html">features/shared-ride/components/DriverRideManager</a></li><li><a href="module-features_shared-ride_components_EditRideModal.html">features/shared-ride/components/EditRideModal</a></li><li><a href="module-features_shared-ride_components_RateReportModal.html">features/shared-ride/components/RateReportModal</a></li><li><a href="module-features_shared-ride_components_RideDetailsModal.html">features/shared-ride/components/RideDetailsModal</a></li><li><a href="module-features_shared-ride_components_RoleSelectorBar.html">features/shared-ride/components/RoleSelectorBar</a></li><li><a href="module-features_shared-ride_components_SharedRideCard.html">features/shared-ride/components/SharedRideCard</a></li><li><a href="module-features_shared-ride_hooks_useSharedRide.html">features/shared-ride/hooks/useSharedRide</a></li><li><a href="module-features_shared-ride_pages_SharedRidePage.html">features/shared-ride/pages/SharedRidePage</a></li><li><a href="module-features_shared-ride_services_sharedRideService.html">features/shared-ride/services/sharedRideService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Sep 03 2026 23:18:35 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+/* TransitHub JU - Complete Shared Ride Stylesheet */
+.shared-ride-page {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+  padding-bottom: 60px;
+}
+
+/* Navbar */
+.sr-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  height: 64px;
+}
+
+.sr-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 17px;
+  color: #0f2c59;
+}
+
+.sr-nav-links {
+  display: flex;
+  gap: 32px;
+  height: 100%;
+}
+
+.sr-nav-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  padding: 0 4px;
+}
+
+.sr-nav-item.active {
+  color: #0f2c59;
+  font-weight: 700;
+  border-bottom-color: #0f2c59;
+}
+
+.sr-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.sr-icon-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.sr-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* Main Layout */
+.sr-container {
+  max-width: 1040px;
+  margin: 28px auto;
+  padding: 0 20px;
+}
+
+.sr-title-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sr-main-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.sr-sub-title {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.sr-create-btn {
+  background-color: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sr-create-btn:hover {
+  background-color: #0369a1;
+}
+
+/* Search Card */
+.sr-search-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.sr-search-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.sr-input-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sr-input-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.sr-select-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 44px;
+  background-color: #ffffff;
+}
+
+.sr-field-icon {
+  margin-right: 8px;
+}
+
+.sr-select {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sr-swap-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sr-swap-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.sr-search-btn {
+  height: 44px;
+  padding: 0 24px;
+  background-color: #0f2c59;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sr-search-btn:hover {
+  background-color: #0a1f3f;
+}
+
+/* Rides Stack */
+.sr-list-header {
+  margin-bottom: 16px;
+}
+
+.sr-list-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.sr-rides-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.sr-ride-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.sr-card-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 240px;
+}
+
+.sr-vehicle-box {
+  width: 64px;
+  height: 64px;
+  background-color: #f1f5f9;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sr-vehicle-icon { font-size: 20px; }
+.sr-vehicle-name { font-size: 11px; font-weight: 600; color: #475569; }
+
+.sr-route-path {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  gap: 8px;
+}
+
+.sr-datetime-row {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.sr-card-stats {
+  display: flex;
+  gap: 44px;
+}
+
+.sr-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sr-stat-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.sr-seats-val {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sr-seats-val.open { color: #10b981; }
+.sr-seats-val.full { color: #ef4444; }
+
+.sr-fare-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Action Buttons & Alignment */
+.sr-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sr-view-details-btn {
+  background: none;
+  border: none;
+  color: #0f2c59;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 10px;
+}
+
+.sr-view-details-btn:hover {
+  text-decoration: underline;
+}
+
+.sr-book-btn {
+  background-color: #0f2c59;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.sr-book-btn:hover {
+  background-color: #0a1f3f;
+}
+
+.sr-book-btn:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.sr-passenger-joined-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sr-book-btn.joined {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
+.sr-book-btn.joined:hover {
+  background-color: #fee2e2;
+}
+
+.sr-rate-btn-link {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.sr-rate-btn-link:hover {
+  background-color: #dcfce7;
+}
+
+.sr-creator-action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sr-btn-edit-sm {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Info Box */
+.sr-info-box {
+  background-color: #ebf3fc;
+  border: 1px solid #cfe2f7;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  gap: 20px;
+}
+
+.sr-info-icon-badge {
+  width: 44px;
+  height: 44px;
+  background-color: #0f2c59;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.sr-info-content h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  color: #0f2c59;
+}
+
+.sr-info-content p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ==========================================================================
+   MODAL POPUP STYLES (Fixed Backdrop & Floating Card)
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.modal-content-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f2c59;
+}
+
+.btn-close-x {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #64748b;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close-x:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group-row {
+  display: flex;
+  gap: 14px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+  border-color: #0284c7;
+}
+
+.modal-actions-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-cancel-flat {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary-action {
+  background-color: #0f2c59;
+  border: none;
+  color: #ffffff;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notification-toast {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.notification-toast.success { background-color: #dcfce7; color: #166534; }
+.notification-toast.error { background-color: #fee2e2; color: #991b1b; }
+.notification-toast.info { background-color: #e0f2fe; color: #0369a1; }
+
+.sr-emergency-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 44px;
+  height: 44px;
+  background-color: #dc2626;
+  border-radius: 8px;
+  color: #ffffff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}

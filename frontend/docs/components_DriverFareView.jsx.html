@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/DriverFareView.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/DriverFareView.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Driver quick fare verification screen component (SRS FR-5.2).
+ * Enables drivers to check and display official rates with minimal interaction.
+ * @module features/fare/components/DriverFareView
+ * @author Nazmus Sakib
+ * @version 1.0.0
+ */
+
+import React, { useState } from 'react';
+import { CAMPUS_LOCATIONS_LIST, fareService } from '../services/fareService';
+
+/**
+ * Driver fare lookup interface with high-contrast, large-touch controls.
+ * @param {Object} props - Component properties.
+ * @param {Array&lt;Object>} props.activeFareChartList - Current active fare chart list.
+ * @returns {JSX.Element} Rendered Driver view UI.
+ */
+export const DriverFareView = ({ activeFareChartList }) => {
+  const [selectedPickupLocation, setSelectedPickupLocation] = useState('');
+  const [selectedDestinationLocation, setSelectedDestinationLocation] = useState('');
+  const [calculatedFareResult, setCalculatedFareResult] = useState(null);
+
+  /**
+   * Evaluates fare based on driver inputs.
+   */
+  const handleCalculateFare = () => {
+    if (selectedPickupLocation &amp;&amp; selectedDestinationLocation) {
+      const evaluationResult = fareService.calculateFare(
+        selectedPickupLocation,
+        selectedDestinationLocation,
+        activeFareChartList
+      );
+      setCalculatedFareResult(evaluationResult);
+    }
+  };
+
+  return (
+    &lt;div className="driver-view-card">
+      &lt;div className="driver-header">
+        &lt;h2 style={{ margin: '0 0 0.4rem 0', fontSize: '1.3rem', color: 'var(--primary-navy)' }}>
+          🛺 Driver Quick Fare Checker
+        &lt;/h2>
+        &lt;p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+          Verify official campus rate before starting trip
+        &lt;/p>
+      &lt;/div>
+
+      &lt;div className="driver-form-grid">
+        &lt;div className="input-field-group">
+          &lt;label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+            START STAND
+          &lt;/label>
+          &lt;select
+            className="fare-select driver-select"
+            value={selectedPickupLocation}
+            onChange={(event) => {
+              setSelectedPickupLocation(event.target.value);
+              setCalculatedFareResult(null);
+            }}
+          >
+            &lt;option value="">-- Select Pickup Point --&lt;/option>
+            {CAMPUS_LOCATIONS_LIST.map((locationItem) => (
+              &lt;option
+                key={locationItem}
+                value={locationItem}
+                disabled={locationItem === selectedDestinationLocation}
+              >
+                {locationItem}
+              &lt;/option>
+            ))}
+          &lt;/select>
+        &lt;/div>
+
+        &lt;div className="input-field-group">
+          &lt;label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+            DESTINATION
+          &lt;/label>
+          &lt;select
+            className="fare-select driver-select"
+            value={selectedDestinationLocation}
+            onChange={(event) => {
+              setSelectedDestinationLocation(event.target.value);
+              setCalculatedFareResult(null);
+            }}
+          >
+            &lt;option value="">-- Select Drop Point --&lt;/option>
+            {CAMPUS_LOCATIONS_LIST.map((locationItem) => (
+              &lt;option
+                key={locationItem}
+                value={locationItem}
+                disabled={locationItem === selectedPickupLocation}
+              >
+                {locationItem}
+              &lt;/option>
+            ))}
+          &lt;/select>
+        &lt;/div>
+      &lt;/div>
+
+      &lt;button
+        className="btn-calculate driver-btn"
+        disabled={!selectedPickupLocation || !selectedDestinationLocation}
+        onClick={handleCalculateFare}
+        type="button"
+        style={{ width: '100%', height: '44px', marginTop: '1rem' }}
+      >
+        Show Fare to Passenger
+      &lt;/button>
+
+      {calculatedFareResult &amp;&amp; (
+        &lt;div style={{ marginTop: '1.5rem' }}>
+          {calculatedFareResult.hasMatchingRoute ? (
+            &lt;div className="driver-result-box">
+              &lt;div className="driver-rate-box">
+                &lt;span className="driver-label">🚲 Rickshaw Fare&lt;/span>
+                &lt;span className="driver-price">৳ {calculatedFareResult.rickshawFare}&lt;/span>
+              &lt;/div>
+              &lt;div className="driver-rate-box highlight">
+                &lt;span className="driver-label">🚐 Easy-Bike / Cart&lt;/span>
+                &lt;span className="driver-price">৳ {calculatedFareResult.cartFare}&lt;/span>
+              &lt;/div>
+            &lt;/div>
+          ) : (
+            &lt;div className="no-fare-box">
+              &lt;div style={{ fontSize: '1.4rem', marginBottom: '0.2rem' }}>⚠️&lt;/div>
+              &lt;div className="no-fare-title">No Official Fare Available&lt;/div>
+              &lt;div className="no-fare-desc">{calculatedFareResult.userFeedbackMessage}&lt;/div>
+            &lt;/div>
+          )}
+        &lt;/div>
+      )}
+    &lt;/div>
+  );
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-features_fare.html">features/fare</a></li><li><a href="module-features_fare_components_AdminFareManager.html">features/fare/components/AdminFareManager</a></li><li><a href="module-features_fare_components_DriverFareView.html">features/fare/components/DriverFareView</a></li><li><a href="module-features_fare_components_FareChartTable.html">features/fare/components/FareChartTable</a></li><li><a href="module-features_fare_components_FareComparisonCard.html">features/fare/components/FareComparisonCard</a></li><li><a href="module-features_fare_components_ReportOverchargeModal.html">features/fare/components/ReportOverchargeModal</a></li><li><a href="module-features_fare_hooks_useFare.html">features/fare/hooks/useFare</a></li><li><a href="module-features_fare_pages_ViewFarePage.html">features/fare/pages/ViewFarePage</a></li><li><a href="module-features_fare_services_fareService.html">features/fare/services/fareService</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Aug 27 2026 23:17:25 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
