@@ -26,7 +26,8 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
+            <pre class="prettyprint source linenums"><code>
+/**
  * Queue Join Form module.
  * @module QueueJoinForm
  */
@@ -34,27 +35,22 @@
 import { locations } from "../services/queueService";
 
 /**
- * Displays the passenger queue registration form.
+ * Displays the passenger queue joining form.
  *
- * Allows passengers to select pickup and destination points,
- * specify seat requirements, choose a gender preference,
- * and request priority consideration before joining the queue.
- *
- * @memberof module:QueueJoinForm
  * @param {Object} props Component properties.
- * @param {string} props.pickup Selected pickup location.
- * @param {Function} props.setPickup Updates the pickup location.
- * @param {string} props.destination Selected destination.
- * @param {Function} props.setDestination Updates the destination.
- * @param {number} props.seats Number of requested seats.
- * @param {Function} props.setSeats Updates the seat count.
- * @param {string} props.gender Selected gender preference.
- * @param {Function} props.setGender Updates the gender preference.
- * @param {boolean} props.priority Whether priority is requested.
- * @param {Function} props.setPriority Updates the priority selection.
- * @param {Function} props.onJoin Callback for joining the queue.
- * @param {boolean} props.disabled Disables the form when already queued.
- * @returns {JSX.Element} Queue join form.
+ * @param {string} props.pickup Pickup location ID.
+ * @param {Function} props.setPickup Updates pickup location.
+ * @param {string} props.destination Destination location ID.
+ * @param {Function} props.setDestination Updates destination location.
+ * @param {number} props.seats Number of seats required.
+ * @param {Function} props.setSeats Updates seat count.
+ * @param {string} props.gender Gender preference.
+ * @param {Function} props.setGender Updates gender preference.
+ * @param {boolean} props.priority Priority request flag.
+ * @param {Function} props.setPriority Updates priority flag.
+ * @param {Function} props.onJoin Queue submission callback.
+ * @param {boolean} props.disabled Disables the form.
+ * @returns {JSX.Element} Queue joining form.
  */
 export default function QueueJoinForm({
   pickup,
@@ -73,22 +69,26 @@ export default function QueueJoinForm({
   return (
     &lt;section className="queue-card">
       &lt;h2>Join the waiting queue&lt;/h2>
+
       &lt;p className="card-copy">
-        No vehicles are available right now. Join to receive a fair place in
-        line.
+        No vehicles are available right now. Join to receive a fair place
+        in line.
       &lt;/p>
 
       &lt;div className="queue-form-group">
         &lt;label htmlFor="queue-pickup">Pickup point&lt;/label>
+
         &lt;select
           id="queue-pickup"
           value={pickup}
           onChange={(event) => setPickup(event.target.value)}
           disabled={disabled}
+          required
         >
           &lt;option value="">Choose your pickup point&lt;/option>
+
           {locations.map((location) => (
-            &lt;option key={location.id} value={location.name}>
+            &lt;option key={location.id} value={location.id}>
               {location.name}
             &lt;/option>
           ))}
@@ -97,15 +97,18 @@ export default function QueueJoinForm({
 
       &lt;div className="queue-form-group">
         &lt;label htmlFor="queue-destination">Destination point&lt;/label>
+
         &lt;select
           id="queue-destination"
           value={destination}
           onChange={(event) => setDestination(event.target.value)}
           disabled={disabled}
+          required
         >
           &lt;option value="">Choose your destination point&lt;/option>
+
           {locations.map((location) => (
-            &lt;option key={location.id} value={location.name}>
+            &lt;option key={location.id} value={location.id}>
               {location.name}
             &lt;/option>
           ))}
@@ -115,6 +118,7 @@ export default function QueueJoinForm({
       &lt;div className="queue-form-row">
         &lt;div className="queue-form-group">
           &lt;label htmlFor="queue-seats">Seats needed&lt;/label>
+
           &lt;input
             id="queue-seats"
             type="number"
@@ -123,11 +127,13 @@ export default function QueueJoinForm({
             value={seats}
             onChange={(event) => setSeats(Number(event.target.value))}
             disabled={disabled}
+            required
           />
         &lt;/div>
 
         &lt;div className="queue-form-group">
           &lt;label htmlFor="queue-gender">Gender preference&lt;/label>
+
           &lt;select
             id="queue-gender"
             value={gender}
@@ -148,10 +154,12 @@ export default function QueueJoinForm({
           onChange={(event) => setPriority(event.target.checked)}
           disabled={disabled}
         />
+
         Request priority consideration
       &lt;/label>
 
       &lt;button
+        type="button"
         className="queue-primary-btn"
         onClick={onJoin}
         disabled={disabled}
@@ -160,7 +168,9 @@ export default function QueueJoinForm({
       &lt;/button>
     &lt;/section>
   );
-}</code></pre>
+}
+
+</code></pre>
         </article>
     </section>
 
@@ -170,13 +180,13 @@ export default function QueueJoinForm({
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AdminQueuePage.html">AdminQueuePage</a></li><li><a href="module-AdminQueueTable.html">AdminQueueTable</a></li><li><a href="module-DriverQueueCard.html">DriverQueueCard</a></li><li><a href="module-DriverQueuePage.html">DriverQueuePage</a></li><li><a href="module-PassengerQueuePage.html">PassengerQueuePage</a></li><li><a href="module-PriorityRequestForm.html">PriorityRequestForm</a></li><li><a href="module-QueueJoinForm.html">QueueJoinForm</a></li><li><a href="module-QueueStatusCard.html">QueueStatusCard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AdminQueuePage.html">AdminQueuePage</a></li><li><a href="module-AdminQueueTable.html">AdminQueueTable</a></li><li><a href="module-DriverQueueCard.html">DriverQueueCard</a></li><li><a href="module-DriverQueuePage.html">DriverQueuePage</a></li><li><a href="module-PassengerQueuePage.html">PassengerQueuePage</a></li><li><a href="module-PriorityRequestForm.html">PriorityRequestForm</a></li><li><a href="module-QueueJoinForm.html">QueueJoinForm</a></li><li><a href="module-QueueStatusCard.html">QueueStatusCard</a></li><li><a href="module-queueService.html">queueService</a></li><li><a href="module-usePassengerQueue.html">usePassengerQueue</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue Sep 01 2026 01:19:26 GMT+0600 (Bangladesh Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Sep 04 2026 00:18:03 GMT+0600 (Bangladesh Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

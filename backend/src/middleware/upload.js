@@ -2,9 +2,11 @@ import fs from "fs";
 import path from "path";
 import multer from "multer";
 
+/** Directory used for stored priority request proofs. */
 const uploadDirectory = path.resolve("uploads", "priority-proofs");
 fs.mkdirSync(uploadDirectory, { recursive: true });
 
+/** Stores uploaded proof files with generated names. */
 const storage = multer.diskStorage({
 	destination: (_req, _file, callback) => callback(null, uploadDirectory),
 	filename: (_req, file, callback) => {
@@ -12,12 +14,19 @@ const storage = multer.diskStorage({
 		callback(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`);
 	},
 });
+	/** Accepts the proof formats supported by the priority request workflow. */
 
 const fileFilter = (_req, file, callback) => {
 	const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
 	callback(null, allowedTypes.includes(file.mimetype));
 };
 
+/**
+ * Multer middleware for priority request proofs.
+ *
+ * Files are limited to 5 MB and must be PDF, JPEG, or PNG documents.
+ * @module upload
+ */
 export default multer({
 	storage,
 	fileFilter,

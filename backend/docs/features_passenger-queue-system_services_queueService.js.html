@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: features/passenger-queue-system/services/queueService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: features/passenger-queue-system/services/queueService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Passenger Queue Service module.
+ * @module queueService
+ */
+
+import QueueEntry from "../models/QueueEntry.js";
+import QueueAssignment from "../models/QueueAssignment.js";
+import PriorityRequest from "../models/PriorityRequest.js";
+
+/**
+ * Adds a passenger to the waiting queue.
+ *
+ * @param {Object} data Queue entry information.
+ * @returns {Promise&lt;Object>} Created queue entry.
+ */
+export const joinQueue = async (data) => {
+  const passengerId = Number(data.passenger_id);
+  const pickupLocationId = Number(data.pickup_location_id);
+  const destinationLocationId = Number(data.destination_location_id);
+  const seatsNeeded = Number(data.seats_needed);
+
+  if (!Number.isInteger(passengerId) || passengerId &lt; 1) {
+    throw new Error("A valid passenger is required.");
+  }
+
+  if (!Number.isInteger(pickupLocationId) || pickupLocationId &lt; 1) {
+    throw new Error("A valid pickup location is required.");
+  }
+
+  if (!Number.isInteger(destinationLocationId) || destinationLocationId &lt; 1) {
+    throw new Error("A valid destination location is required.");
+  }
+
+  if (pickupLocationId === destinationLocationId) {
+    throw new Error("Pickup and destination locations must be different.");
+  }
+
+  if (!Number.isInteger(seatsNeeded) || seatsNeeded &lt; 1) {
+    throw new Error("At least one seat is required.");
+  }
+
+  const queueEntry = await QueueEntry.create({
+    passenger_id: passengerId,
+    token: `Q-${pickupLocationId}-${Date.now()}`,
+    pickup_location_id: pickupLocationId,
+    destination_location_id: destinationLocationId,
+    seats_needed: seatsNeeded,
+    gender_preference: data.gender_preference || "Any",
+    priority: Boolean(data.priority),
+    status: "Waiting",
+    joined_at: new Date(),
+  });
+
+  await refreshQueue(pickupLocationId);
+  await queueEntry.reload();
+
+  return {
+    message: "Successfully joined the queue.",
+    queueEntry,
+  };
+};
+
+/**
+ * Gets all waiting entries for a pickup location.
+ *
+ * @param {number|string} pickupId Pickup location ID.
+ * @returns {Promise&lt;Array>} Ordered waiting queue.
+ */
+export const getQueue = async (pickupId) => {
+  const locationId = Number(pickupId);
+
+  if (!Number.isInteger(locationId) || locationId &lt; 1) {
+    throw new Error("A valid pickup location is required.");
+  }
+
+  return QueueEntry.findAll({
+    where: {
+      pickup_location_id: locationId,
+      status: "Waiting",
+    },
+    order: [
+      ["priority", "DESC"],
+      ["joined_at", "ASC"],
+    ],
+  });
+};
+
+/**
+ * Assigns a waiting passenger to a driver and vehicle.
+ *
+ * @param {number} queueId Queue entry ID.
+ * @param {Object} data Assignment information.
+ * @param {number} data.driver_id Driver ID.
+ * @param {number} data.vehicle_id Vehicle ID.
+ * @param {number} data.availableSeats Available vehicle seats.
+ * @returns {Promise&lt;Object>} Assignment result.
+ */
+export const assignPassenger = async (queueId, data) => {
+  const passenger = await QueueEntry.findByPk(queueId);
+
+  if (!passenger) {
+    throw new Error("Passenger not found.");
+  }
+
+  if (passenger.status !== "Waiting") {
+    throw new Error("Passenger is no longer waiting.");
+  }
+
+  if (data.availableSeats &lt; passenger.seats_needed) {
+    throw new Error(
+      `Only ${data.availableSeats} seat${
+        data.availableSeats === 1 ? " is" : "s are"
+      } available; passenger requested ${passenger.seats_needed}.`
+    );
+  }
+
+  passenger.status = "Assigned";
+
+  await passenger.save();
+
+  await QueueAssignment.create({
+    queue_entry_id: passenger.id,
+    driver_id: data.driver_id,
+    vehicle_id: data.vehicle_id,
+    seats_assigned: passenger.seats_needed,
+  });
+
+  await refreshQueue(passenger.pickup_location_id);
+
+  return {
+    message: "Passenger assigned successfully.",
+    seatsUsed: passenger.seats_needed,
+  };
+};
+
+/**
+ * Marks a waiting passenger as a no-show.
+ *
+ * @param {number} queueId Queue entry ID.
+ * @returns {Promise&lt;Object>} No-show result.
+ */
+export const markNoShow = async (queueId) => {
+  const passenger = await QueueEntry.findByPk(queueId);
+
+  if (!passenger) {
+    throw new Error("Passenger not found.");
+  }
+
+  if (passenger.status !== "Waiting") {
+    throw new Error("Passenger is no longer waiting.");
+  }
+
+  passenger.status = "No-show";
+
+  await passenger.save();
+
+  await refreshQueue(passenger.pickup_location_id);
+
+  return {
+    message: "Passenger marked as no-show.",
+  };
+};
+
+/**
+ * Creates a priority request for a passenger.
+ *
+ * @param {Object} data Priority request information.
+ * @param {number} data.queue_entry_id Queue entry ID.
+ * @param {number} data.passenger_id Passenger ID.
+ * @param {string} data.reason Priority reason.
+ * @param {string} data.proof_path Path or reference to supporting proof.
+ * @returns {Promise&lt;Object>} Priority request result.
+ */
+export const createPriorityRequest = async (data) => {
+  const queueEntry = await QueueEntry.findByPk(data.queue_entry_id);
+
+  if (!queueEntry) {
+    throw new Error("Queue entry not found.");
+  }
+
+  if (queueEntry.passenger_id !== Number(data.passenger_id)) {
+    throw new Error("Passenger does not own this queue entry.");
+  }
+
+  if (queueEntry.status !== "Waiting") {
+    throw new Error(
+      "Priority request can only be submitted while waiting."
+    );
+  }
+
+  if (!data.reason || !data.reason.trim()) {
+    throw new Error("Priority reason is required.");
+  }
+
+  if (!data.proof_path || !data.proof_path.trim()) {
+    throw new Error("Supporting proof is required.");
+  }
+
+  const existingRequest = await PriorityRequest.findOne({
+    where: {
+      queue_entry_id: data.queue_entry_id,
+      status: "Pending",
+    },
+  });
+
+  if (existingRequest) {
+    throw new Error(
+      "A priority request is already pending for this queue entry."
+    );
+  }
+
+  const priorityRequest = await PriorityRequest.create({
+    queue_entry_id: data.queue_entry_id,
+    passenger_id: Number(data.passenger_id),
+    reason: data.reason.trim(),
+    proof_path: data.proof_path.trim(),
+    status: "Pending",
+  });
+
+  return {
+    message: "Priority request submitted for review.",
+    status: priorityRequest.status,
+    priorityRequest,
+  };
+};
+
+/**
+ * Recalculates queue positions.
+ *
+ * Priority passengers are placed first, followed by
+ * passengers ordered by join time.
+ *
+ * @param {number} pickupId Pickup location ID.
+ * @returns {Promise&lt;void>}
+ */
+const refreshQueue = async (pickupId) => {
+  const waiting = await QueueEntry.findAll({
+    where: {
+      pickup_location_id: pickupId,
+      status: "Waiting",
+    },
+    order: [
+      ["priority", "DESC"],
+      ["joined_at", "ASC"],
+    ],
+  });
+
+  for (let i = 0; i &lt; waiting.length; i += 1) {
+    waiting[i].position = i + 1;
+    await waiting[i].save();
+  }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-queueController.html">queueController</a></li><li><a href="module-queueRoutes.html">queueRoutes</a></li><li><a href="module-queueService.html">queueService</a></li><li><a href="module-upload.html">upload</a></li></ul><h3>Global</h3><ul><li><a href="global.html#approvePriorityRequest">approvePriorityRequest</a></li><li><a href="global.html#approveRequest">approveRequest</a></li><li><a href="global.html#createPriorityRequest">createPriorityRequest</a></li><li><a href="global.html#fileFilter">fileFilter</a></li><li><a href="global.html#getPendingPriorityRequests">getPendingPriorityRequests</a></li><li><a href="global.html#listPendingPriorityRequests">listPendingPriorityRequests</a></li><li><a href="global.html#rejectPriorityRequest">rejectPriorityRequest</a></li><li><a href="global.html#rejectRequest">rejectRequest</a></li><li><a href="global.html#reviewPriorityRequest">reviewPriorityRequest</a></li><li><a href="global.html#storage">storage</a></li><li><a href="global.html#submitPriorityRequest">submitPriorityRequest</a></li><li><a href="global.html#uploadDirectory">uploadDirectory</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Sep 04 2026 00:21:14 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

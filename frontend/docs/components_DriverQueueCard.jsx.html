@@ -26,7 +26,8 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
+            <pre class="prettyprint source linenums"><code>
+/**
  * Driver Queue Card module.
  * @module DriverQueueCard
  */
@@ -35,38 +36,44 @@
  * Displays an individual passenger waiting in the driver queue.
  *
  * Shows the passenger's queue information and provides actions
- * for assigning a seat or marking the passenger as a no-show.
+ * for assigning the passenger or marking the passenger as a no-show.
  *
  * @memberof module:DriverQueueCard
  * @param {Object} props Component properties.
  * @param {Object} props.passenger Passenger queue information.
- * @param {number} props.passenger.id Unique passenger identifier.
+ * @param {number} props.passenger.id Queue entry identifier.
  * @param {string} props.passenger.name Passenger name.
- * @param {string} props.passenger.token Queue token number.
+ * @param {string} props.passenger.token Queue token.
  * @param {string} props.passenger.destination Destination point.
  * @param {number} props.passenger.seats Number of requested seats.
  * @param {string} props.passenger.gender Gender preference.
  * @param {boolean} props.passenger.priority Priority status.
- * @param {Function} props.onAssign Callback for assigning a seat.
- * @param {Function} props.onNoShow Callback for marking a no-show.
- * @param {boolean} props.disabled Disables seat assignment when capacity is insufficient.
+ * @param {Function} props.onAssign Callback executed when assigning the passenger.
+ * @param {Function} props.onNoShow Callback executed when marking the passenger as a no-show.
+ * @param {boolean} props.disabled Disables assignment when available seats are insufficient.
  * @returns {JSX.Element} Driver queue card.
  */
 export default function DriverQueueCard({
   passenger,
   onAssign,
   onNoShow,
-  disabled,
+  disabled = false,
 }) {
+  const passengerName = passenger.name || "Unknown passenger";
+  const initial = passengerName.charAt(0).toUpperCase();
+
   return (
     &lt;article className="driver-queue-card">
       &lt;div className="queue-passenger">
-        &lt;div className="queue-avatar">{passenger.name.charAt(0)}&lt;/div>
+        &lt;div className="queue-avatar">{initial}&lt;/div>
 
         &lt;div>
-          &lt;h3>{passenger.name}&lt;/h3>
+          &lt;h3>{passengerName}&lt;/h3>
+
           &lt;p>
-            {passenger.priority ? "Verified priority" : "Standard queue"}
+            {passenger.priority
+              ? "Verified priority"
+              : "Standard queue"}
           &lt;/p>
         &lt;/div>
       &lt;/div>
@@ -78,7 +85,7 @@ export default function DriverQueueCard({
 
       &lt;div className="queue-token-box">
         &lt;span>Destination&lt;/span>
-        &lt;strong>{passenger.destination}&lt;/strong>
+        &lt;strong>{passenger.destination || "Unknown"}&lt;/strong>
       &lt;/div>
 
       &lt;div className="queue-token-box">
@@ -88,24 +95,28 @@ export default function DriverQueueCard({
 
       &lt;div className="queue-token-box">
         &lt;span>Gender preference&lt;/span>
-        &lt;strong>{passenger.gender}&lt;/strong>
+        &lt;strong>{passenger.gender || "Any"}&lt;/strong>
       &lt;/div>
 
       &lt;div className="queue-token-box">
         &lt;span>Priority&lt;/span>
-        &lt;strong>{passenger.priority ? "Verified" : "Standard"}&lt;/strong>
+        &lt;strong>
+          {passenger.priority ? "Verified" : "Standard"}
+        &lt;/strong>
       &lt;/div>
 
       &lt;div className="queue-card-actions">
         &lt;button
+          type="button"
           className="queue-assign-btn"
           onClick={onAssign}
           disabled={disabled}
         >
-          Assign seat
+          {disabled ? "Not enough seats" : "Assign passenger"}
         &lt;/button>
 
         &lt;button
+          type="button"
           className="queue-no-show-btn"
           onClick={onNoShow}
         >
@@ -114,7 +125,9 @@ export default function DriverQueueCard({
       &lt;/div>
     &lt;/article>
   );
-}</code></pre>
+}
+
+</code></pre>
         </article>
     </section>
 
@@ -124,13 +137,13 @@ export default function DriverQueueCard({
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AdminQueuePage.html">AdminQueuePage</a></li><li><a href="module-AdminQueueTable.html">AdminQueueTable</a></li><li><a href="module-DriverQueueCard.html">DriverQueueCard</a></li><li><a href="module-DriverQueuePage.html">DriverQueuePage</a></li><li><a href="module-PassengerQueuePage.html">PassengerQueuePage</a></li><li><a href="module-PriorityRequestForm.html">PriorityRequestForm</a></li><li><a href="module-QueueJoinForm.html">QueueJoinForm</a></li><li><a href="module-QueueStatusCard.html">QueueStatusCard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AdminQueuePage.html">AdminQueuePage</a></li><li><a href="module-AdminQueueTable.html">AdminQueueTable</a></li><li><a href="module-DriverQueueCard.html">DriverQueueCard</a></li><li><a href="module-DriverQueuePage.html">DriverQueuePage</a></li><li><a href="module-PassengerQueuePage.html">PassengerQueuePage</a></li><li><a href="module-PriorityRequestForm.html">PriorityRequestForm</a></li><li><a href="module-QueueJoinForm.html">QueueJoinForm</a></li><li><a href="module-QueueStatusCard.html">QueueStatusCard</a></li><li><a href="module-queueService.html">queueService</a></li><li><a href="module-usePassengerQueue.html">usePassengerQueue</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue Sep 01 2026 01:19:26 GMT+0600 (Bangladesh Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Sep 04 2026 00:18:03 GMT+0600 (Bangladesh Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

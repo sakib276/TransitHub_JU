@@ -26,7 +26,8 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
+            <pre class="prettyprint source linenums"><code>
+/**
  * Passenger Queue page module.
  * @module PassengerQueuePage
  */
@@ -39,33 +40,25 @@ import usePassengerQueue from "../hooks/usePassengerQueue";
 import "../styles/passengerQueue.css";
 
 /**
- * Passenger Queue Page component.
+ * Displays the passenger queue page.
  *
- * Allows passengers to join a vehicle queue, monitor their
- * current queue status, and submit a priority request.
- *
- * @memberof module:PassengerQueuePage
- * @returns {JSX.Element} Passenger queue interface.
+ * @returns {JSX.Element} Passenger queue page.
  */
 export default function PassengerQueuePage() {
-  /** Selected pickup location. */
   const [pickup, setPickup] = useState("");
-
-  /** Selected destination. */
   const [destination, setDestination] = useState("");
-
-  /** Number of requested seats. */
   const [seats, setSeats] = useState(1);
-
-  /** Passenger gender preference. */
   const [gender, setGender] = useState("Any");
-
-  /** Indicates whether the passenger requests priority. */
   const [priority, setPriority] = useState(false);
 
-  /**
-   * Queue management state and actions provided by the custom hook.
+  /*
+   * Temporary passenger ID.
+   *
+   * Replace this with the authenticated user's ID
+   * when authentication is connected.
    */
+  const passengerId = 1;
+
   const {
     queueEntry,
     priorityStatus,
@@ -73,6 +66,52 @@ export default function PassengerQueuePage() {
     joinQueue,
     submitPriorityRequest,
   } = usePassengerQueue();
+
+  /**
+   * Handles joining the queue.
+   */
+  const handleJoinQueue = async () => {
+    if (!pickup || !destination) {
+      return;
+    }
+
+    if (pickup === destination) {
+      return;
+    }
+
+    try {
+      await joinQueue({
+        passenger_id: passengerId,
+        pickup_location_id: Number(pickup),
+        destination_location_id: Number(destination),
+        seats_needed: seats,
+        gender_preference: gender,
+        priority,
+      });
+    } catch {
+      // Error is already handled by the hook.
+    }
+  };
+
+  /**
+   * Handles priority request submission.
+   *
+   * @param {Object} data Priority request information.
+   */
+  const handlePriorityRequest = async (data) => {
+    if (!queueEntry) {
+      return;
+    }
+
+    try {
+      await submitPriorityRequest({
+        ...data,
+        passenger_id: passengerId,
+      });
+    } catch {
+      // Error is already handled by the hook.
+    }
+  };
 
   return (
     &lt;div className="queue-layout">
@@ -84,54 +123,51 @@ export default function PassengerQueuePage() {
         &lt;main className="queue-content">
           &lt;div className="queue-page-title">
             &lt;h1>Passenger Queue&lt;/h1>
-            &lt;p>Keep your place in line when vehicles are busy.&lt;/p>
+            &lt;p>
+              Join the waiting queue when no vehicle is currently available.
+            &lt;/p>
           &lt;/div>
 
-          {message &amp;&amp; &lt;div className="queue-message">{message}&lt;/div>}
-
-          &lt;div className="passenger-queue-grid">
-            &lt;div>
-              &lt;QueueJoinForm
-                pickup={pickup}
-                setPickup={setPickup}
-                destination={destination}
-                setDestination={setDestination}
-                seats={seats}
-                setSeats={setSeats}
-                gender={gender}
-                setGender={setGender}
-                priority={priority}
-                setPriority={setPriority}
-                onJoin={() =>
-                  joinQueue({
-                    pickup,
-                    destination,
-                    seats,
-                    gender,
-                    priority,
-                  })
-                }
-                disabled={Boolean(queueEntry)}
-              />
-
-              &lt;PriorityRequestForm
-                onSubmit={submitPriorityRequest}
-                status={priorityStatus}
-              />
+          {message &amp;&amp; (
+            &lt;div className="queue-message" role="alert">
+              {message}
             &lt;/div>
+          )}
 
-            &lt;QueueStatusCard
-              entry={queueEntry}
-              priorityStatus={priorityStatus}
+          &lt;QueueJoinForm
+            pickup={pickup}
+            setPickup={setPickup}
+            destination={destination}
+            setDestination={setDestination}
+            seats={seats}
+            setSeats={setSeats}
+            gender={gender}
+            setGender={setGender}
+            priority={priority}
+            setPriority={setPriority}
+            onJoin={handleJoinQueue}
+            disabled={Boolean(queueEntry)}
+          />
+
+          &lt;QueueStatusCard
+            entry={queueEntry}
+            priorityStatus={priorityStatus}
+          />
+
+          {queueEntry &amp;&amp; (
+            &lt;PriorityRequestForm
+              onSubmit={handlePriorityRequest}
+              status={priorityStatus}
             />
-          &lt;/div>
+          )}
         &lt;/main>
       &lt;/div>
 
       &lt;footer className="footer-placeholder">Footer&lt;/footer>
     &lt;/div>
   );
-}</code></pre>
+}
+</code></pre>
         </article>
     </section>
 
@@ -141,13 +177,13 @@ export default function PassengerQueuePage() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AdminQueuePage.html">AdminQueuePage</a></li><li><a href="module-AdminQueueTable.html">AdminQueueTable</a></li><li><a href="module-DriverQueueCard.html">DriverQueueCard</a></li><li><a href="module-DriverQueuePage.html">DriverQueuePage</a></li><li><a href="module-PassengerQueuePage.html">PassengerQueuePage</a></li><li><a href="module-PriorityRequestForm.html">PriorityRequestForm</a></li><li><a href="module-QueueJoinForm.html">QueueJoinForm</a></li><li><a href="module-QueueStatusCard.html">QueueStatusCard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AdminQueuePage.html">AdminQueuePage</a></li><li><a href="module-AdminQueueTable.html">AdminQueueTable</a></li><li><a href="module-DriverQueueCard.html">DriverQueueCard</a></li><li><a href="module-DriverQueuePage.html">DriverQueuePage</a></li><li><a href="module-PassengerQueuePage.html">PassengerQueuePage</a></li><li><a href="module-PriorityRequestForm.html">PriorityRequestForm</a></li><li><a href="module-QueueJoinForm.html">QueueJoinForm</a></li><li><a href="module-QueueStatusCard.html">QueueStatusCard</a></li><li><a href="module-queueService.html">queueService</a></li><li><a href="module-usePassengerQueue.html">usePassengerQueue</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue Sep 01 2026 01:19:26 GMT+0600 (Bangladesh Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Sep 04 2026 00:18:03 GMT+0600 (Bangladesh Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

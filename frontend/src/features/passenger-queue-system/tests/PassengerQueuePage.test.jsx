@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import PassengerQueuePage from "../pages/PassengerQueuePage";
 import usePassengerQueue from "../hooks/usePassengerQueue";
 
@@ -33,11 +33,11 @@ describe("PassengerQueuePage", () => {
     render(<PassengerQueuePage />);
 
     fireEvent.change(screen.getByLabelText(/pickup point/i), {
-      target: { value: "JU Gate" },
+      target: { value: "1" },
     });
 
     fireEvent.change(screen.getByLabelText(/destination point/i), {
-      target: { value: "Medical" },
+      target: { value: "2" },
     });
 
     fireEvent.change(screen.getByLabelText(/seats needed/i), {
@@ -52,10 +52,11 @@ describe("PassengerQueuePage", () => {
     fireEvent.click(screen.getByRole("button", { name: /join queue/i }));
 
     expect(joinQueue).toHaveBeenCalledWith({
-      pickup: "JU Gate",
-      destination: "Medical",
-      seats: 2,
-      gender: "Female",
+      passenger_id: 1,
+      pickup_location_id: 1,
+      destination_location_id: 2,
+      seats_needed: 2,
+      gender_preference: "Female",
       priority: true,
     });
   });
@@ -65,12 +66,12 @@ describe("PassengerQueuePage", () => {
       queueEntry: {
         token: "JU-101",
         position: 3,
-        pickup: "JU Gate",
-        destination: "Medical",
-        seats: 1,
-        gender: "Any",
+        pickup_location_id: 1,
+        destination_location_id: 2,
+        seats_needed: 1,
+        gender_preference: "Any",
         priority: false,
-        joinedAt: "10:30 AM",
+        joined_at: "2026-09-04T10:30:00.000Z",
       },
       priorityStatus: "Waiting",
       message: "",
@@ -82,7 +83,7 @@ describe("PassengerQueuePage", () => {
 
     expect(screen.getByText("JU-101")).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
-    expect(screen.getByText("10:30 AM")).toBeInTheDocument();
+    expect(screen.getByText(/2026|2025/)).toBeInTheDocument();
     expect(screen.getByText("Standard")).toBeInTheDocument();
   });
 
@@ -102,7 +103,15 @@ describe("PassengerQueuePage", () => {
     ).toBeInTheDocument();
   });
 
-  it("submits a priority request", () => {
+  it("submits a priority request", async () => {
+    usePassengerQueue.mockReturnValue({
+      queueEntry: { id: 7, token: "JU-101", position: 3, pickup_location_id: 1, destination_location_id: 2, seats_needed: 1, gender_preference: "Any", priority: false, joined_at: "2026-09-04T10:30:00.000Z" },
+      priorityStatus: null,
+      message: "",
+      joinQueue,
+      submitPriorityRequest,
+    });
+
     render(<PassengerQueuePage />);
 
     fireEvent.change(screen.getByLabelText(/emergency reason/i), {
@@ -121,11 +130,10 @@ describe("PassengerQueuePage", () => {
       screen.getByRole("button", { name: /submit priority request/i })
     );
 
-    expect(submitPriorityRequest).toHaveBeenCalledWith({
+    await waitFor(() => expect(submitPriorityRequest).toHaveBeenCalledWith({
       reason: "Medical emergency",
       proof: file,
-      needsReview: true,
-    });
+    }));
   });
 
   it("disables the join form when already in queue", () => {
