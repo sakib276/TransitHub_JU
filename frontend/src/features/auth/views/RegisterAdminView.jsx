@@ -16,6 +16,7 @@ export const RegisterAdminView = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    phone: '',
     adminPasscode: '',
     password: ''
   });
@@ -57,7 +58,13 @@ export const RegisterAdminView = ({ onSwitchToLogin }) => {
         </div>
 
         <div className="th-form-group">
-          <label className="th-label">Authority Passcode (e.g. JU_ADMIN_AUTH_2026)</label>
+          <label className="th-label">Contact Phone</label>
+          <input className="th-input" type="tel" required placeholder="01XXXXXXXXX" value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+        </div>
+
+        <div className="th-form-group">
+          <label className="th-label">Authority Passcode</label>
           <input
             className="th-input"
             type="password"

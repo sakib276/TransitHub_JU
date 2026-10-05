@@ -144,6 +144,17 @@
   text-decoration: underline;
 }
 
+.th-auth-back {
+  display: block;
+  margin: 1.25rem auto 0;
+  padding: 0.5rem;
+}
+
+.th-link-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .th-alert-error {
   background-color: var(--th-soft-coral);
   color: #8A1C1C;

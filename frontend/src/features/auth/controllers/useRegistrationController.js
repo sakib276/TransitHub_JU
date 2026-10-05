@@ -4,11 +4,11 @@
  */
 
 import { useState } from 'react';
+import { authRequest } from '../models/authApi';
 import { 
   validateStrongPassword, 
   validatePhoneNumber, 
-  validateEmail, 
-  registerUserRecord 
+  validateEmail
 } from '../models/authModel';
 
 /**
@@ -61,14 +61,13 @@ export const useRegistrationController = () => {
 
     try {
       setLoading(true);
-      registerUserRecord({
+      await authRequest('/register/passenger', {
         fullName,
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
-        password, // In real backend integration, passwords must always be hashed before storing
-        role: 'passenger'
+        password
       });
-      setSuccessMessage('Registration successful! Verification code has been sent. You can now log in.');
+      setSuccessMessage('Registration successful. You can now log in.');
       return true;
     } catch (err) {
       setErrorMessage(err.message);
@@ -87,17 +86,22 @@ export const useRegistrationController = () => {
    * @param {string} payload.vehicleType
    * @returns {boolean} Success status
    */
-  const registerDriver = async ({ fullName, phone, nid, vehicleType }) => {
+  const registerDriver = async ({ fullName, email, phone, nid, vehicleType }) => {
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (!fullName || !phone || !nid || !vehicleType) {
+    if (!fullName || !email || !phone || !nid || !vehicleType) {
       setErrorMessage('All driver details are mandatory.');
       return false;
     }
 
     if (!validatePhoneNumber(phone)) {
       setErrorMessage('Please provide a valid 11-digit mobile number.');
+      return false;
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMessage('Please provide a valid email address.');
       return false;
     }
 
@@ -108,14 +112,14 @@ export const useRegistrationController = () => {
 
     try {
       setLoading(true);
-      registerUserRecord({
+      await authRequest('/register/driver', {
         fullName,
+        email: email.trim().toLowerCase(),
         phone: phone.trim(),
         nid: nid.trim(),
-        vehicleType,
-        role: 'driver'
+        vehicleType
       });
-      setSuccessMessage('Driver profile registered! You can now log in with OTP verification.');
+      setSuccessMessage('Driver account created. An administrator must assign your vehicle before you begin service.');
       return true;
     } catch (err) {
       setErrorMessage(err.message);
@@ -134,17 +138,17 @@ export const useRegistrationController = () => {
    * @param {string} payload.password
    * @returns {boolean} Success status
    */
-  const registerAdmin = async ({ fullName, email, adminPasscode, password }) => {
+  const registerAdmin = async ({ fullName, email, phone, adminPasscode, password }) => {
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (!fullName || !email || !adminPasscode || !password) {
+    if (!fullName || !email || !phone || !adminPasscode || !password) {
       setErrorMessage('All administrative fields must be filled.');
       return false;
     }
 
-    if (adminPasscode !== 'JU_ADMIN_AUTH_2026') {
-      setErrorMessage('Invalid administrative authorization passcode.');
+    if (!validateEmail(email) || !validatePhoneNumber(phone)) {
+      setErrorMessage('Enter a valid email address and 11-digit phone number.');
       return false;
     }
 
@@ -155,10 +159,11 @@ export const useRegistrationController = () => {
 
     try {
       setLoading(true);
-      registerUserRecord({
+      await authRequest('/register/admin', {
         fullName,
         email: email.trim().toLowerCase(),
-        role: 'admin',
+        phone: phone.trim(),
+        adminPasscode,
         password
       });
       setSuccessMessage('Administrator account registered successfully.');

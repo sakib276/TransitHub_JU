@@ -15,6 +15,7 @@ export const RegisterDriverView = ({ onSwitchToLogin }) => {
   const { loading, errorMessage, successMessage, registerDriver } = useRegistrationController();
   const [formData, setFormData] = useState({
     fullName: '',
+    email: '',
     phone: '',
     nid: '',
     vehicleType: 'Rickshaw (2 Seats)'
@@ -43,6 +44,12 @@ export const RegisterDriverView = ({ onSwitchToLogin }) => {
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
           />
+        </div>
+
+        <div className="th-form-group">
+          <label className="th-label">Email Address (OTP delivery)</label>
+          <input className="th-input" type="email" autoComplete="email" required value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
         </div>
 
         <div className="th-form-group">
