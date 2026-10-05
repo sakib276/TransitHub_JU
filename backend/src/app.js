@@ -6,11 +6,11 @@
 
 import express from 'express';
 import cors from 'cors';
+import vehicleStatusRoutes from './features/vehicle-status/routes/vehicle-status-route.js';
 
 const app = express();
 
 //Global Middleware
-
 app.use(cors());
 app.use(express.json());
 
@@ -26,7 +26,8 @@ app.get('/api/health',(req,res)=>{
         message: 'TransitHub API is running',
     });
 });
-
+// Mount Feature Routes
+app.use('/api/v1/vehicles',vehicleStatusRoutes);
 /**
  * Handles application errors centrally.
  * 
