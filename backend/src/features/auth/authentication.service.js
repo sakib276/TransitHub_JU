@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import nodemailer from 'nodemailer';
-import pool from '../../config/database.js';
+import pool from './database.js';
 
 const LOCK_MS = 10 * 60 * 1000;
 const OTP_TTL_MS = 5 * 60 * 1000;

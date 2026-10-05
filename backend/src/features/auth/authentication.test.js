@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import app from '../../app.js';
+import app from './app.js';
 
 describe('authentication request validation', () => {
   it('rejects malformed passenger credentials before database access', async () => {
@@ -35,6 +35,6 @@ describe('authentication request validation', () => {
 });
 
 afterAll(async () => {
-  const { default: pool } = await import('../../config/database.js');
+  const { default: pool } = await import('./database.js');
   await pool.end();
 });

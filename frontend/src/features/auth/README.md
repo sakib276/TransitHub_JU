@@ -1,32 +1,32 @@
 # TransitHub JU Authentication Feature
 
-This folder contains the authentication frontend: registration views, login, driver OTP, password reset, the API client, styling, and the small Vite app used to run this feature on its own.
+This folder contains the authentication frontend: registration views, login, driver OTP, password reset, the API client, styling, and a small Vite app for previewing the feature by itself. The main project frontend also loads this `AuthFeature` component.
 
 ## Run the frontend
 
-Open this folder as the working directory in a VS Code terminal:
+From a VS Code terminal at the repository root:
 
 ```powershell
-cd 'frontend/src/features/auth'
+cd frontend/src/features/auth
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173`). The API defaults to `http://localhost:5000/api`; set `VITE_API_BASE_URL` only if the backend runs elsewhere.
+Open the local URL printed by Vite (usually `http://localhost:5173`). The API defaults to `http://localhost:5001/api` because the auth server has its own runner.
 
 ## Backend location
 
-The API is server code and stays in `backend/src/features/authentication`. Start it from the repository root in a second terminal:
+The API is server code and lives in `backend/src/features/auth`. Start it in a second terminal from the repository root:
 
 ```powershell
-cd backend
+cd backend/src/features/auth
 Copy-Item .env.example .env
-# Edit backend/.env with MySQL, SMTP, JWT_SECRET, and ADMIN_REGISTRATION_CODE values.
+# Edit .env with MySQL, SMTP, JWT_SECRET, and ADMIN_REGISTRATION_CODE values.
 npm install
 npm run dev
 ```
 
-Create the team `transithub_ju` database first, then apply `backend/src/features/authentication/authentication.sql`. The team SQL script drops and recreates the database; run it only if resetting that database is safe.
+Create the team `transithub_ju` database first, then apply `backend/src/features/auth/authentication.sql`. The team SQL script drops and recreates the database; run it only if resetting that database is safe.
 
 ## View this documentation
 
