@@ -18,6 +18,7 @@
     "@eslint/js": "^10.0.1",
     "eslint": "^10.9.1",
     "nodemon": "^3.1.14",
+    "supertest": "^7.3.1",
     "vitest": "^4.1.11"
   },
   "dependencies": {

@@ -15,6 +15,7 @@ const authMiddleware = require("../../shared/middleware/authMiddleware");
  *
  * @module notificationRoutes
  */
+
 const router = express.Router();
 
 router.use(authMiddleware);
@@ -23,10 +24,7 @@ router.use(authMiddleware);
  * GET /api/notifications
  * Retrieves notifications for the authenticated user.
  */
-//router.get("/", getNotifications);
-const notificationController = require("./notificationController");
-
-router.get("/", notificationController.getNotifications);
+router.get("/", getNotifications);
 
 /**
  * PATCH /api/notifications/read-all
