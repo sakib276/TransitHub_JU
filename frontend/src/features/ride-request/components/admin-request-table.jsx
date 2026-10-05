@@ -1,7 +1,15 @@
+/**
+ * Lists ride requests for administrative review.
+ *
+ * @param {object} props - Table props.
+ * @param {Array<object>} props.requests - Ride requests to display.
+ * @returns {JSX.Element} The admin request table.
+ */
 export default function AdminRequestTable({ requests }) {
   const badgeClass = (status) => {
     switch (status) {
       case "Accepted":
+      case "Assigned":
         return "accepted";
       case "Completed":
         return "completed";
@@ -37,11 +45,11 @@ export default function AdminRequestTable({ requests }) {
               {requests.map((req) => (
                 <tr key={req.id}>
                   <td>#{req.id}</td>
-                  <td>{req.user}</td>
+                  <td>{req.passenger}</td>
                   <td>
                     {req.pickup} → {req.destination}
                   </td>
-                  <td>{req.date}</td>
+                  <td>{new Date(req.joinedAt).toLocaleDateString()}</td>
                   <td>
                     <span className={`status-pill ${badgeClass(req.status)}`}>
                       {req.status}

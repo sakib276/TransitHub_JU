@@ -65,6 +65,14 @@ body{
   gap:22px;
 }
 
+.ride-error{
+  padding:12px 16px;
+  border:1px solid #dc8d8d;
+  border-radius:10px;
+  background:#fff1f1;
+  color:#8e2c2c;
+}
+
 .page-title{
   background:linear-gradient(135deg,#E9EEFF,#F8FAFF);
   border:2px solid var(--sky);

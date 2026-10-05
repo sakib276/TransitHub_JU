@@ -1,18 +1,13 @@
+import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import RideForm from "../components/RideForm";
+import RideForm from "../components/ride-form";
 
 const mockRideData = {
-  pickup: "",
-  destination: "",
-  date: "2026-08-25",
-  time: "21:30",
-  seats: 2,
-  gender: "",
-  rideType: "shared",
-  notes: "",
-  fare: 0,
-  travelTime: 0,
+  pickupLocationId: "",
+  destinationLocationId: "",
+  seatsNeeded: 2,
+  genderPreference: "Any",
 };
 
 const mockProps = {
@@ -24,7 +19,7 @@ const mockProps = {
 
 describe("RideForm Component", () => {
   it("renders pickup and destination fields", () => {
-    render(<RideForm {...mockProps} />);
+    render(React.createElement(RideForm, mockProps));
 
     expect(
       screen.getByLabelText("Pickup Point")
@@ -36,7 +31,7 @@ describe("RideForm Component", () => {
   });
 
   it("renders seat input", () => {
-    render(<RideForm {...mockProps} />);
+    render(React.createElement(RideForm, mockProps));
 
     expect(
       screen.getByLabelText("Seats")
@@ -44,12 +39,25 @@ describe("RideForm Component", () => {
   });
 
   it("renders Request Ride button", () => {
-    render(<RideForm {...mockProps} />);
+    render(React.createElement(RideForm, mockProps));
 
     expect(
       screen.getByRole("button", {
         name: /request ride/i,
       })
     ).toBeInTheDocument();
+  });
+
+  it("renders locations supplied by the backend", () => {
+    render(
+      React.createElement(RideForm, {
+        ...mockProps,
+        locations: [{ id: 17, name: "Dairy Gate" }],
+      })
+    );
+
+    expect(
+      screen.getAllByRole("option", { name: "Dairy Gate" })
+    ).toHaveLength(2);
   });
 });

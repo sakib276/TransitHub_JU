@@ -1,3 +1,10 @@
+/**
+ * Displays a preview or saved summary of a passenger queue entry.
+ *
+ * @param {object} props - Card props.
+ * @param {object} props.rideData - Selected ride request details.
+ * @returns {JSX.Element} The route preview card.
+ */
 export default function RideRequestCard({ rideData }) {
   return (
     <div className="card">
@@ -11,9 +18,7 @@ export default function RideRequestCard({ rideData }) {
             <strong>{rideData.pickup || "Not selected"}</strong>
           </div>
         </div>
-
         <div className="route-line"></div>
-
         <div className="route-point">
           <span className="dot end"></span>
           <div>
@@ -24,32 +29,27 @@ export default function RideRequestCard({ rideData }) {
       </div>
 
       <div className="summary">
-        <h3>Ride Summary</h3>
-
-        <div className="summary-row">
-          <span>Date</span>
-          <strong>{rideData.date}</strong>
-        </div>
-
-        <div className="summary-row">
-          <span>Time</span>
-          <strong>{rideData.time}</strong>
-        </div>
-
+        <h3>Queue Request</h3>
         <div className="summary-row">
           <span>Seats</span>
-          <strong>{rideData.seats}</strong>
+          <strong>{rideData.seatsNeeded}</strong>
         </div>
-
         <div className="summary-row">
-          <span>Ride Type</span>
-          <strong>{rideData.rideType}</strong>
+          <span>Gender Preference</span>
+          <strong>{rideData.genderPreference || "Any"}</strong>
         </div>
-
-        <div className="summary-row total">
-          <span>Total Fare</span>
-          <strong>৳ {rideData.fare}</strong>
-        </div>
+        {rideData.token && (
+          <div className="summary-row">
+            <span>Queue Token</span>
+            <strong>{rideData.token}</strong>
+          </div>
+        )}
+        {rideData.position && (
+          <div className="summary-row">
+            <span>Queue Position</span>
+            <strong>{rideData.position}</strong>
+          </div>
+        )}
       </div>
     </div>
   );

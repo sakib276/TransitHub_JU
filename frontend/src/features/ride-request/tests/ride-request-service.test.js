@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateRequest } from "../services/rideRequestService";
+import { validateRequest } from "../services/ride-request-service";
 
 describe("validateRequest", () => {
 
@@ -54,30 +54,29 @@ describe("validateRequest", () => {
 
     expect(
       validateRequest(request)
-    ).toBe("Seat count must be at least 1");
+    ).toBe("Seat count must be between 1 and 4");
   });
 
-
-  it("rejects pickup outside the service area", () => {
+  it("rejects pickup outside the active locations", () => {
     const request = {
       ...validRequest,
       pickup: "Outside Campus",
     };
 
     expect(
-      validateRequest(request)
+      validateRequest(request, false, ["JU Gate", "Transport"])
     ).toBe("Outside service area");
   });
 
 
-  it("rejects destination outside the service area", () => {
+  it("rejects destination outside the active locations", () => {
     const request = {
       ...validRequest,
       destination: "Outside Campus",
     };
 
     expect(
-      validateRequest(request)
+      validateRequest(request, false, ["JU Gate", "Transport"])
     ).toBe("Outside service area");
   });
 

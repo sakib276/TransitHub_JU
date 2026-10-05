@@ -1,23 +1,37 @@
+/**
+ * Shows a single passenger request to a driver.
+ *
+ * @param {object} props - Driver request props.
+ * @param {object} props.request - Passenger ride request.
+ * @param {Function} props.onAccept - Handles accepting the request.
+ * @param {Function} props.onReject - Handles rejecting the request.
+ * @returns {JSX.Element} The driver request card.
+ */
 export default function DriverRequestCard({
   request,
   onAccept,
   onReject,
+  disabled = false,
 }) {
   return (
     <div className="driver-card">
       <div className="card-top">
         <div className="passenger">
           <div className="avatar">
-            {request.passenger.charAt(0)}
+            {request.passenger?.charAt(0) || "P"}
           </div>
 
           <div>
             <h3>{request.passenger}</h3>
-            <p>Passenger Request</p>
+            <p>Queue token: {request.token || "—"}</p>
           </div>
         </div>
 
-        <div className="time-badge">{request.time}</div>
+        <div className="time-badge">
+          {request.joinedAt
+            ? new Date(request.joinedAt).toLocaleTimeString()
+            : "Waiting"}
+        </div>
       </div>
 
       <div className="route-box">
@@ -48,16 +62,16 @@ export default function DriverRequestCard({
 
         <div className="info-box">
           <span>Status</span>
-          <strong>Pending</strong>
+          <strong>{request.status || "Waiting"}</strong>
         </div>
       </div>
 
       <div className="action-row">
-        <button className="accept-btn" onClick={onAccept}>
+        <button className="accept-btn" onClick={onAccept} disabled={disabled}>
           Accept
         </button>
 
-        <button className="reject-btn" onClick={onReject}>
+        <button className="reject-btn" onClick={onReject} disabled={disabled}>
           Reject
         </button>
       </div>
