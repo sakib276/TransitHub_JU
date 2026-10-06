@@ -3,6 +3,16 @@ import request from 'supertest';
 import app from './app.js';
 
 describe('authentication request validation', () => {
+  it('allows the standalone auth frontend origin on localhost ports 5173 and 4173', async () => {
+    const response = await request(app)
+      .options('/api/auth/register/passenger')
+      .set('Origin', 'http://localhost:4173')
+      .set('Access-Control-Request-Method', 'POST');
+
+    expect(response.status).toBe(204);
+    expect(response.headers['access-control-allow-origin']).toBe('http://localhost:4173');
+  });
+
   it('rejects malformed passenger credentials before database access', async () => {
     const response = await request(app).post('/api/auth/login/passenger').send({ email: 'bad', password: 'x' });
     expect(response.status).toBe(400);
