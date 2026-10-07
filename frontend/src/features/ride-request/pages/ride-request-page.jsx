@@ -8,6 +8,8 @@ import "../styles/ride-request.css";
 
 const PASSENGER_ID = Number(import.meta.env.VITE_DEMO_PASSENGER_ID);
 const ACTIVE_STATUSES = new Set(["Waiting", "Assigned"]);
+const HAS_PASSENGER_CONFIGURATION =
+  Number.isInteger(PASSENGER_ID) && PASSENGER_ID > 0;
 
 /**
  * Main page for joining and tracking a passenger queue request.
@@ -32,23 +34,31 @@ export default function RideRequestPage() {
     genderPreference: "Any",
   });
   const [submittedRequest, setSubmittedRequest] = useState(null);
-  const [drivers, setDrivers] = useState([]);
-  const [isLoadingRequests, setIsLoadingRequests] = useState(true);
-  const [isLoadingDrivers, setIsLoadingDrivers] = useState(false);
+  const [driverResults, setDriverResults] = useState({
+    requestId: null,
+    drivers: [],
+  });
+  const [isLoadingRequests, setIsLoadingRequests] = useState(
+    HAS_PASSENGER_CONFIGURATION
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const locationById = useMemo(
     () => new Map(locations.map((location) => [String(location.id), location])),
     [locations]
   );
+  const isLoadingDrivers =
+    submittedRequest?.status === "Waiting" &&
+    driverResults.requestId !== submittedRequest.id;
+  const drivers =
+    driverResults.requestId === submittedRequest?.id
+      ? driverResults.drivers
+      : [];
 
   const loadPassengerRequests = useCallback(async () => {
-    if (!Number.isInteger(PASSENGER_ID) || PASSENGER_ID < 1) {
-      setIsLoadingRequests(false);
+    if (!HAS_PASSENGER_CONFIGURATION) {
       return;
     }
-
-    setIsLoadingRequests(true);
 
     try {
       const response = await getRideRequests({ passengerId: PASSENGER_ID });
@@ -76,29 +86,32 @@ export default function RideRequestPage() {
   }, [getRideRequests]);
 
   useEffect(() => {
+    // The initial fetch owns its loading state; mount-time state updates are required here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadPassengerRequests();
   }, [loadPassengerRequests]);
 
   useEffect(() => {
     if (!submittedRequest || submittedRequest.status !== "Waiting") {
-      setDrivers([]);
       return;
     }
 
     let isCurrent = true;
-    setIsLoadingDrivers(true);
     getAvailableDrivers(submittedRequest.seats)
       .then((response) => {
         if (isCurrent) {
-          setDrivers(response.data);
+          setDriverResults({
+            requestId: submittedRequest.id,
+            drivers: response.data,
+          });
         }
       })
       .catch(() => {
-        setDrivers([]);
-      })
-      .finally(() => {
         if (isCurrent) {
-          setIsLoadingDrivers(false);
+          setDriverResults({
+            requestId: submittedRequest.id,
+            drivers: [],
+          });
         }
       });
 
@@ -162,10 +175,13 @@ export default function RideRequestPage() {
       return;
     }
 
+    setIsLoadingRequests(true);
+    setIsSubmitting(true);
+
     try {
       await rejectRideRequest(submittedRequest.id);
       setSubmittedRequest(null);
-      setDrivers([]);
+      setDriverResults({ requestId: null, drivers: [] });
       setRideData({
         pickupLocationId: "",
         destinationLocationId: "",
@@ -175,6 +191,9 @@ export default function RideRequestPage() {
       await loadPassengerRequests();
     } catch {
       // The hook stores the API error for display.
+    } finally {
+      setIsSubmitting(false);
+      setIsLoadingRequests(false);
     }
   };
 

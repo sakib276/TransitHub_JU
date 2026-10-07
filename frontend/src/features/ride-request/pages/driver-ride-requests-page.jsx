@@ -5,6 +5,11 @@ import "../styles/driver-ride-requests.css";
 
 const DRIVER_ID = Number(import.meta.env.VITE_DEMO_DRIVER_ID);
 const VEHICLE_ID = Number(import.meta.env.VITE_DEMO_VEHICLE_ID);
+const HAS_DRIVER_CONFIGURATION =
+  Number.isInteger(DRIVER_ID) &&
+  DRIVER_ID > 0 &&
+  Number.isInteger(VEHICLE_ID) &&
+  VEHICLE_ID > 0;
 
 /**
  * Displays real passenger queue requests and driver vehicle availability.
@@ -23,22 +28,14 @@ export default function DriverRideRequestsPage() {
   } = useRideRequest({ shouldLoadLocations: false });
   const [requests, setRequests] = useState([]);
   const [vehicle, setVehicle] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(HAS_DRIVER_CONFIGURATION);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const loadDashboard = useCallback(async () => {
-    if (
-      !Number.isInteger(DRIVER_ID) ||
-      DRIVER_ID < 1 ||
-      !Number.isInteger(VEHICLE_ID) ||
-      VEHICLE_ID < 1
-    ) {
+    if (!HAS_DRIVER_CONFIGURATION) {
       setError("Set VITE_DEMO_DRIVER_ID and VITE_DEMO_VEHICLE_ID to active database IDs until login is connected.");
-      setIsLoading(false);
       return;
     }
-
-    setIsLoading(true);
 
     try {
       const [requestResponse, vehicleResponse] = await Promise.all([
@@ -55,11 +52,14 @@ export default function DriverRideRequestsPage() {
   }, [getDriverVehicle, getRideRequests, setError]);
 
   useEffect(() => {
+    // The initial fetch owns its loading state; mount-time state updates are required here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDashboard();
   }, [loadDashboard]);
 
   const handleAccept = async (request) => {
     setIsProcessing(true);
+    setIsLoading(true);
 
     try {
       await acceptRideRequest(request.id, {
@@ -72,11 +72,13 @@ export default function DriverRideRequestsPage() {
       // The hook stores the API error for display.
     } finally {
       setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
   const handleReject = async (requestId) => {
     setIsProcessing(true);
+    setIsLoading(true);
 
     try {
       await rejectRideRequest(requestId, DRIVER_ID);
@@ -85,6 +87,7 @@ export default function DriverRideRequestsPage() {
       // The hook stores the API error for display.
     } finally {
       setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
@@ -94,6 +97,7 @@ export default function DriverRideRequestsPage() {
     }
 
     setIsProcessing(true);
+    setIsLoading(true);
     const status = vehicle.driverStatus === "Available" ? "Offline" : "Available";
 
     try {
@@ -103,6 +107,7 @@ export default function DriverRideRequestsPage() {
       // The hook stores the API error for display.
     } finally {
       setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 

@@ -89,6 +89,12 @@ The demo ID values are sent by the browser and are not safe identity claims. Rep
 
 Frontend tests use **Vitest** and **React Testing Library**. Backend tests use **Vitest** and **Supertest**.
 
+Run ESLint from `frontend/` or `backend/`:
+
+```bash
+npm run lint
+```
+
 Run tests:
 
 ```bash

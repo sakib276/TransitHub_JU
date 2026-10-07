@@ -22,7 +22,6 @@ export default function AdminRideRequestsPage() {
 
   useEffect(() => {
     let isCurrent = true;
-    setIsLoading(true);
 
     getRideRequests()
       .then((response) => {

@@ -8,7 +8,7 @@ import api from "../../../shared/api";
  */
 export default function useRideRequest({ shouldLoadLocations = true } = {}) {
   const [locations, setLocations] = useState([]);
-  const [isLoadingLocations, setIsLoadingLocations] = useState(true);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(shouldLoadLocations);
   const [error, setError] = useState("");
 
   const loadLocations = useCallback(async () => {
@@ -29,10 +29,11 @@ export default function useRideRequest({ shouldLoadLocations = true } = {}) {
 
   useEffect(() => {
     if (!shouldLoadLocations) {
-      setIsLoadingLocations(false);
       return;
     }
 
+    // The initial fetch owns its loading state; mount-time state updates are required here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadLocations().catch(() => {});
   }, [loadLocations, shouldLoadLocations]);
 
