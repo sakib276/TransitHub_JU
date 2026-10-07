@@ -1,228 +1,179 @@
-/**
- * Provides API functions for retrieving and managing notifications.
- *
- * The current implementation uses mock data for frontend development.
- * The API calls can be replaced with the actual backend endpoints when
- * the notification backend is connected.
- *
- * @module notificationApi
- * @author Nourin Dina
- */
+import { apiRequest } from "../../shared/api";
+
+const NOTIFICATIONS_ENDPOINT = "/notifications";
 
 /**
- * Base URL for notification-related API endpoints.
+ * Converts a notification creation timestamp into a
+ * user-friendly local date and time.
  *
- * @constant
- * @type {string}
+ * @param {string|Date} createdAt - Notification creation timestamp.
+ * @returns {string} Formatted local date and time.
  */
-const _BASE_URL = '/api/notifications';
+function formatNotificationTime(createdAt) {
+  const date = new Date(createdAt);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown time";
+  }
+
+  return date.toLocaleString();
+}
 
 /**
- * Mock notification data used during frontend development.
+ * Determines a UI category from the notification title and message.
  *
- * @constant
- * @type {Array<Object>}
+ * The category is derived for the existing frontend filter UI.
+ * It is not stored in the Notifications database table.
+ *
+ * @param {string} title - Notification title.
+ * @param {string} message - Notification message.
+ * @returns {string} Derived notification category.
  */
-const MOCK_NOTIFICATIONS = [
-  {
-    id: 'n1',
-    type: 'driver_assigned',
-    category: 'ride',
-    title: 'Driver Assigned',
-    message: 'Your ride request #RID1234 has been assigned to a driver.',
-    time: 'Today, 10:30 AM',
-    status: 'unread',
-    details: {
-      description:
-        'Good news! A driver has been assigned to your ride request. Please be ready at your pickup location at the estimated time.',
-      dateTime: 'Today, 10:30 AM',
-      relatedRideId: 'RID1234',
-      rideStatus: 'Driver Assigned',
-    },
-  },
-  {
-    id: 'n2',
-    type: 'queue_update',
-    category: 'queue',
-    title: 'Queue Position Update',
-    message: 'You are now at position #3 in the queue.',
-    time: 'Today, 10:15 AM',
-    status: 'unread',
-    details: {
-      description: 'Your position in the ride queue has been updated.',
-      dateTime: 'Today, 10:15 AM',
-      relatedRideId: 'RID1234',
-      rideStatus: 'In Queue',
-    },
-  },
-  {
-    id: 'n3',
-    type: 'pickup_time',
-    category: 'ride',
-    title: 'Estimated Pickup Time',
-    message: 'Your estimated pickup time is 10:45 AM.',
-    time: 'Today, 10:10 AM',
-    status: 'unread',
-    details: {
-      description:
-        'Your estimated pickup time has been calculated based on current traffic and driver location.',
-      dateTime: 'Today, 10:10 AM',
-      relatedRideId: 'RID1234',
-      rideStatus: 'Pending Pickup',
-    },
-  },
-  {
-    id: 'n4',
-    type: 'system_maintenance',
-    category: 'system',
-    title: 'System Maintenance',
-    message:
-      'Scheduled maintenance on 27th May from 2:00 AM to 4:00 AM.',
-    time: 'Yesterday, 08:00 PM',
-    status: 'read',
-    details: {
-      description:
-        'TransitHub JU will be undergoing scheduled maintenance. The app may be unavailable during this window.',
-      dateTime: '27 May, 2:00 AM - 4:00 AM',
-      relatedRideId: '-',
-      rideStatus: '-',
-    },
-  },
-  {
-    id: 'n5',
-    type: 'ride_completed',
-    category: 'ride',
-    title: 'Ride Completed',
-    message: 'Your ride #RID1220 has been completed. Thank you!',
-    time: 'Yesterday, 06:45 PM',
-    status: 'read',
-    details: {
-      description:
-        'Your ride has been completed successfully. Thanks for riding with TransitHub JU.',
-      dateTime: 'Yesterday, 06:45 PM',
-      relatedRideId: 'RID1220',
-      rideStatus: 'Completed',
-    },
-  },
-];
+function getNotificationCategory(title, message) {
+  const notificationText =
+    `${title} ${message}`.toLowerCase();
+
+  if (notificationText.includes("queue")) {
+    return "queue";
+  }
+
+  if (
+    notificationText.includes("maintenance") ||
+    notificationText.includes("announcement")
+  ) {
+    return "system";
+  }
+
+  return "ride";
+}
 
 /**
- * Mock recent activity data used during frontend development.
+ * Converts a backend notification into the frontend
+ * notification structure currently used by the UI.
  *
- * @constant
- * @type {Array<Object>}
+ * @param {Object} notification - Backend notification.
+ * @returns {Object} Frontend notification object.
  */
-const MOCK_ACTIVITY = [
-  {
-    id: 'a1',
-    icon: 'user',
-    title: 'Latest Notification',
-    detail: 'Driver Assigned for ride #RID1234',
-    time: 'Today, 10:30 AM',
-  },
-  {
-    id: 'a2',
-    icon: 'car',
-    title: 'Driver Assignment',
-    detail:
-      'Driver Name: John Doe\nVehicle: JU-1234 (Toyota Premio)',
-    time: 'Today, 10:30 AM',
-  },
-  {
-    id: 'a3',
-    icon: 'users',
-    title: 'Queue Position',
-    detail: 'You are at position #3',
-    time: 'Today, 10:15 AM',
-  },
-  {
-    id: 'a4',
-    icon: 'clock',
-    title: 'Estimated Pickup Time',
-    detail: '10:45 AM',
-    time: 'Today, 10:10 AM',
-  },
-];
+function mapNotification(notification) {
+  const notificationId =
+    notification.notificationId ??
+    notification.notification_id;
+
+  const userId =
+    notification.userId ??
+    notification.user_id;
+
+  const title = notification.title;
+  const message = notification.message;
+
+  const isRead = Boolean(
+    notification.isRead ??
+    notification.is_read
+  );
+
+  const createdAt =
+    notification.createdAt ??
+    notification.created_at;
+
+  return {
+    id: notificationId,
+    notificationId,
+    userId,
+    title,
+    message,
+    isRead,
+    status: isRead ? "read" : "unread",
+    createdAt,
+    time: formatNotificationTime(createdAt),
+    category: getNotificationCategory(
+      title,
+      message
+    ),
+    details: {
+      message,
+      createdAt,
+      status: isRead ? "read" : "unread",
+    },
+  };
+}
 
 /**
- * Retrieves all notifications.
+ * Retrieves notifications belonging to the authenticated user.
  *
- * The current implementation returns mock notification data.
- * Replace the mock implementation with the actual API request
- * when the backend is connected.
- *
- * @async
- * @returns {Promise<Array<Object>>} A promise containing the notification list.
+ * @returns {Promise<Array>} Notification list.
+ * @throws {Error} When the notification request fails.
  */
 export async function getNotifications() {
-  // return fetch(BASE_URL).then((response) => response.json());
-
-  return new Promise((resolve) =>
-    setTimeout(() => resolve(MOCK_NOTIFICATIONS), 200)
+  const response = await apiRequest(
+    NOTIFICATIONS_ENDPOINT
   );
+
+  return response.data.map(mapNotification);
 }
 
 /**
- * Retrieves recent notification-related activity.
+ * Converts notifications into recent activity items
+ * for the existing notification page.
  *
- * The current implementation returns mock activity data.
- * Replace the mock implementation with the actual API request
- * when the backend is connected.
- *
- * @async
- * @returns {Promise<Array<Object>>} A promise containing recent activity items.
+ * @param {Array} notifications - Notification records.
+ * @returns {Array} Recent activity items.
  */
-export async function getRecentActivity() {
-  // return fetch(`${BASE_URL}/activity`).then((response) => response.json());
+function mapRecentActivity(notifications) {
+  return notifications.slice(0, 5).map((notification) => ({
+    id: `activity-${notification.id}`,
+    icon: "🔔",
+    title: notification.title,
+    detail: notification.message,
+    time: notification.time,
+  }));
+}
 
-  return new Promise((resolve) =>
-    setTimeout(() => resolve(MOCK_ACTIVITY), 200)
+/**
+ * Retrieves recent notification activity.
+ *
+ * @param {Array|null} notifications - Existing notification list.
+ * @returns {Promise<Array>} Recent activity items.
+ */
+export async function getRecentActivity(
+  notifications = null
+) {
+  if (notifications) {
+    return mapRecentActivity(notifications);
+  }
+
+  const notificationList = await getNotifications();
+
+  return mapRecentActivity(notificationList);
+}
+
+/**
+ * Marks one notification as read.
+ *
+ * @param {number} notificationId - Notification identifier.
+ * @returns {Promise<void>} Resolves after the update.
+ * @throws {Error} When the request fails.
+ */
+export async function markAsRead(notificationId) {
+  await apiRequest(
+    `${NOTIFICATIONS_ENDPOINT}/${notificationId}/read`,
+    {
+      method: "PATCH",
+    }
   );
 }
 
 /**
- * Marks all notifications as read.
+ * Marks all notifications belonging to the authenticated
+ * user as read.
  *
- * The current implementation simulates the API request using
- * a short delay.
- *
- * @async
- * @returns {Promise<void>} Resolves after the operation is completed.
+ * @returns {Promise<void>} Resolves after the update.
+ * @throws {Error} When the request fails.
  */
 export async function markAllAsRead() {
-  // return fetch(`${BASE_URL}/read-all`, { method: 'PATCH' });
-
-  return new Promise((resolve) => setTimeout(resolve, 150));
-}
-
-/**
- * Marks a specific notification as read.
- *
- * The current implementation simulates the API request using
- * a short delay.
- *
- * @async
- * @param {string} notificationId - Unique identifier of the notification.
- * @returns {Promise<void>} Resolves after the operation is completed.
- */
-export async function markAsRead(_notificationId) {
-   return undefined;
-   
-  // return fetch(`${BASE_URL}/${notificationId}/read`, { method: 'PATCH' });
-  // return new Promise((resolve) => setTimeout(resolve, 150));
-}
-
-/**
- * Clears all notifications.
- *
- * The current implementation simulates the API request using
- * a short delay.
- *
- * @async
- * @returns {Promise<void>} Resolves after the operation is completed.
- */
-export async function clearNotifications() {
-  // return fetch(BASE_URL, { method: 'DELETE' });
-
-  return new Promise((resolve) => setTimeout(resolve, 150));
+  await apiRequest(
+    `${NOTIFICATIONS_ENDPOINT}/read-all`,
+    {
+      method: "PATCH",
+    }
+  );
 }
