@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   getNotifications,
@@ -8,7 +9,49 @@ import {
   clearNotifications,
 } from "./notificationApi";
 
+import { apiRequest } from "../../shared/api";
+
+vi.mock("../../shared/api", () => ({
+  apiRequest: vi.fn(),
+}));
+
+const mockNotifications = [
+  {
+    notificationId: "n1",
+    userId: 1,
+    title: "Driver Assigned",
+    message: "A driver has been assigned to your ride.",
+    isRead: false,
+    createdAt: "2026-10-07T10:30:00.000Z",
+  },
+  {
+    notificationId: "n2",
+    userId: 1,
+    title: "Queue Updated",
+    message: "Your queue position has been updated.",
+    isRead: true,
+    createdAt: "2026-10-07T10:35:00.000Z",
+  },
+  {
+    notificationId: "n3",
+    userId: 1,
+    title: "System Maintenance",
+    message: "System maintenance is scheduled.",
+    isRead: false,
+    createdAt: "2026-10-07T11:00:00.000Z",
+  },
+];
+
 describe("notificationApi", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    apiRequest.mockResolvedValue({
+      success: true,
+      data: mockNotifications,
+    });
+  });
+
   describe("getNotifications", () => {
     it("should return notifications", async () => {
       const notifications = await getNotifications();
@@ -73,12 +116,26 @@ describe("notificationApi", () => {
   describe("markAllAsRead", () => {
     it("should resolve successfully", async () => {
       await expect(markAllAsRead()).resolves.toBeUndefined();
+
+      expect(apiRequest).toHaveBeenCalledWith(
+        "/notifications/read-all",
+        {
+          method: "PATCH",
+        }
+      );
     });
   });
 
   describe("markAsRead", () => {
     it("should resolve successfully for a notification id", async () => {
       await expect(markAsRead("n1")).resolves.toBeUndefined();
+
+      expect(apiRequest).toHaveBeenCalledWith(
+        "/notifications/n1/read",
+        {
+          method: "PATCH",
+        }
+      );
     });
 
     it("should accept different notification ids", async () => {
@@ -91,6 +148,14 @@ describe("notificationApi", () => {
   describe("clearNotifications", () => {
     it("should resolve successfully", async () => {
       await expect(clearNotifications()).resolves.toBeUndefined();
+
+      expect(apiRequest).toHaveBeenCalledWith(
+        "/notifications",
+        {
+          method: "DELETE",
+        }
+      );
     });
   });
 });
+

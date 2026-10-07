@@ -1,72 +1,94 @@
 import { useEffect, useMemo, useState } from "react";
 
-import NotificationCard from "../components/NotificationCard";
-import NotificationDetails from "../components/NotificationDetails";
-import RecentActivity from "../components/RecentActivity";
 import {
+  clearNotifications,
   getNotifications,
   getRecentActivity,
   markAllAsRead,
   markAsRead,
 } from "../notificationApi";
 
-import "../notifications.css";
+import NotificationCard from "../components/NotificationCard";
+import NotificationDetails from "../components/NotificationDetails";
+import RecentActivity from "../components/RecentActivity";
 
 /**
- * Defines the available notification filtering tabs.
+ * Available notification filter tabs.
  *
  * @constant
- * @type {Array<{key: string, label: string}>}
+ * @type {Array<Object>}
  */
 const TABS = [
-  { key: "all", label: "All" },
-  { key: "unread", label: "Unread" },
-  { key: "ride", label: "Ride Updates" },
-  { key: "queue", label: "Queue Updates" },
-  { key: "system", label: "System Announcements" },
+  {
+    id: "all",
+    label: "All",
+  },
+  {
+    id: "unread",
+    label: "Unread",
+  },
+  {
+    id: "ride",
+    label: "Ride Updates",
+  },
+  {
+    id: "queue",
+    label: "Queue Updates",
+  },
+  {
+    id: "system",
+    label: "System Announcements",
+  },
 ];
 
 /**
- * Displays notifications belonging to the authenticated user.
+ * Receive Notification page.
  *
- * @component
- * @returns {JSX.Element} The notifications page.
+ * Displays notifications, supports filtering, marking notifications
+ * as read, clearing notifications, and showing recent activity.
+ *
+ * @returns {JSX.Element} Notification page.
  */
-export default function Notifications() {
+function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [activity, setActivity] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
 
   /**
-   * Loads notifications from the backend.
+   * Loads notifications and recent activity when the page is mounted.
    *
-   * @returns {Promise<void>} Resolves after notification data is loaded.
+   * @returns {Promise<void>} Resolves after the data is loaded.
    */
   useEffect(() => {
-    async function loadNotificationData() {
+    const loadNotificationData = async () => {
       try {
         setLoading(true);
-        setErrorMessage("");
 
-        const notificationData = await getNotifications();
-
-        const activityData =
-          await getRecentActivity(notificationData);
+        const [notificationData, activityData] = await Promise.all([
+          getNotifications(),
+          getRecentActivity(),
+        ]);
 
         setNotifications(notificationData);
         setActivity(activityData);
-        setSelected(notificationData[0] ?? null);
+
+        if (notificationData.length > 0) {
+          setSelected(notificationData[0]);
+        } else {
+          setSelected(null);
+        }
       } catch (error) {
-        setErrorMessage(
-          "Unable to load notifications. Please try again."
-        );
+        console.error("Failed to load notifications:", error);
+
+        setNotifications([]);
+        setActivity([]);
+        setSelected(null);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     loadNotificationData();
   }, []);
@@ -74,35 +96,31 @@ export default function Notifications() {
   /**
    * Filters notifications according to the active tab.
    *
-   * @returns {Array} Filtered notification list.
+   * @returns {Array<Object>} Filtered notifications.
    */
-  const filtered = useMemo(() => {
+  const filteredNotifications = useMemo(() => {
     if (activeTab === "all") {
       return notifications;
     }
 
     if (activeTab === "unread") {
       return notifications.filter(
-        (notification) =>
-          notification.status === "unread"
+        (notification) => notification.status === "unread"
       );
     }
 
     return notifications.filter(
-      (notification) =>
-        notification.category === activeTab
+      (notification) => notification.category === activeTab
     );
-  }, [notifications, activeTab]);
+  }, [activeTab, notifications]);
 
   /**
-   * Selects a notification and marks it as read.
-   *
-   * The backend is updated before the local state is changed.
+   * Handles selecting a notification.
    *
    * @param {Object} notification - Selected notification.
-   * @returns {Promise<void>} Resolves after selection is processed.
+   * @returns {Promise<void>} Resolves after the notification is processed.
    */
-  const handleSelect = async (notification) => {
+  const handleNotificationSelect = async (notification) => {
     setSelected(notification);
 
     if (notification.status !== "unread") {
@@ -110,130 +128,124 @@ export default function Notifications() {
     }
 
     try {
-      await markAsRead(notification.notificationId);
+      await markAsRead(notification.id);
 
-      setNotifications((previousNotifications) =>
-        previousNotifications.map(
-          (currentNotification) =>
-            currentNotification.notificationId ===
-            notification.notificationId
-              ? {
-                  ...currentNotification,
-                  isRead: true,
-                  status: "read",
-                }
-              : currentNotification
-        )
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((currentNotification) => {
+          if (currentNotification.id !== notification.id) {
+            return currentNotification;
+          }
+
+          return {
+            ...currentNotification,
+            isRead: true,
+            status: "read",
+          };
+        })
       );
 
-      setSelected((previousNotification) => {
-        if (
-          !previousNotification ||
-          previousNotification.notificationId !==
-            notification.notificationId
-        ) {
-          return previousNotification;
+      setSelected((currentSelected) => {
+        if (!currentSelected) {
+          return currentSelected;
+        }
+
+        if (currentSelected.id !== notification.id) {
+          return currentSelected;
         }
 
         return {
-          ...previousNotification,
+          ...currentSelected,
           isRead: true,
           status: "read",
         };
       });
     } catch (error) {
-      setErrorMessage(
-        "Unable to mark notification as read. Please try again."
-      );
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   /**
-   * Marks every notification as read through the backend.
+   * Marks all notifications as read.
    *
    * @returns {Promise<void>} Resolves after all notifications are updated.
    */
-  const handleMarkAllRead = async () => {
+  const handleMarkAllAsRead = async () => {
     try {
-      setErrorMessage("");
-
       await markAllAsRead();
 
-      setNotifications((previousNotifications) =>
-        previousNotifications.map(
-          (notification) => ({
-            ...notification,
-            isRead: true,
-            status: "read",
-          })
-        )
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) => ({
+          ...notification,
+          isRead: true,
+          status: "read",
+        }))
       );
 
-      setSelected((previousNotification) =>
-        previousNotification
-          ? {
-              ...previousNotification,
-              isRead: true,
-              status: "read",
-            }
-          : null
-      );
+      setSelected((currentSelected) => {
+        if (!currentSelected) {
+          return currentSelected;
+        }
+
+        return {
+          ...currentSelected,
+          isRead: true,
+          status: "read",
+        };
+      });
     } catch (error) {
-      setErrorMessage(
-        "Unable to mark notifications as read. Please try again."
-      );
+      console.error("Failed to mark all notifications as read:", error);
+    }
+  };
+
+  /**
+   * Clears all notifications for the authenticated user.
+   *
+   * @returns {Promise<void>} Resolves after notifications are cleared.
+   */
+  const handleClearNotifications = async () => {
+    try {
+      await clearNotifications();
+
+      setNotifications([]);
+      setSelected(null);
+      setActivity([]);
+    } catch (error) {
+      console.error("Failed to clear notifications:", error);
     }
   };
 
   return (
     <div className="notif-page">
       <div className="panel">
-        <h1 className="notif-title">
-          Notifications
-        </h1>
+        <h1 className="notif-title">Notifications</h1>
 
         <div className="notif-tabs">
           {TABS.map((tab) => (
             <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
+              key={tab.id}
               className={`notif-tab ${
-                activeTab === tab.key
-                  ? "active"
-                  : ""
+                activeTab === tab.id ? "active" : ""
               }`}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}
             </button>
           ))}
         </div>
 
-        {errorMessage && (
-          <p className="empty-state">
-            {errorMessage}
-          </p>
-        )}
-
         {loading ? (
-          <p className="empty-state">
-            Loading notifications...
-          </p>
-        ) : filtered.length === 0 ? (
-          <p className="empty-state">
-            No notifications here.
-          </p>
+          <p className="empty-state">Loading notifications…</p>
+        ) : filteredNotifications.length === 0 ? (
+          <p className="empty-state">No notifications here.</p>
         ) : (
           <div>
-            {filtered.map((notification) => (
+            {filteredNotifications.map((notification) => (
               <NotificationCard
-                key={notification.notificationId}
+                key={notification.id}
                 notification={notification}
-                isSelected={
-                  selected?.notificationId ===
-                  notification.notificationId
-                }
-                onSelect={handleSelect}
+                isSelected={selected?.id === notification.id}
+                onSelect={handleNotificationSelect}
               />
             ))}
           </div>
@@ -241,11 +253,19 @@ export default function Notifications() {
 
         <div className="notif-footer">
           <button
-            type="button"
-            onClick={handleMarkAllRead}
             className="btn-outline"
+            type="button"
+            onClick={handleMarkAllAsRead}
           >
             ✉️ Mark All as Read
+          </button>
+
+          <button
+            className="btn-outline"
+            type="button"
+            onClick={handleClearNotifications}
+          >
+            Clear Notifications
           </button>
         </div>
 
@@ -255,11 +275,12 @@ export default function Notifications() {
       </div>
 
       <div>
-        <NotificationDetails
-          notification={selected}
-        />
+        <NotificationDetails notification={selected} />
+
         <RecentActivity items={activity} />
       </div>
     </div>
   );
 }
+
+export default Notifications;

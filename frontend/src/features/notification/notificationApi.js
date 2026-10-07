@@ -1,45 +1,58 @@
 import { apiRequest } from "../../shared/api";
 
+/**
+ * Base API endpoint for notification operations.
+ *
+ * @constant
+ * @type {string}
+ */
 const NOTIFICATIONS_ENDPOINT = "/notifications";
 
 /**
- * Converts a notification creation timestamp into a
- * user-friendly local date and time.
+ * Formats an ISO date string into a readable local date and time.
  *
- * @param {string|Date} createdAt - Notification creation timestamp.
+ * @param {string} dateString - ISO date string.
  * @returns {string} Formatted local date and time.
  */
-function formatNotificationTime(createdAt) {
-  const date = new Date(createdAt);
+function formatNotificationTime(dateString) {
+  if (!dateString) {
+    return "";
+  }
+
+  const date = new Date(dateString);
 
   if (Number.isNaN(date.getTime())) {
-    return "Unknown time";
+    return "";
   }
 
   return date.toLocaleString();
 }
 
 /**
- * Determines a UI category from the notification title and message.
+ * Determines the notification category from notification information.
  *
- * The category is derived for the existing frontend filter UI.
- * It is not stored in the Notifications database table.
- *
- * @param {string} title - Notification title.
- * @param {string} message - Notification message.
- * @returns {string} Derived notification category.
+ * @param {Object} notification - Notification object.
+ * @param {string} notification.title - Notification title.
+ * @param {string} notification.message - Notification message.
+ * @returns {string} Notification category.
  */
-function getNotificationCategory(title, message) {
-  const notificationText =
-    `${title} ${message}`.toLowerCase();
+function getNotificationCategory(notification) {
+  const title = String(notification.title || "").toLowerCase();
+  const message = String(notification.message || "").toLowerCase();
 
-  if (notificationText.includes("queue")) {
+  if (
+    title.includes("queue") ||
+    message.includes("queue") ||
+    title.includes("pickup") ||
+    message.includes("pickup")
+  ) {
     return "queue";
   }
 
   if (
-    notificationText.includes("maintenance") ||
-    notificationText.includes("announcement")
+    title.includes("system") ||
+    message.includes("maintenance") ||
+    message.includes("announcement")
   ) {
     return "system";
   }
@@ -48,109 +61,82 @@ function getNotificationCategory(title, message) {
 }
 
 /**
- * Converts a backend notification into the frontend
- * notification structure currently used by the UI.
+ * Maps a backend notification object into the frontend notification format.
  *
- * @param {Object} notification - Backend notification.
+ * @param {Object} notification - Backend notification object.
  * @returns {Object} Frontend notification object.
  */
 function mapNotification(notification) {
-  const notificationId =
-    notification.notificationId ??
-    notification.notification_id;
-
-  const userId =
-    notification.userId ??
-    notification.user_id;
-
-  const title = notification.title;
-  const message = notification.message;
-
-  const isRead = Boolean(
-    notification.isRead ??
-    notification.is_read
-  );
-
-  const createdAt =
-    notification.createdAt ??
-    notification.created_at;
+  const category = getNotificationCategory(notification);
 
   return {
-    id: notificationId,
-    notificationId,
-    userId,
-    title,
-    message,
-    isRead,
-    status: isRead ? "read" : "unread",
-    createdAt,
-    time: formatNotificationTime(createdAt),
-    category: getNotificationCategory(
-      title,
-      message
-    ),
+    id: notification.notificationId,
+    notificationId: notification.notificationId,
+    userId: notification.userId,
+    type:
+      notification.type ||
+      notification.notificationType ||
+      category,
+    title: notification.title,
+    message: notification.message,
+    isRead: notification.isRead,
+    status: notification.isRead ? "read" : "unread",
+    createdAt: notification.createdAt,
+    time: formatNotificationTime(notification.createdAt),
+    category,
     details: {
-      message,
-      createdAt,
-      status: isRead ? "read" : "unread",
+      title: notification.title,
+      message: notification.message,
+      time: formatNotificationTime(notification.createdAt),
     },
   };
 }
 
 /**
- * Retrieves notifications belonging to the authenticated user.
+ * Retrieves notifications for the authenticated user.
  *
- * @returns {Promise<Array>} Notification list.
- * @throws {Error} When the notification request fails.
+ * @returns {Promise<Array>} List of mapped notifications.
+ * @throws {Error} When the request fails.
  */
 export async function getNotifications() {
-  const response = await apiRequest(
-    NOTIFICATIONS_ENDPOINT
-  );
+  const response = await apiRequest(NOTIFICATIONS_ENDPOINT);
 
   return response.data.map(mapNotification);
 }
 
 /**
- * Converts notifications into recent activity items
- * for the existing notification page.
+ * Maps a notification into recent activity format.
  *
- * @param {Array} notifications - Notification records.
- * @returns {Array} Recent activity items.
+ * @param {Object} notification - Notification object.
+ * @returns {Object} Recent activity object.
  */
-function mapRecentActivity(notifications) {
-  return notifications.slice(0, 5).map((notification) => ({
-    id: `activity-${notification.id}`,
+function mapRecentActivity(notification) {
+  return {
+    id: notification.notificationId,
     icon: "🔔",
     title: notification.title,
     detail: notification.message,
-    time: notification.time,
-  }));
+    time: formatNotificationTime(notification.createdAt),
+  };
 }
 
 /**
  * Retrieves recent notification activity.
  *
- * @param {Array|null} notifications - Existing notification list.
- * @returns {Promise<Array>} Recent activity items.
+ * @returns {Promise<Array>} List of recent activity items.
+ * @throws {Error} When the request fails.
  */
-export async function getRecentActivity(
-  notifications = null
-) {
-  if (notifications) {
-    return mapRecentActivity(notifications);
-  }
+export async function getRecentActivity() {
+  const response = await apiRequest(NOTIFICATIONS_ENDPOINT);
 
-  const notificationList = await getNotifications();
-
-  return mapRecentActivity(notificationList);
+  return response.data.map(mapRecentActivity);
 }
 
 /**
- * Marks one notification as read.
+ * Marks a notification as read.
  *
- * @param {number} notificationId - Notification identifier.
- * @returns {Promise<void>} Resolves after the update.
+ * @param {number|string} notificationId - Notification identifier.
+ * @returns {Promise<void>} Resolves after the update request.
  * @throws {Error} When the request fails.
  */
 export async function markAsRead(notificationId) {
@@ -163,10 +149,9 @@ export async function markAsRead(notificationId) {
 }
 
 /**
- * Marks all notifications belonging to the authenticated
- * user as read.
+ * Marks all notifications as read.
  *
- * @returns {Promise<void>} Resolves after the update.
+ * @returns {Promise<void>} Resolves after the update request.
  * @throws {Error} When the request fails.
  */
 export async function markAllAsRead() {
@@ -174,6 +159,21 @@ export async function markAllAsRead() {
     `${NOTIFICATIONS_ENDPOINT}/read-all`,
     {
       method: "PATCH",
+    }
+  );
+}
+
+/**
+ * Clears all notifications belonging to the authenticated user.
+ *
+ * @returns {Promise<void>} Resolves after the delete request.
+ * @throws {Error} When the request fails.
+ */
+export async function clearNotifications() {
+  await apiRequest(
+    NOTIFICATIONS_ENDPOINT,
+    {
+      method: "DELETE",
     }
   );
 }
