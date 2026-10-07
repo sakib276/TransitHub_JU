@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "lint": "eslint .",
     "test": "vitest run",
     "docs": "jsdoc -c jsdoc.json"
   },
@@ -19,6 +20,9 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.0",
+    "globals": "^17.11.0",
     "jsdoc": "^4.0.4",
     "supertest": "^7.2.2",
     "vitest": "^4.1.11"

@@ -28,3 +28,11 @@ The generated HTML is written to `docs/jsdoc/`.
 ```powershell
 npm test
 ```
+
+## Lint
+
+Run ESLint across the backend source and tests:
+
+```powershell
+npm run lint
+```
