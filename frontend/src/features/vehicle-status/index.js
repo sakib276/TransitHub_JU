@@ -1,0 +1,1 @@
+export { default as VehicleStatusPage } from './pages/vehicle-status-page';

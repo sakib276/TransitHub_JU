@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: features/vehicle-status/tests/integration/vehicle-status.test.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: features/vehicle-status/tests/integration/vehicle-status.test.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+/**
+ * Integration tests for the Driver Vehicle Status HTTP API.
+ *
+ * These tests verify the complete API flow from HTTP request through
+ * the application layers to the database and back to the HTTP response.
+ *
+ * The tests cover retrieving driver status, retrieving active locations,
+ * validating status updates, successful status changes, automatic
+ * Busy &amp; Full status handling, and invalid driver handling.
+ *
+ * @module vehicle-status.test
+ */
+
+import { describe, expect, it } from 'vitest';
+import request from 'supertest';
+import app from '../../../../app.js';
+
+/**
+ * Test suite for Driver Vehicle Status API (FR-7.1).
+ *
+ * Supertest sends HTTP requests to the Express application without
+ * starting a separate server. The requests pass through the actual
+ * route, controller, service, repository, and database layers.
+ */
+describe('Driver Vehicle Status API (Integration Tests - FR-7.1)', () => {
+  /**
+   * Verifies that the current vehicle status of an existing driver
+   * can be retrieved successfully.
+   */
+  it('GET /api/v1/vehicles/driver/status - should fetch current driver status', async () => {
+    const response = await request(app)
+      .get('/api/v1/vehicles/driver/status?driverId=2');
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data).toHaveProperty('driverStatus');
+  });
+
+  /**
+   * Verifies that all active vehicle stands/locations are returned
+   * successfully for use when updating the driver's current location.
+   */
+  it('GET /api/v1/vehicles/locations - should retrieve all active stands', async () => {
+    const response = await request(app)
+      .get('/api/v1/vehicles/locations');
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(Array.isArray(response.body.data)).toBe(true);
+    expect(response.body.data.length).toBeGreaterThan(0);
+  });
+
+  /**
+   * Verifies that the API rejects an Available status update when
+   * the driver does not provide a current stand.
+   *
+   * According to the business rule, a driver must select a current
+   * stand before changing the vehicle status to Available.
+   */
+  it('PUT /api/v1/vehicles/driver/status - should reject Available status when current stand is missing', async () => {
+    const response = await request(app)
+      .put('/api/v1/vehicles/driver/status')
+      .send({
+        driverId: 2,
+        driverStatus: 'Available',
+        currentLocationId: null,
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe('Please select your current stand.');
+  });
+
+  /**
+   * Verifies that a driver can successfully change the vehicle
+   * status to Available when a valid current stand is provided.
+   */
+  it('PUT /api/v1/vehicles/driver/status - should successfully update status to Available with stand', async () => {
+    const response = await request(app)
+      .put('/api/v1/vehicles/driver/status')
+      .send({
+        driverId: 2,
+        driverStatus: 'Available',
+        currentLocationId: 1,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.driverStatus).toBe('Available');
+    expect(response.body.data.currentLocationId).toBe(1);
+  });
+
+  /**
+   * Verifies that the vehicle status is automatically changed to
+   * Busy &amp; Full when the available seat count reaches zero.
+   */
+  it('PUT /api/v1/vehicles/driver/status - should update to Busy &amp; Full when available seats are 0', async () => {
+    const response = await request(app)
+      .put('/api/v1/vehicles/driver/status')
+      .send({
+        driverId: 2,
+        driverStatus: 'Busy',
+        destinationLocationId: 3,
+        availableSeats: 0,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.driverStatus).toBe('Busy &amp; Full');
+  });
+
+  /**
+   * Verifies that the API returns a 404 error when the requested
+   * driver does not have an assigned vehicle.
+   */
+  it('GET /api/v1/vehicles/driver/status - should return 404 for non-existent driver vehicle', async () => {
+    const response = await request(app)
+      .get('/api/v1/vehicles/driver/status?driverId=99999');
+
+    expect(response.status).toBe(404);
+    expect(response.body.success).toBe(false);
+  });
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-database.html">database</a></li><li><a href="module-features_vehicle-status_services_vehicle-status-service.html">features/vehicle-status/services/vehicle-status-service</a></li><li><a href="module-server.html">server</a></li><li><a href="module-vehicle-status-constants.html">vehicle-status-constants</a></li><li><a href="module-vehicle-status-controller.html">vehicle-status-controller</a></li><li><a href="module-vehicle-status-repository.html">vehicle-status-repository</a></li><li><a href="module-vehicle-status-route.html">vehicle-status-route</a></li><li><a href="vehicle-status-service.module_test.html">test</a></li><li><a href="vehicle-status.module_test.html">test</a></li></ul><h3>Classes</h3><ul><li><a href="module-features_vehicle-status_services_vehicle-status-service-VehicleStatusService.html">VehicleStatusService</a></li><li><a href="module-vehicle-status-controller-VehicleStatusController.html">VehicleStatusController</a></li><li><a href="module-vehicle-status-repository-VehicleStatusRepository.html">VehicleStatusRepository</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Sat Nov 07 2026 16:08:27 GMT+0600 (Bangladesh Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
