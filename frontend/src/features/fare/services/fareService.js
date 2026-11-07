@@ -1,204 +1,171 @@
 /**
- * @fileoverview Service module for handling JU campus transport fare matrix,
- * calculations, local offline caching, and overcharge reporting.
+ * @fileoverview Service layer handling HTTP communication with TransitHub JU Fare backend API.
  * @module features/fare/services/fareService
  * @author Nazmus Sakib
  * @version 1.0.0
  */
 
-const FARE_CACHE_STORAGE_KEY = 'transithub_ju_fare_chart';
-const OVERCHARGE_COMPLAINTS_STORAGE_KEY = 'ju_overcharge_reports';
+const API_BASE_URL = 'http://localhost:5000/api/fares';
 
+/**
+ * Predefined list of active pickup and drop-off points inside Jahangirnagar University campus.
+ * @type {Array<string>}
+ */
 export const CAMPUS_LOCATIONS_LIST = [
-  'CSE',
   'Dairy Gate',
-  'Bishmile',
-  'Ladies Hall Road',
-  'Prantic',
   'Bottola',
+  'Prantic Gate',
+  'CSE Department',
   'Central Library',
-  'Tajuddin Hall',
+  'Tarabag',
+  'Medical Center',
   'Mir Mosharraf Hossain Hall'
 ];
 
-export const PREDEFINED_FARE_MATRIX = [
-  { id: 1, from: 'CSE', to: 'Dairy Gate', rickshawFare: 20, cartFare: 10 },
-  { id: 2, from: 'CSE', to: 'Bishmile', rickshawFare: 25, cartFare: 15 },
-  { id: 3, from: 'CSE', to: 'Ladies Hall Road', rickshawFare: 20, cartFare: 10 },
-  { id: 4, from: 'CSE', to: 'Prantic', rickshawFare: 20, cartFare: 15 },
-  { id: 5, from: 'CSE', to: 'Mir Mosharraf Hossain Hall', rickshawFare: 20, cartFare: 10 },
-  { id: 6, from: 'CSE', to: 'Tajuddin Hall', rickshawFare: 20, cartFare: 10 },
-  { id: 7, from: 'Dairy Gate', to: 'Bishmile', rickshawFare: 30, cartFare: 15 },
-  { id: 8, from: 'Dairy Gate', to: 'Ladies Hall Road', rickshawFare: 10, cartFare: 5 },
-  { id: 9, from: 'Bishmile', to: 'Prantic', rickshawFare: 20, cartFare: 10 },
-  { id: 10, from: 'Ladies Hall Road', to: 'Prantic', rickshawFare: 15, cartFare: 10 },
-  { id: 11, from: 'Bottola', to: 'CSE', rickshawFare: 10, cartFare: 5 },
-  { id: 12, from: 'Dairy Gate', to: 'Bottola', rickshawFare: 20, cartFare: 10 }
+/**
+ * Offline fallback fare matrix used when the backend server is unreachable.
+ * @type {Array<Object>}
+ */
+const FALLBACK_FARES = [
+  { id: 1, from: 'Dairy Gate', to: 'Bottola', rickshawFare: 20, autoFare: 15 },
+  { id: 2, from: 'Dairy Gate', to: 'Prantic Gate', rickshawFare: 25, autoFare: 20 },
+  { id: 3, from: 'Dairy Gate', to: 'CSE Department', rickshawFare: 30, autoFare: 20 },
+  { id: 4, from: 'Dairy Gate', to: 'Central Library', rickshawFare: 25, autoFare: 15 },
+  { id: 5, from: 'Prantic Gate', to: 'Bottola', rickshawFare: 20, autoFare: 15 },
+  { id: 6, from: 'Prantic Gate', to: 'CSE Department', rickshawFare: 20, autoFare: 15 },
+  { id: 7, from: 'Bottola', to: 'CSE Department', rickshawFare: 15, autoFare: 10 },
+  { id: 8, from: 'Bottola', to: 'Tarabag', rickshawFare: 20, autoFare: 15 }
 ];
 
-export const fareService = {
-  /**
-   * Fetches official fare matrix with automatic localStorage offline fallback.
-   * @async
-   * @returns {Promise<{isSuccessful: boolean, fareChartData: Array<Object>, isOfflineMode: boolean}>}
-   */
-  async getFareChart() {
-    try {
-      const persistedFareData = localStorage.getItem(FARE_CACHE_STORAGE_KEY);
-      const activeFareChart = persistedFareData ? JSON.parse(persistedFareData) : PREDEFINED_FARE_MATRIX;
-      localStorage.setItem(FARE_CACHE_STORAGE_KEY, JSON.stringify(activeFareChart));
-
-      return {
-        isSuccessful: true,
-        fareChartData: activeFareChart,
-        isOfflineMode: false
-      };
-    } catch (fetchError) {
-      const cachedFareData = localStorage.getItem(FARE_CACHE_STORAGE_KEY);
-
-      return {
-        isSuccessful: true,
-        fareChartData: cachedFareData ? JSON.parse(cachedFareData) : PREDEFINED_FARE_MATRIX,
-        isOfflineMode: true
-      };
+/**
+ * Retrieves the complete predefined official fare chart from the backend.
+ * @async
+ * @returns {Promise<Array<Object>>} List of official fare routes.
+ */
+export const getPredefinedFares = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}`);
+    if (!response.ok) {
+      throw new Error(`Server responded with status ${response.status}`);
     }
-  },
+    const result = await response.json();
+    return result.data || FALLBACK_FARES;
+  } catch (error) {
+    console.warn('Backend API unavailable. Using fallback fare list:', error.message);
+    return FALLBACK_FARES;
+  }
+};
 
-  /**
-   * Calculates rickshaw and cart fare between two points bidirectionally.
-   * @param {string} startLocation - Selected departure point.
-   * @param {string} destinationLocation - Selected arrival point.
-   * @param {Array<Object>} [activeFareList=PREDEFINED_FARE_MATRIX] - Current fare reference table.
-   * @returns {Object|null} Calculation outcome.
-   */
-  calculateFare(startLocation, destinationLocation, activeFareList = PREDEFINED_FARE_MATRIX) {
-    if (!startLocation || !destinationLocation) {
-      return null;
-    }
+/**
+ * Requests the backend to calculate fare between two specific campus locations.
+ * @async
+ * @param {string} from - Pickup location name.
+ * @param {string} to - Destination location name.
+ * @returns {Promise<Object>} Route fare details matched for FareComparisonCard.
+ */
+export const calculateFare = async (from, to) => {
+  if (!from || !to || from === to) return null;
 
-    if (startLocation === destinationLocation) {
+  try {
+    const queryParams = new URLSearchParams({ from, to });
+    const response = await fetch(`${API_BASE_URL}/calculate?${queryParams.toString()}`);
+
+    if (!response.ok) {
       return {
         hasMatchingRoute: false,
-        isSameLocationSelected: true,
-        userFeedbackMessage: 'Start point and destination cannot be identical.'
+        userFeedbackMessage: 'No official route fare established between these locations.'
       };
     }
 
-    const matchedRoute = activeFareList.find((routeItem) => {
-      const isDirectMatch =
-        routeItem.from.toLowerCase() === startLocation.toLowerCase() &&
-        routeItem.to.toLowerCase() === destinationLocation.toLowerCase();
+    const result = await response.json();
+    const data = result.data;
 
-      const isReverseMatch =
-        routeItem.from.toLowerCase() === destinationLocation.toLowerCase() &&
-        routeItem.to.toLowerCase() === startLocation.toLowerCase();
-
-      return isDirectMatch || isReverseMatch;
-    });
-
-    if (matchedRoute) {
+    if (!data) {
       return {
-        hasMatchingRoute: true,
-        pickupLocation: startLocation,
-        destinationLocation,
-        rickshawFare: matchedRoute.rickshawFare,
-        cartFare: matchedRoute.cartFare,
-        estimatedSavingsAmount: matchedRoute.rickshawFare - matchedRoute.cartFare
+        hasMatchingRoute: false,
+        userFeedbackMessage: 'No route details returned from server.'
       };
     }
 
+    // FareComparisonCard-এর প্রত্যাশিত ফিল্ডগুলো ম্যাপ করা হলো
     return {
-      hasMatchingRoute: false,
-      pickupLocation: startLocation,
-      destinationLocation,
-      userFeedbackMessage: `No official fare is set by the authority between "${startLocation}" and "${destinationLocation}".`
+      hasMatchingRoute: true,
+      rickshawFare: data.rickshawFare,
+      cartFare: data.autoFare || data.cartFare,
+      autoFare: data.autoFare || data.cartFare,
+      from: data.from,
+      to: data.to,
+      userFeedbackMessage: ''
     };
-  },
+  } catch (error) {
+    console.warn('Backend unavailable, evaluating locally:', error.message);
+    const fromLower = from.toLowerCase();
+    const toLower = to.toLowerCase();
 
-  /**
-   * Submits passenger overcharge complaints into localStorage repository.
-   * @async
-   * @param {Object} reportPayload - Incident submission details.
-   * @returns {Promise<{isSuccessful: boolean, responseMessage: string}>}
-   */
-  async reportOvercharge(reportPayload) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const storedComplaints = JSON.parse(localStorage.getItem(OVERCHARGE_COMPLAINTS_STORAGE_KEY) || '[]');
-        const updatedComplaintsList = [
-          ...storedComplaints,
-          {
-            ...reportPayload,
-            reportId: Date.now(),
-            reportedAtTimestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ];
-
-        localStorage.setItem(OVERCHARGE_COMPLAINTS_STORAGE_KEY, JSON.stringify(updatedComplaintsList));
-        resolve({
-          isSuccessful: true,
-          responseMessage: 'Overcharge complaint submitted successfully to administration.'
-        });
-      }, 300);
-    });
-  },
-
-  /**
-   * Admin: Retrieves all reported overcharge complaints.
-   * @async
-   * @returns {Promise<Array<Object>>}
-   */
-  async getComplaints() {
-    const storedComplaints = JSON.parse(localStorage.getItem(OVERCHARGE_COMPLAINTS_STORAGE_KEY) || '[]');
-    return storedComplaints;
-  },
-
-  /**
-   * Admin: Adds a new official route to the fare chart.
-   * @async
-   * @param {Object} newRoutePayload - New route details.
-   * @returns {Promise<{isSuccessful: boolean, updatedData?: Array<Object>, errorMessage?: string}>}
-   */
-  async addRoute(newRoutePayload) {
-    const storedChart = JSON.parse(localStorage.getItem(FARE_CACHE_STORAGE_KEY) || JSON.stringify(PREDEFINED_FARE_MATRIX));
-    const isDuplicateRoute = storedChart.some(
+    const matched = FALLBACK_FARES.find(
       (item) =>
-        (item.from.toLowerCase() === newRoutePayload.from.toLowerCase() &&
-          item.to.toLowerCase() === newRoutePayload.to.toLowerCase()) ||
-        (item.from.toLowerCase() === newRoutePayload.to.toLowerCase() &&
-          item.to.toLowerCase() === newRoutePayload.from.toLowerCase())
+        (item.from.toLowerCase() === fromLower && item.to.toLowerCase() === toLower) ||
+        (item.from.toLowerCase() === toLower && item.to.toLowerCase() === fromLower)
     );
 
-    if (isDuplicateRoute) {
+    if (!matched) {
       return {
-        isSuccessful: false,
-        errorMessage: 'This route already exists in the campus fare chart.'
+        hasMatchingRoute: false,
+        userFeedbackMessage: 'No official fare found for this route.'
       };
     }
 
-    const updatedFareChart = [...storedChart, { ...newRoutePayload, id: Date.now() }];
-    localStorage.setItem(FARE_CACHE_STORAGE_KEY, JSON.stringify(updatedFareChart));
-
     return {
-      isSuccessful: true,
-      updatedData: updatedFareChart
-    };
-  },
-
-  /**
-   * Admin: Deletes an existing route from the fare chart.
-   * @async
-   * @param {number} routeIdentifier - Unique ID of route to delete.
-   * @returns {Promise<{isSuccessful: boolean, updatedData: Array<Object>}>}
-   */
-  async deleteRoute(routeIdentifier) {
-    const storedChart = JSON.parse(localStorage.getItem(FARE_CACHE_STORAGE_KEY) || JSON.stringify(PREDEFINED_FARE_MATRIX));
-    const updatedFareChart = storedChart.filter((item) => item.id !== routeIdentifier);
-    localStorage.setItem(FARE_CACHE_STORAGE_KEY, JSON.stringify(updatedFareChart));
-
-    return {
-      isSuccessful: true,
-      updatedData: updatedFareChart
+      hasMatchingRoute: true,
+      rickshawFare: matched.rickshawFare,
+      cartFare: matched.autoFare,
+      autoFare: matched.autoFare,
+      from: matched.from,
+      to: matched.to,
+      userFeedbackMessage: ''
     };
   }
+};
+/**
+ * Submits an overcharge complaint to the backend database.
+ * @async
+ * @param {Object} reportData - Complaint details payload.
+ * @param {string} reportData.pickup - Pickup spot.
+ * @param {string} reportData.destination - Drop-off spot.
+ * @param {string} reportData.vehicleType - Type of vehicle (e.g. Rickshaw, Battery Auto).
+ * @param {number} reportData.demandedFare - Fare demanded by driver.
+ * @param {number} [reportData.officialFare] - Regulated official fare.
+ * @param {string} [reportData.vehicleNumber] - Vehicle registration or identifier.
+ * @param {string} [reportData.comment] - Additional details.
+ * @returns {Promise<{success: boolean, message: string, data?: Object}>}
+ */
+export const reportOvercharge = async (reportData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/report-overcharge`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(reportData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Report submission failed with status ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error submitting overcharge report:', error.message);
+    return {
+      success: false,
+      message: error.message || 'Network error occurred while submitting report.'
+    };
+  }
+};
+
+export default {
+  CAMPUS_LOCATIONS_LIST,
+  getPredefinedFares,
+  calculateFare,
+  reportOvercharge
 };
