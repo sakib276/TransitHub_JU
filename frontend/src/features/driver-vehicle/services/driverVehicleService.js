@@ -1,48 +1,46 @@
 /**
- * Mock data + API for FR-11.1 (Passenger: View Assigned Driver).
+ * API calls for FR-11.1 (Passenger: View Assigned Driver).
  *
- * There is no backend yet, so this pretends to be the API call that would
- * normally join Drivers + Users + Vehicles once a ride request is accepted.
+ * Calls the backend: GET /api/driver-vehicle/assigned-driver
+ * The backend finds the logged-in passenger from their login token.
  */
 
-const ASSIGNED_DRIVER = {
-  driverName: 'Karim Mia',
-  driverPhoto: 'https://i.pravatar.cc/150?img=12',
-  vehicleType: 'Rickshaw',
-  vehicleColor: 'Green',
-  plateNumber: 'JU-RIK-101',
-};
+// Backend address. Can be changed with VITE_API_URL in frontend/.env
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-// How long the mock request takes.
-const LOAD_DELAY_MS = 2000;
-
-// How often the mock request fails, to simulate a network issue.
-const NETWORK_FAILURE_CHANCE = 0.3;
-
-/**
- * Waits for the given number of milliseconds.
- *
- * @param {number} ms - Milliseconds to wait.
- * @returns {Promise<void>} Resolves after the delay.
- */
-function wait(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
+// Where the login page (feature/registration-login) saves the token after login.
+const TOKEN_STORAGE_KEY = 'th_auth_token';
 
 /**
  * Gets the driver and vehicle assigned to the passenger's accepted ride.
  *
- * @returns {Promise<Object>} Driver/vehicle info.
- * @throws {Error} If the details fail to load (network failure).
+ * @returns {Promise<Object>} Driver/vehicle info from the backend.
+ * @throws {Error} If not logged in, there is no accepted ride, or the request fails.
  */
 export async function getAssignedDriver() {
-  await wait(LOAD_DELAY_MS);
+  const token = sessionStorage.getItem(TOKEN_STORAGE_KEY);
 
-  if (Math.random() < NETWORK_FAILURE_CHANCE) {
+  if (!token) {
+    throw new Error('Please log in as a passenger to see your driver.');
+  }
+
+  let response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}/api/driver-vehicle/assigned-driver`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    // fetch only throws when the server can't be reached at all.
     throw new Error('Could not load driver details. Check your connection and try again.');
   }
 
-  return ASSIGNED_DRIVER;
+  const body = await response.json();
+
+  if (!response.ok) {
+    // The backend sends a readable message, e.g. "You have no accepted ride yet."
+    throw new Error(body.message);
+  }
+
+  return body.data;
 }

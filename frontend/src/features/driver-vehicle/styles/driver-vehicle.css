@@ -162,6 +162,17 @@
   border:3px solid var(--sky);
 }
 
+.driver-initials{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  background:#EEF3FF;
+  color:#2B3F8C;
+  font-weight:700;
+  font-size:20px;
+}
+
 .driver-info{
   flex:1;
 }
