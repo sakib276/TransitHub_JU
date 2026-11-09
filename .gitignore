@@ -1,0 +1,8 @@
+.env
+node_modules/
+.vite/
+dist/
+playwright-report/
+test-results/
+/package-lock.json
+/frontend/package-lock.json
