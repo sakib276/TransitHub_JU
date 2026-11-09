@@ -1,10 +1,14 @@
+
 name: TransitHub JU Tests
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main
       - feature/receive-notification
+
   pull_request:
     branches:
       - main
@@ -14,9 +18,31 @@ jobs:
     name: Backend Tests
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: transithub_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     defaults:
       run:
         working-directory: backend
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: transithub_test
+      DB_USER: root
+      DB_PASSWORD: root
+      NODE_ENV: test
 
     steps:
       - name: Checkout repository
@@ -32,8 +58,33 @@ jobs:
       - name: Install backend dependencies
         run: npm ci
 
+      - name: Setup test database
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot transithub_test <<'SQL'
+          CREATE TABLE users (
+            user_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY
+          ) ENGINE=InnoDB;
+
+          INSERT INTO users (user_id) VALUES (2);
+
+          CREATE TABLE notifications (
+            notification_id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            title VARCHAR(100) NOT NULL,
+            message TEXT NOT NULL,
+            is_read BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+          ) ENGINE=InnoDB;
+
+          INSERT INTO notifications
+            (user_id, title, message, is_read)
+          VALUES
+            (2, 'Test notification', 'CI test data', FALSE);
+          SQL
+
       - name: Run backend tests
-        run: npm test -- --run
+        run: npm run test:run
 
   frontend-tests:
     name: Frontend Tests
