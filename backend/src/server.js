@@ -5,7 +5,7 @@
 import dotenv from 'dotenv';
 
 import { createApp } from './app.js';
-import { createDatabase } from './config/database.js';
+import { createDatabase } from '../src/features/submit-a-complaint/config/database.js';
 
 dotenv.config();
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 
-import { createDatabase } from '../../../config/database.js';
+import { createDatabase } from '../config/database.js';
 
 /**
  * Tests the Submit a Complaint feature against the real MySQL database.

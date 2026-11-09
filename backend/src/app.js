@@ -43,18 +43,16 @@ const createApp = ({
   app.use(express.json());
 
   /**
-   * Temporary authentication middleware.
+   * Temporary development/test identity middleware.
    *
-   * The actual project will later use the real authentication
-   * middleware to identify the logged-in user.
-   *
-   * For now, this allows the complaint feature to receive
-   * req.user during integration testing.
+   * In testing/development, this reads the x-user-id and x-user-role
+   * headers so that requests from both passengers and admins can be simulated.
+   * Defaults to passenger if not specified.
    */
   app.use((req, res, next) => {
     req.user = {
-      id: 'PASSENGER-001',
-      role: 'PASSENGER',
+      id: req.headers['x-user-id'] || 'PASSENGER-001',
+      role: (req.headers['x-user-role'] || 'PASSENGER').toUpperCase(),
     };
 
     next();

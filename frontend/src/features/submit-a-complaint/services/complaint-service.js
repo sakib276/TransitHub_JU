@@ -75,3 +75,65 @@ export async function submitComplaint(complaintData) {
 
   return result.data;
 }
+
+/**
+ * Fetches all complaints across the system (Administrator action).
+ *
+ * @returns {Promise<Array<Object>>} List of all complaints.
+ * @throws {Error} If the request fails.
+ */
+export async function getAllComplaints() {
+  const response = await fetch(
+    'http://localhost:3000/api/complaints/all',
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-role': 'ADMIN',
+      },
+    },
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to fetch complaints.');
+  }
+
+  return result.data;
+}
+
+/**
+ * Updates the review status of a complaint (Administrator action).
+ *
+ * @param {string} complaintId - ID of complaint to update.
+ * @param {Object} updateData - Data containing status and optional adminNotes.
+ * @param {string} updateData.status - RESOLVED or DISMISSED.
+ * @param {string} [updateData.adminNotes] - Notes added by the administrator.
+ * @returns {Promise<Object>} Updated complaint object.
+ * @throws {Error} If the request fails.
+ */
+export async function updateComplaintStatus(complaintId, updateData) {
+  const response = await fetch(
+    `http://localhost:3000/api/complaints/${complaintId}/status`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-role': 'ADMIN',
+      },
+      body: JSON.stringify({
+        status: updateData.status,
+        adminNotes: updateData.adminNotes || '',
+      }),
+    },
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Failed to update complaint status.');
+  }
+
+  return result.data;
+}

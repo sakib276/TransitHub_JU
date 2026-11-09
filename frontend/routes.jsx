@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import SubmitAComplaintPage from "./src/features/submit-a-complaint/pages/submit-a-complaint-page";
+import AdminComplaintManagementPage from "./src/features/submit-a-complaint/pages/admin-complaint-management-page";
 
 function FeaturePlaceholder({ title }) {
   return (
@@ -67,6 +68,11 @@ function AppRoutes() {
       <Route
         path="/submit-a-complaint"
         element={<SubmitAComplaintPage />}
+      />
+
+      <Route
+        path="/admin/complaints"
+        element={<AdminComplaintManagementPage />}
       />
 
       <Route

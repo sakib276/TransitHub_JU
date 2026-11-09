@@ -467,3 +467,40 @@
     border-radius: 13px;
   }
 }
+
+/* =========================================================
+   Admin Complaint Badges & Tags
+   ========================================================= */
+
+.complaint-category-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.complaint-status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.complaint-badge--review {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.complaint-badge--resolved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.complaint-badge--dismissed {
+  background: #fee2e2;
+  color: #991b1b;
+}

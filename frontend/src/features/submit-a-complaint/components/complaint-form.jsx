@@ -30,6 +30,7 @@ function ComplaintForm({ onSubmit }) {
   const [relatedRide, setRelatedRide] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
 
  /**
@@ -55,11 +56,20 @@ const handleSubmit = async (event) => {
   }
 
   setErrors({});
+  setSuccessMessage("");
   setIsSubmitting(true);
 
   try {
     if (typeof onSubmit === 'function') {
-      await onSubmit(complaintData);
+      const result = await onSubmit(complaintData);
+      setSuccessMessage(
+        result?.complaintId
+          ? `Complaint ${result.complaintId} submitted successfully!`
+          : "Complaint submitted successfully!"
+      );
+      setCategory("");
+      setDescription("");
+      setRelatedRide("");
     }
   } catch (error) {
     setErrors({
@@ -113,6 +123,23 @@ const handleSubmit = async (event) => {
         <p className="complaint-form__error">
           {errors.submit}
         </p>
+      )}
+
+      {successMessage && (
+        <div
+          className="complaint-feedback complaint-feedback--success"
+          style={{
+            background: "#dcfce7",
+            color: "#15803d",
+            padding: "12px",
+            borderRadius: "6px",
+            marginBottom: "14px",
+            fontWeight: "600",
+            fontSize: "14px",
+          }}
+        >
+          {successMessage}
+        </div>
       )}
 
       <ComplaintSubmitButton
