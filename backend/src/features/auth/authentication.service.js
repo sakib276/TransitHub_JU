@@ -59,15 +59,15 @@ function getLockSeconds(value) {
   return remaining > 0 ? remaining : 0;
 }
 
-/** Authenticate a Passenger by email/password and enforce a persistent five-failure lockout. */
-export async function loginPassenger({ email, password }) {
+/** Authenticate a password-based account and enforce a persistent five-failure lockout. */
+async function loginWithPassword({ email, password, role }) {
   const normalizedEmail = normalizeEmail(email);
   if (typeof password !== 'string' || !password) throw Object.assign(new Error('Password is required.'), { status: 400 });
   const connection = await pool.getConnection();
   let committed = false;
   try {
     await connection.beginTransaction();
-    const [users] = await connection.execute("SELECT user_id, full_name, email, role, password_hash FROM users WHERE email = ? AND role = 'Passenger' LIMIT 1", [normalizedEmail]);
+    const [users] = await connection.execute('SELECT user_id, full_name, email, role, password_hash FROM users WHERE email = ? AND role = ? LIMIT 1', [normalizedEmail, role]);
     const user = users[0];
     if (!user) {
       await bcrypt.compare(password, '$2a$12$C6UzMDM.H6dfI/f/IKcEe.0zYqgCzSx4N7S1kzFfR0Bk1xv3z8F9a');
@@ -96,6 +96,9 @@ export async function loginPassenger({ email, password }) {
     throw error;
   } finally { connection.release(); }
 }
+
+export const loginPassenger = ({ email, password }) => loginWithPassword({ email, password, role: 'Passenger' });
+export const loginAdmin = ({ email, password }) => loginWithPassword({ email, password, role: 'Admin' });
 
 /** Send a hashed, short-lived OTP to an existing driver's registered email. */
 export async function requestDriverOtp({ phone }) {
@@ -237,7 +240,7 @@ function timingSafeTextEqual(left, right) {
 /** Start password reset with an opaque random token; store only its SHA-256 digest. */
 export async function requestPasswordReset({ email }) {
   const normalizedEmail = normalizeEmail(email);
-  const [users] = await pool.execute("SELECT user_id, email FROM users WHERE email = ? AND role = 'Passenger' LIMIT 1", [normalizedEmail]);
+  const [users] = await pool.execute("SELECT user_id, email FROM users WHERE email = ? AND role IN ('Passenger', 'Admin') LIMIT 1", [normalizedEmail]);
   if (!users[0]) return { message: 'If an account matches that email, reset instructions will be sent.' };
   const token = randomBytes(32).toString('hex');
   const digest = createHash('sha256').update(token).digest('hex');

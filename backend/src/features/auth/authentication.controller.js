@@ -17,6 +17,8 @@ async function handle(res, action, status = 200) {
 
 /** Authenticate a passenger with email and password. */
 export const loginPassenger = (req, res) => handle(res, () => auth.loginPassenger(req.body));
+/** Authenticate an administrator with email and password. */
+export const loginAdmin = (req, res) => handle(res, () => auth.loginAdmin(req.body));
 /** Send an OTP to a driver's registered email. */
 export const requestDriverOtp = (req, res) => handle(res, () => auth.requestDriverOtp(req.body));
 /** Verify a driver's OTP and issue a login token. */

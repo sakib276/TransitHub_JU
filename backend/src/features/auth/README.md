@@ -14,4 +14,4 @@ npm run dev
 
 Create the `transithub_ju` database from the team's supplied SQL, then apply `authentication.sql` in MySQL Workbench. The supplied SQL drops and recreates that database, so run it only when resetting the database is safe.
 
-The API is at `http://localhost:5001/api/auth`. The frontend is in `frontend/src/features/auth` and defaults to this API URL.
+The API is at `http://localhost:5001/api/auth`. Password login is available for Passengers and Admins; Drivers sign in with a one-time email code. The frontend is in `frontend/src/features/auth` and defaults to this API URL.

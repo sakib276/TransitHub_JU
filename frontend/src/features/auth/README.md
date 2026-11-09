@@ -14,6 +14,10 @@ npm run dev
 
 Open the local URL printed by Vite (usually `http://localhost:5173`). The API defaults to `http://localhost:5001/api` because the auth server has its own runner.
 
+## View the saved test report
+
+Run `npm test` from `frontend/src/features/auth` to execute the frontend component tests. The backend tests run with `npm test` from `backend/src/features/auth`. The existing `frontend/playwright-report/index.html` is a saved generated report from a previous run, not the output of the current Vitest tests.
+
 ## Backend location
 
 The API is server code and lives in `backend/src/features/auth`. Start it in a second terminal from the repository root:

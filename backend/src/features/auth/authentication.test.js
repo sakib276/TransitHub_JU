@@ -20,6 +20,13 @@ describe('authentication request validation', () => {
     expect(response.body.message).toMatch(/email/i);
   });
 
+  it('rejects malformed admin credentials before database access', async () => {
+    const response = await request(app).post('/api/auth/login/admin').send({ email: 'bad', password: 'x' });
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toMatch(/email/i);
+  });
+
   it('rejects malformed driver phone and OTP before database access', async () => {
     const otpRequest = await request(app).post('/api/auth/login/driver/request-otp').send({ phone: '123' });
     expect(otpRequest.status).toBe(400);
