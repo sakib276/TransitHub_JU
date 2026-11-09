@@ -1,4 +1,5 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+// The login routes now live in the main backend (port 5000), see backend/src/app.js.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 /** Call an authentication endpoint and surface safe API error messages. */
 export async function authRequest(path, body) {

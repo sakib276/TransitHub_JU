@@ -1,6 +1,8 @@
 # Authentication Backend
 
-This folder contains the authentication API, MySQL pool, migration, and local runner. It runs separately on port 5001 so no shared backend router or server files need editing.
+This folder contains the authentication API, MySQL pool, migration, and local runner.
+
+> **Now part of the main backend:** `backend/src/app.js` mounts these routes at `/api/auth`, so `npm run dev` in `backend/` (port 5000) serves login too. The standalone runner below (port 5001) still works for testing this feature alone.
 
 From a VS Code terminal at the repository root:
 

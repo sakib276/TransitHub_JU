@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createRideRequest, getRouteOptions } from "../services/rideRequestApi";
 import RideForm from "../components/RideForm";
 import RideRequestCard from "../components/RideRequestCard";
 import RequestStatus from "../components/RequestStatus";
 import "../styles/rideRequest.css";
 
 export default function RideRequestPage() {
+  const navigate = useNavigate();
+
   // Get current date and time
   const now = new Date();
 
@@ -28,7 +32,17 @@ export default function RideRequestPage() {
   // Stores the submitted request
   const [submittedRequest, setSubmittedRequest] = useState(null);
 
-  const handleSubmit = () => {
+  // Pickup → destination pairs (with fare and time) from the database
+  const [routeOptions, setRouteOptions] = useState([]);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    getRouteOptions()
+      .then(setRouteOptions)
+      .catch((error) => setLoadError(error.message));
+  }, []);
+
+  const handleSubmit = async () => {
     // Basic validation
     if (!rideData.pickup || !rideData.destination) {
       alert("Please select pickup and destination.");
@@ -45,11 +59,26 @@ export default function RideRequestPage() {
       return;
     }
 
-    // Save the submitted request
+    // Show "Searching" while the request is being saved
     setSubmittedRequest({
       ...rideData,
       status: "Searching",
     });
+
+    try {
+      // Save to the database; the backend assigns a driver and vehicle
+      await createRideRequest({
+        pickupStop: rideData.pickup,
+        dropStop: rideData.destination,
+      });
+    } catch (error) {
+      setSubmittedRequest(null);
+      alert(error.message);
+      return;
+    }
+
+    // Go to the passenger's "Your Ride" page (FR-11.1, driver-vehicle feature)
+    navigate("/assigned-driver");
   };
 
   const handleCancel = () => {
@@ -90,12 +119,21 @@ export default function RideRequestPage() {
 
           <div className="ride-grid">
 
-            <RideForm
-              rideData={rideData}
-              setRideData={setRideData}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-            />
+            <div>
+              {loadError && (
+                <p className="load-error" role="alert">
+                  {loadError}
+                </p>
+              )}
+
+              <RideForm
+                rideData={rideData}
+                setRideData={setRideData}
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
+                routeOptions={routeOptions}
+              />
+            </div>
 
             <div className="right-column">
 

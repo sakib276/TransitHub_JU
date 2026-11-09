@@ -1,86 +1,36 @@
-const locations = [
-  { id: 1, name: "JU Gate" },
-  { id: 2, name: "Transport" },
-  { id: 3, name: "Medical" },
-  { id: 4, name: "Bot Tala" },
-  { id: 5, name: "Bangabandhu Hall" },
-  { id: 6, name: "Shaheed Salam Hall" },
-  { id: 7, name: "Central Library" },
-  { id: 8, name: "Business Studies" },
-];
+/**
+ * Unique stop names, in the order they first appear.
+ *
+ * @param {Array<string>} names - Stop names (may repeat).
+ * @returns {Array<string>} Names without duplicates.
+ */
+function uniqueNames(names) {
+  return [...new Set(names)];
+}
 
-const routeInfo = {
-  "JU Gate-Transport": { fare: 20, travelTime: 5 },
-  "JU Gate-Medical": { fare: 25, travelTime: 7 },
-  "JU Gate-Bot Tala": { fare: 30, travelTime: 10 },
-  "JU Gate-Bangabandhu Hall": { fare: 25, travelTime: 8 },
-  "JU Gate-Shaheed Salam Hall": { fare: 30, travelTime: 10 },
-  "JU Gate-Central Library": { fare: 25, travelTime: 8 },
-  "JU Gate-Business Studies": { fare: 30, travelTime: 10 },
-
-  "Transport-JU Gate": { fare: 20, travelTime: 5 },
-  "Transport-Medical": { fare: 15, travelTime: 4 },
-  "Transport-Bot Tala": { fare: 20, travelTime: 6 },
-  "Transport-Bangabandhu Hall": { fare: 20, travelTime: 6 },
-  "Transport-Shaheed Salam Hall": { fare: 25, travelTime: 8 },
-  "Transport-Central Library": { fare: 20, travelTime: 6 },
-  "Transport-Business Studies": { fare: 25, travelTime: 8 },
-
-  "Medical-JU Gate": { fare: 25, travelTime: 7 },
-  "Medical-Transport": { fare: 15, travelTime: 4 },
-  "Medical-Bot Tala": { fare: 20, travelTime: 6 },
-  "Medical-Bangabandhu Hall": { fare: 20, travelTime: 6 },
-  "Medical-Shaheed Salam Hall": { fare: 25, travelTime: 8 },
-  "Medical-Central Library": { fare: 20, travelTime: 6 },
-  "Medical-Business Studies": { fare: 25, travelTime: 8 },
-
-  "Bot Tala-JU Gate": { fare: 30, travelTime: 10 },
-  "Bot Tala-Transport": { fare: 20, travelTime: 6 },
-  "Bot Tala-Medical": { fare: 20, travelTime: 6 },
-  "Bot Tala-Bangabandhu Hall": { fare: 15, travelTime: 4 },
-  "Bot Tala-Shaheed Salam Hall": { fare: 20, travelTime: 6 },
-  "Bot Tala-Central Library": { fare: 15, travelTime: 4 },
-  "Bot Tala-Business Studies": { fare: 20, travelTime: 6 },
-
-  "Bangabandhu Hall-JU Gate": { fare: 25, travelTime: 8 },
-  "Bangabandhu Hall-Transport": { fare: 20, travelTime: 6 },
-  "Bangabandhu Hall-Medical": { fare: 20, travelTime: 6 },
-  "Bangabandhu Hall-Bot Tala": { fare: 15, travelTime: 4 },
-  "Bangabandhu Hall-Shaheed Salam Hall": { fare: 15, travelTime: 5 },
-  "Bangabandhu Hall-Central Library": { fare: 15, travelTime: 4 },
-  "Bangabandhu Hall-Business Studies": { fare: 20, travelTime: 6 },
-
-  "Shaheed Salam Hall-JU Gate": { fare: 30, travelTime: 10 },
-  "Shaheed Salam Hall-Transport": { fare: 25, travelTime: 8 },
-  "Shaheed Salam Hall-Medical": { fare: 25, travelTime: 8 },
-  "Shaheed Salam Hall-Bot Tala": { fare: 20, travelTime: 6 },
-  "Shaheed Salam Hall-Bangabandhu Hall": { fare: 15, travelTime: 5 },
-  "Shaheed Salam Hall-Central Library": { fare: 20, travelTime: 6 },
-  "Shaheed Salam Hall-Business Studies": { fare: 20, travelTime: 6 },
-
-  "Central Library-JU Gate": { fare: 25, travelTime: 8 },
-  "Central Library-Transport": { fare: 20, travelTime: 6 },
-  "Central Library-Medical": { fare: 20, travelTime: 6 },
-  "Central Library-Bot Tala": { fare: 15, travelTime: 4 },
-  "Central Library-Bangabandhu Hall": { fare: 15, travelTime: 4 },
-  "Central Library-Shaheed Salam Hall": { fare: 20, travelTime: 6 },
-  "Central Library-Business Studies": { fare: 20, travelTime: 6 },
-
-  "Business Studies-JU Gate": { fare: 30, travelTime: 10 },
-  "Business Studies-Transport": { fare: 25, travelTime: 8 },
-  "Business Studies-Medical": { fare: 25, travelTime: 8 },
-  "Business Studies-Bot Tala": { fare: 20, travelTime: 6 },
-  "Business Studies-Bangabandhu Hall": { fare: 20, travelTime: 6 },
-  "Business Studies-Shaheed Salam Hall": { fare: 20, travelTime: 6 },
-  "Business Studies-Central Library": { fare: 20, travelTime: 6 },
-};
-
+/**
+ * Ride request form.
+ *
+ * Pickup/destination, fare and travel time come from the database
+ * (routeOptions, loaded by RideRequestPage from /api/ride-requests/route-options).
+ */
 export default function RideForm({
   rideData,
   setRideData,
   onSubmit,
   onCancel,
+  routeOptions = [],
 }) {
+  // Pickup list: every stop you can start from.
+  const pickupNames = uniqueNames(routeOptions.map((option) => option.pickupStop));
+
+  // Destination list: only stops reachable from the chosen pickup.
+  const destinationNames = uniqueNames(
+    routeOptions
+      .filter((option) => !rideData.pickup || option.pickupStop === rideData.pickup)
+      .map((option) => option.dropStop),
+  );
+
   const updateField = (field, value) => {
     setRideData((previousData) => ({
       ...previousData,
@@ -95,20 +45,28 @@ export default function RideForm({
     };
 
     const pickup = updatedRideData.pickup;
-    const destination = updatedRideData.destination;
 
-    if (pickup && destination && pickup !== destination) {
-      const routeKey = `${pickup}-${destination}`;
-      const route = routeInfo[routeKey];
-
-      if (route) {
-        updatedRideData.fare = route.fare;
-        updatedRideData.travelTime = route.travelTime;
-      }
-    } else {
-      updatedRideData.fare = 0;
-      updatedRideData.travelTime = 0;
+    // A new pickup may not reach the old destination, so clear it.
+    if (
+      field === "pickup" &&
+      !routeOptions.some(
+        (option) =>
+          option.pickupStop === pickup &&
+          option.dropStop === updatedRideData.destination
+      )
+    ) {
+      updatedRideData.destination = "";
     }
+
+    // routeOptions is sorted cheapest first, so this finds the cheapest route.
+    const route = routeOptions.find(
+      (option) =>
+        option.pickupStop === pickup &&
+        option.dropStop === updatedRideData.destination
+    );
+
+    updatedRideData.fare = route ? route.fare : 0;
+    updatedRideData.travelTime = route ? route.travelTime : 0;
 
     setRideData(updatedRideData);
   };
@@ -129,15 +87,9 @@ export default function RideForm({
         >
           <option value="">Select pickup</option>
 
-          {locations.map((location) => (
-            <option
-              key={location.id}
-              value={location.name}
-              disabled={
-                location.name === rideData.destination
-              }
-            >
-              {location.name}
+          {pickupNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
             </option>
           ))}
         </select>
@@ -158,15 +110,9 @@ export default function RideForm({
         >
           <option value="">Select destination</option>
 
-          {locations.map((location) => (
-            <option
-              key={location.id}
-              value={location.name}
-              disabled={
-                location.name === rideData.pickup
-              }
-            >
-              {location.name}
+          {destinationNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
             </option>
           ))}
         </select>

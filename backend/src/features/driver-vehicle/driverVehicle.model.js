@@ -19,7 +19,8 @@ import { db } from '../../config/database.js';
  *   - "Accepted ride" = ride_requests.status is 'Approved'.
  *   - Only trips that are still active: trip_status 'Scheduled' or 'Running'
  *     (a 'Completed' or 'Cancelled' trip has no driver coming anymore).
- *   - If the passenger has more than one, return the one leaving soonest.
+ *   - If the passenger has more than one, return the NEWEST request
+ *     (so the card matches the ride they just asked for).
  *
  * @param {number} passengerId - users.user_id of the logged-in passenger.
  * @returns {Promise<Object|null>} One row, or null if there is no accepted ride.
@@ -51,7 +52,7 @@ export async function findAssignedDriverByPassenger(passengerId) {
     WHERE rr.passenger_id = ?
       AND rr.status = 'Approved'
       AND t.trip_status IN ('Scheduled', 'Running')
-    ORDER BY t.departure_time ASC
+    ORDER BY rr.request_time DESC, rr.request_id DESC
     LIMIT 1
   `;
 

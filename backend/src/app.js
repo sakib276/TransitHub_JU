@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import authenticationRoutes from './features/auth/authentication.routes.js';
 import driverVehicleRoutes from './features/driver-vehicle/driverVehicle.routes.js';
+import rideRequestRoutes from './features/ride-request/rideRequest.routes.js';
 
 /**
  * The Express application: middleware + all API routes.
@@ -22,7 +24,9 @@ app.get('/health', (req, res) => {
 });
 
 // Feature routes
+app.use('/api/auth', authenticationRoutes); // login, register, password reset (feature/registration-login)
 app.use('/api/driver-vehicle', driverVehicleRoutes);
+app.use('/api/ride-requests', rideRequestRoutes);
 
 // Any other URL → 404
 app.use((req, res) => {

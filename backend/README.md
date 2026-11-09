@@ -1,6 +1,9 @@
 # TransitHub JU – Backend
 
-Node.js + Express + MySQL. This branch contains **FR-11.1: Passenger – View Assigned Driver**.
+Node.js + Express + MySQL. This branch contains:
+- **Login / registration / password reset** (from `feature/registration-login`) at `/api/auth/...`
+- **Ride request** (save a request + assign a trip) at `/api/ride-requests`
+- **FR-11.1: Passenger – View Assigned Driver** at `/api/driver-vehicle/assigned-driver`
 
 ## 1. Setup (first time only)
 
@@ -10,13 +13,19 @@ Node.js + Express + MySQL. This branch contains **FR-11.1: Passenger – View As
    cd backend
    cp .env.example .env
    ```
-   Open `.env` and set your MySQL password (`DB_PASSWORD`) and `JWT_SECRET`.
-   **`JWT_SECRET` must be the same value as in the login backend's `.env`**
-   (`backend/src/features/auth/.env` on the `feature/registration-login` branch).
+   Open `.env` and set your MySQL password (`DB_PASSWORD`), a long random `JWT_SECRET`
+   and an `ADMIN_REGISTRATION_CODE`. SMTP settings are only needed for Driver OTP login
+   and password-reset emails.
 3. Install packages:
    ```bash
    npm install
    ```
+4. Create the login tables and give the demo users a real password
+   (the passwords in `transithub_ju.sql` are fake placeholders):
+   ```bash
+   npm run setup-demo-login
+   ```
+   It asks you to choose a password. Then log in as e.g. `nusrat@juniv.edu` with it.
 
 ## 2. Run
 
@@ -49,6 +58,7 @@ Authorization: Bearer <login token>
 ```
 backend/
 ├── .env.example                 settings template (copy to .env)
+├── scripts/setup-demo-login.js  local only: login tables + demo passwords
 ├── package.json                 packages + npm scripts
 └── src/
     ├── server.js                starts the server (loads .env first)
@@ -56,6 +66,8 @@ backend/
     ├── config/database.js       MySQL connection pool
     ├── shared/middleware/
     │   └── requireLogin.js      login (JWT) + role checks
+    ├── features/auth/           login/register/reset (feature/registration-login)
+    ├── features/ride-request/   rideRequest.routes / .controller / .model + tests
     └── features/driver-vehicle/
         ├── driverVehicle.routes.js
         ├── driverVehicle.controller.js
@@ -65,13 +77,41 @@ backend/
 
 ## 5. API
 
+### Login – `POST /api/auth/login/passenger`
+
+Body `{ "email": "...", "password": "..." }` → `{ success: true, data: { token, user } }`.
+The frontend saves `token` and sends it as `Authorization: Bearer <token>` on later requests.
+Other auth routes: see `src/features/auth/authentication.routes.js`.
+
+### `GET /api/ride-requests/route-options` (login needed)
+
+Every pickup → drop pair from the database (both stops on the same route, pickup first),
+with `fare` (from `fare`) and `travelTime` (from `routes.estimated_time`), cheapest first.
+
+### `POST /api/ride-requests` (Passenger only)
+
+Body `{ "pickupStop": "Main Gate", "dropStop": "Muktomancho" }`. In one transaction it:
+1. finds a `Scheduled`/`Running` trip on a route with both stops and a free seat
+   (cheapest route first, then earliest departure),
+2. inserts a `ride_requests` row with `status = 'Approved'`,
+3. does `trips.available_seats - 1`.
+
+| Status | When |
+|---|---|
+| 201 `{ data: { requestId, tripId } }` | Saved and assigned |
+| 400 | Pickup/drop missing or the same |
+| 409 | No trip with a free seat for that route |
+
+Only pickup, drop and trip are saved: the form's date, time, seats, gender, ride type
+and notes have no column in `ride_requests`.
+
 ### `GET /api/driver-vehicle/assigned-driver`
 
 Shows the driver and vehicle of the logged-in passenger's accepted ride.
 
 **Which ride?** A `ride_requests` row for this passenger with `status = 'Approved'`
-whose trip is still `'Scheduled'` or `'Running'`. If there are several, the one
-departing soonest.
+whose trip is still `'Scheduled'` or `'Running'`. If there are several, the
+**newest request** (so the card matches the ride just requested).
 
 | Status | When | Body |
 |---|---|---|

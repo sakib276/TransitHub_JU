@@ -187,6 +187,11 @@
   font-size:13px;
 }
 
+.driver-info .your-trip{
+  font-weight:700;
+  color:var(--blue);
+}
+
 .driver-info .plate-number{
   margin-top:2px;
   font-weight:700;

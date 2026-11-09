@@ -50,9 +50,10 @@ function AssignedDriverCard({ driver }) {
           {driver.vehicleType} · {driver.totalSeats} seats
         </p>
         <p className="plate-number">{driver.vehicleNumber}</p>
-        <p>
-          {driver.routeName} ({driver.pickupStop} → {driver.dropStop})
+        <p className="your-trip">
+          Your trip: {driver.pickupStop} → {driver.dropStop}
         </p>
+        <p>Bus route: {driver.routeName}</p>
         <p>Departure: {driver.departureTime}</p>
       </div>
 

@@ -31,7 +31,7 @@ describe('authentication login UI', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
-    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:5001/api/auth/login/admin');
+    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:5000/api/auth/login/admin');
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ email: user.email, password: 'StrongPass1' });
     expect(onLogin).toHaveBeenCalledWith(user);
     expect(sessionStorage.getItem('th_auth_token')).toBe('test-token');

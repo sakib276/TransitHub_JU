@@ -462,3 +462,12 @@ textarea:focus{
     grid-template-columns:1fr;
   }
 }
+.load-error{
+  margin:0 0 12px;
+  padding:12px 16px;
+  border-radius:14px;
+  background:#FFF1F1;
+  border:1px solid #FFC9C9;
+  color:#B3261E;
+  font-size:14px;
+}

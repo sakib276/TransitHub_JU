@@ -1,5 +1,7 @@
 # TransitHub JU Authentication Feature
 
+> **Now part of the main frontend:** `frontend/src/App.jsx` has `/login`, `/register` and `/reset-password` pages (see `pages/`), and pages that need login redirect to `/login`. The API URL now defaults to `http://localhost:5000/api` (the main backend).
+
 This folder contains the authentication frontend: registration views, login, driver OTP, password reset, the API client, styling, and a small Vite app for previewing the feature by itself. The main project frontend also loads this `AuthFeature` component.
 
 ## Run the frontend

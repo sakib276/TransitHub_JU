@@ -27,9 +27,8 @@ describe('AssignedDriverCard', () => {
     expect(screen.getByText('Phone: 01700000004')).toBeInTheDocument();
     expect(screen.getByText('Bus · 40 seats')).toBeInTheDocument();
     expect(screen.getByText('JU-BUS-01')).toBeInTheDocument();
-    expect(
-      screen.getByText('Main Gate - Central Library (Main Gate → Central Library)'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Your trip: Main Gate → Central Library')).toBeInTheDocument();
+    expect(screen.getByText('Bus route: Main Gate - Central Library')).toBeInTheDocument();
     expect(screen.getByText('Departure: 2026-10-05 08:00:00')).toBeInTheDocument();
     expect(screen.getByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByAltText('Photo of Karim Mia')).toBeInTheDocument();
